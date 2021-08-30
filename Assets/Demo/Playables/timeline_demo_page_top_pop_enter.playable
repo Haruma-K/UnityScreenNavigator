@@ -1,0 +1,756 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-9015890211819002456
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab997e120f9c3184195588497850c91e, type: 3}
+  m_Name: Rect Transform Animation Track
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_AnimClip: {fileID: 0}
+  m_Locked: 0
+  m_Muted: 0
+  m_CustomPlayableFullTypename: 
+  m_Curves: {fileID: 0}
+  m_Parent: {fileID: 11400000}
+  m_Children: []
+  m_Clips:
+  - m_Version: 1
+    m_Start: 0
+    m_ClipIn: 0
+    m_Asset: {fileID: 7910647823178168934}
+    m_Duration: 0.5
+    m_TimeScale: 1
+    m_ParentTrack: {fileID: -9015890211819002456}
+    m_EaseInDuration: 0
+    m_EaseOutDuration: 0
+    m_BlendInDuration: -1
+    m_BlendOutDuration: -1
+    m_MixInCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_MixOutCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_BlendInCurveMode: 0
+    m_BlendOutCurveMode: 0
+    m_ExposedParameterNames: []
+    m_AnimationCurves: {fileID: 0}
+    m_Recordable: 0
+    m_PostExtrapolationMode: 0
+    m_PreExtrapolationMode: 0
+    m_PostExtrapolationTime: 0
+    m_PreExtrapolationTime: 0
+    m_DisplayName: RectTransformAnimationClip
+  m_Markers:
+    m_Objects: []
+--- !u!114 &-8427995714785580429
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a16748d9461eae46a725db9776d5390, type: 3}
+  m_Name: Markers
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_AnimClip: {fileID: 0}
+  m_Locked: 0
+  m_Muted: 0
+  m_CustomPlayableFullTypename: 
+  m_Curves: {fileID: 0}
+  m_Parent: {fileID: 11400000}
+  m_Children: []
+  m_Clips: []
+  m_Markers:
+    m_Objects: []
+--- !u!114 &-6241093618153833156
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7a9eca39c5a41845b0e562c76a03ed2, type: 3}
+  m_Name: ImageAnimationClip
+  m_EditorClassIdentifier: 
+  template:
+    _loopDuration: 0
+    _loopType: 0
+    _curve:
+      _curveType: 0
+      _easeType: 2
+      _animationCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+    _controlColor: 1
+    _controlFillAmount: 0
+    _startValue:
+      _color: {r: 1, g: 1, b: 1, a: 0}
+      _fillAmount: 1
+    _endValue:
+      _color: {r: 1, g: 1, b: 1, a: 1}
+      _fillAmount: 1
+--- !u!114 &-6140603285432754776
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11aa0b29ff13eab449a39fa0f8c3c506, type: 3}
+  m_Name: RectTransformAnimationClip
+  m_EditorClassIdentifier: 
+  template:
+    _loopDuration: 0
+    _loopType: 0
+    _curve:
+      _curveType: 0
+      _easeType: 2
+      _animationCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+    _controlPosition: 1
+    _controlSize: 0
+    _controlRotation: 0
+    _controlScale: 0
+    _startValue:
+      _anchoredPosition: {x: 0, y: -126, z: 0}
+      _sizeDelta: {x: 0, y: 0}
+      _localRotation: {x: 0, y: 0, z: 0}
+      _localScale: {x: 0, y: 0, z: 0}
+    _endValue:
+      _anchoredPosition: {x: 0, y: 0, z: 0}
+      _sizeDelta: {x: 0, y: 0}
+      _localRotation: {x: 0, y: 0, z: 0}
+      _localScale: {x: 0, y: 0, z: 0}
+--- !u!114 &-2899632979302788835
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa164a07e2607b34aad5f7abdaeda554, type: 3}
+  m_Name: TextMeshProUGUIAnimationClip(Clone)
+  m_EditorClassIdentifier: 
+  template:
+    _loopDuration: 0
+    _loopType: 0
+    _curve:
+      _curveType: 0
+      _easeType: 2
+      _animationCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+    _controlFontSize: 0
+    _controlColor: 1
+    _controlVertexGradient: 0
+    _controlSpacing: 0
+    _controlRuntimeFaceColor: 0
+    _controlRuntimeOutlineColor: 0
+    _controlRuntimeOutlineWidth: 0
+    _startValue:
+      _fontSize: 36
+      _color: {r: 1, g: 1, b: 1, a: 0}
+      _gradient:
+        _usePreset: 0
+        _vertexGradient:
+          topLeft: {r: 1, g: 1, b: 1, a: 1}
+          topRight: {r: 1, g: 1, b: 1, a: 1}
+          bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+          bottomRight: {r: 1, g: 1, b: 1, a: 1}
+        _preset: {fileID: 0}
+      _spacing:
+        _character: 0
+        _line: 0
+        _word: 0
+        _paragraph: 0
+      _faceColor: {r: 1, g: 1, b: 1, a: 1}
+      _outlineColor: {r: 0, g: 0, b: 0, a: 1}
+      _outlineWidth: 0
+    _endValue:
+      _fontSize: 36
+      _color: {r: 1, g: 1, b: 1, a: 0.7490196}
+      _gradient:
+        _usePreset: 0
+        _vertexGradient:
+          topLeft: {r: 1, g: 1, b: 1, a: 1}
+          topRight: {r: 1, g: 1, b: 1, a: 1}
+          bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+          bottomRight: {r: 1, g: 1, b: 1, a: 1}
+        _preset: {fileID: 0}
+      _spacing:
+        _character: 0
+        _line: 0
+        _word: 0
+        _paragraph: 0
+      _faceColor: {r: 1, g: 1, b: 1, a: 1}
+      _outlineColor: {r: 0, g: 0, b: 0, a: 1}
+      _outlineWidth: 0
+--- !u!114 &-1041969053192530728
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 583515fb0fbe9ff4ba244ff5c01d126d, type: 3}
+  m_Name: Text Mesh Pro UGUI Animation Track
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_AnimClip: {fileID: 0}
+  m_Locked: 0
+  m_Muted: 0
+  m_CustomPlayableFullTypename: 
+  m_Curves: {fileID: 0}
+  m_Parent: {fileID: 11400000}
+  m_Children: []
+  m_Clips:
+  - m_Version: 1
+    m_Start: 0
+    m_ClipIn: 0
+    m_Asset: {fileID: 8498629552814055557}
+    m_Duration: 0.5
+    m_TimeScale: 1
+    m_ParentTrack: {fileID: -1041969053192530728}
+    m_EaseInDuration: 0
+    m_EaseOutDuration: 0
+    m_BlendInDuration: -1
+    m_BlendOutDuration: -1
+    m_MixInCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_MixOutCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_BlendInCurveMode: 0
+    m_BlendOutCurveMode: 0
+    m_ExposedParameterNames: []
+    m_AnimationCurves: {fileID: 0}
+    m_Recordable: 0
+    m_PostExtrapolationMode: 0
+    m_PreExtrapolationMode: 0
+    m_PostExtrapolationTime: 0
+    m_PreExtrapolationTime: 0
+    m_DisplayName: TextMeshProUGUIAnimationClip
+  m_Markers:
+    m_Objects: []
+--- !u!114 &-129159511914646364
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab997e120f9c3184195588497850c91e, type: 3}
+  m_Name: Rect Transform Animation Track (1)
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_AnimClip: {fileID: 0}
+  m_Locked: 0
+  m_Muted: 0
+  m_CustomPlayableFullTypename: 
+  m_Curves: {fileID: 0}
+  m_Parent: {fileID: 11400000}
+  m_Children: []
+  m_Clips:
+  - m_Version: 1
+    m_Start: 0
+    m_ClipIn: 0
+    m_Asset: {fileID: -6140603285432754776}
+    m_Duration: 0.5
+    m_TimeScale: 1
+    m_ParentTrack: {fileID: -129159511914646364}
+    m_EaseInDuration: 0
+    m_EaseOutDuration: 0
+    m_BlendInDuration: -1
+    m_BlendOutDuration: -1
+    m_MixInCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_MixOutCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_BlendInCurveMode: 0
+    m_BlendOutCurveMode: 0
+    m_ExposedParameterNames: []
+    m_AnimationCurves: {fileID: 0}
+    m_Recordable: 0
+    m_PostExtrapolationMode: 0
+    m_PreExtrapolationMode: 0
+    m_PostExtrapolationTime: 0
+    m_PreExtrapolationTime: 0
+    m_DisplayName: RectTransformAnimationClip
+  m_Markers:
+    m_Objects: []
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfda56da833e2384a9677cd3c976a436, type: 3}
+  m_Name: timeline_demo_page_top_pop_enter
+  m_EditorClassIdentifier: 
+  m_Version: 0
+  m_Tracks:
+  - {fileID: -9015890211819002456}
+  - {fileID: -129159511914646364}
+  - {fileID: -1041969053192530728}
+  - {fileID: 6626333011259011697}
+  - {fileID: 3798266852558392995}
+  m_FixedDuration: 0
+  m_EditorSettings:
+    m_Framerate: 60
+    m_ScenePreview: 1
+  m_DurationMode: 0
+  m_MarkerTrack: {fileID: -8427995714785580429}
+--- !u!114 &3798266852558392995
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7ac71cdd78cc4c4a8ebbcc13035b63c, type: 3}
+  m_Name: Image Animation Track
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_AnimClip: {fileID: 0}
+  m_Locked: 0
+  m_Muted: 0
+  m_CustomPlayableFullTypename: 
+  m_Curves: {fileID: 0}
+  m_Parent: {fileID: 11400000}
+  m_Children: []
+  m_Clips:
+  - m_Version: 1
+    m_Start: 0
+    m_ClipIn: 0
+    m_Asset: {fileID: -6241093618153833156}
+    m_Duration: 0.5
+    m_TimeScale: 1
+    m_ParentTrack: {fileID: 3798266852558392995}
+    m_EaseInDuration: 0
+    m_EaseOutDuration: 0
+    m_BlendInDuration: -1
+    m_BlendOutDuration: -1
+    m_MixInCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_MixOutCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_BlendInCurveMode: 0
+    m_BlendOutCurveMode: 0
+    m_ExposedParameterNames: []
+    m_AnimationCurves: {fileID: 0}
+    m_Recordable: 0
+    m_PostExtrapolationMode: 0
+    m_PreExtrapolationMode: 0
+    m_PostExtrapolationTime: 0
+    m_PreExtrapolationTime: 0
+    m_DisplayName: ImageAnimationClip
+  m_Markers:
+    m_Objects: []
+--- !u!114 &6626333011259011697
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 583515fb0fbe9ff4ba244ff5c01d126d, type: 3}
+  m_Name: Text Mesh Pro UGUI Animation Track (1)
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_AnimClip: {fileID: 0}
+  m_Locked: 0
+  m_Muted: 0
+  m_CustomPlayableFullTypename: 
+  m_Curves: {fileID: 0}
+  m_Parent: {fileID: 11400000}
+  m_Children: []
+  m_Clips:
+  - m_Version: 1
+    m_Start: 0
+    m_ClipIn: 0
+    m_Asset: {fileID: -2899632979302788835}
+    m_Duration: 0.5
+    m_TimeScale: 1
+    m_ParentTrack: {fileID: 6626333011259011697}
+    m_EaseInDuration: 0
+    m_EaseOutDuration: 0
+    m_BlendInDuration: -1
+    m_BlendOutDuration: -1
+    m_MixInCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_MixOutCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_BlendInCurveMode: 0
+    m_BlendOutCurveMode: 0
+    m_ExposedParameterNames: []
+    m_AnimationCurves: {fileID: 0}
+    m_Recordable: 0
+    m_PostExtrapolationMode: 0
+    m_PreExtrapolationMode: 0
+    m_PostExtrapolationTime: 0
+    m_PreExtrapolationTime: 0
+    m_DisplayName: TextMeshProUGUIAnimationClip
+  m_Markers:
+    m_Objects: []
+--- !u!114 &7910647823178168934
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11aa0b29ff13eab449a39fa0f8c3c506, type: 3}
+  m_Name: RectTransformAnimationClip
+  m_EditorClassIdentifier: 
+  template:
+    _loopDuration: 0
+    _loopType: 0
+    _curve:
+      _curveType: 0
+      _easeType: 2
+      _animationCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+    _controlPosition: 1
+    _controlSize: 0
+    _controlRotation: 0
+    _controlScale: 0
+    _startValue:
+      _anchoredPosition: {x: 0, y: 126, z: 0}
+      _sizeDelta: {x: 0, y: 0}
+      _localRotation: {x: 0, y: 0, z: 0}
+      _localScale: {x: 0, y: 0, z: 0}
+    _endValue:
+      _anchoredPosition: {x: 0, y: 0, z: 0}
+      _sizeDelta: {x: 0, y: 0}
+      _localRotation: {x: 0, y: 0, z: 0}
+      _localScale: {x: 0, y: 0, z: 0}
+--- !u!114 &8498629552814055557
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa164a07e2607b34aad5f7abdaeda554, type: 3}
+  m_Name: TextMeshProUGUIAnimationClip
+  m_EditorClassIdentifier: 
+  template:
+    _loopDuration: 0
+    _loopType: 0
+    _curve:
+      _curveType: 0
+      _easeType: 2
+      _animationCurve:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+    _controlFontSize: 0
+    _controlColor: 1
+    _controlVertexGradient: 0
+    _controlSpacing: 0
+    _controlRuntimeFaceColor: 0
+    _controlRuntimeOutlineColor: 0
+    _controlRuntimeOutlineWidth: 0
+    _startValue:
+      _fontSize: 36
+      _color: {r: 1, g: 1, b: 1, a: 0}
+      _gradient:
+        _usePreset: 0
+        _vertexGradient:
+          topLeft: {r: 1, g: 1, b: 1, a: 1}
+          topRight: {r: 1, g: 1, b: 1, a: 1}
+          bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+          bottomRight: {r: 1, g: 1, b: 1, a: 1}
+        _preset: {fileID: 0}
+      _spacing:
+        _character: 0
+        _line: 0
+        _word: 0
+        _paragraph: 0
+      _faceColor: {r: 1, g: 1, b: 1, a: 1}
+      _outlineColor: {r: 0, g: 0, b: 0, a: 1}
+      _outlineWidth: 0
+    _endValue:
+      _fontSize: 36
+      _color: {r: 1, g: 1, b: 1, a: 0.7490196}
+      _gradient:
+        _usePreset: 0
+        _vertexGradient:
+          topLeft: {r: 1, g: 1, b: 1, a: 1}
+          topRight: {r: 1, g: 1, b: 1, a: 1}
+          bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+          bottomRight: {r: 1, g: 1, b: 1, a: 1}
+        _preset: {fileID: 0}
+      _spacing:
+        _character: 0
+        _line: 0
+        _word: 0
+        _paragraph: 0
+      _faceColor: {r: 1, g: 1, b: 1, a: 1}
+      _outlineColor: {r: 0, g: 0, b: 0, a: 1}
+      _outlineWidth: 0

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b15ff60fcf110249b1f95c0fdfe5e8e, type: 3}
+  m_Name: UnityScreenNavigatorSettings
+  m_EditorClassIdentifier: 
+  _defaultSheetEnterAnimation: {fileID: 0}
+  _defaultSheetExitAnimation: {fileID: 0}
+  _defaultPagePushEnterAnimation: {fileID: 0}
+  _defaultPagePushExitAnimation: {fileID: 0}
+  _defaultPagePopEnterAnimation: {fileID: 0}
+  _defaultPagePopExitAnimation: {fileID: 0}
+  _defaultModalEnterAnimation: {fileID: 0}
+  _defaultModalExitAnimation: {fileID: 0}
+  _defaultModalBackdropEnterAnimation: {fileID: 0}
+  _defaultModalBackdropExitAnimation: {fileID: 0}
+  _defaultModalBackdropPrefab: {fileID: 0}
+  _assetLoader: {fileID: 0}

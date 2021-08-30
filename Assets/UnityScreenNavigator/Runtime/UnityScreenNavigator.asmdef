@@ -1,0 +1,34 @@
+{
+    "name": "UnityScreenNavigator",
+    "rootNamespace": "",
+    "references": [
+        "GUID:9e24947de15b9834991c9d8411ea37cf",
+        "GUID:84651a3751eca9349aac36a66bba901b",
+        "GUID:f06555f75b070af458a003d92f9efb00"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.addressables",
+            "expression": "",
+            "define": "USE_ADDLESSABLES"
+        },
+        {
+            "name": "com.unity.timeline",
+            "expression": "",
+            "define": "USE_TIMELINE"
+        },
+        {
+            "name": "com.unity.addressables",
+            "expression": "1.17.4",
+            "define": "ADDRESSABLES_1_17_4_OR_NEWER"
+        }
+    ],
+    "noEngineReferences": false
+}

@@ -1,0 +1,15 @@
+{
+  "name": "com.harumak.unityscreennavigator",
+  "displayName": "UnityScreenNavigator",
+  "version": "1.0.0",
+  "unity": "2019.4",
+  "license": "MIT",
+  "dependencies": {
+  },
+  "author": {
+    "name": "Haruki Yano",
+    "url": "https://github.com/Haruma-K"
+  },
+  "type": "tool",
+  "description": "Transition pages and modals, and manage their history and lifecycle."
+}
