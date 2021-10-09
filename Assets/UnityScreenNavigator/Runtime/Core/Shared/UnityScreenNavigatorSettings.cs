@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Modal;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
+
 #if UNITY_EDITOR
+using UnityEditor;
 
 #endif
 
@@ -16,25 +17,25 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
         private const string DefaultModalBackdropPrefabKey = "DefaultModalBackdrop";
         private static UnityScreenNavigatorSettings _instance;
 
-        [SerializeField] private SimpleTransitionAnimationObject _defaultSheetEnterAnimation;
+        [SerializeField] private TransitionAnimationObject _defaultSheetEnterAnimation;
 
-        [SerializeField] private SimpleTransitionAnimationObject _defaultSheetExitAnimation;
+        [SerializeField] private TransitionAnimationObject _defaultSheetExitAnimation;
 
-        [SerializeField] private SimpleTransitionAnimationObject _defaultPagePushEnterAnimation;
+        [SerializeField] private TransitionAnimationObject _defaultPagePushEnterAnimation;
 
-        [SerializeField] private SimpleTransitionAnimationObject _defaultPagePushExitAnimation;
+        [SerializeField] private TransitionAnimationObject _defaultPagePushExitAnimation;
 
-        [SerializeField] private SimpleTransitionAnimationObject _defaultPagePopEnterAnimation;
+        [SerializeField] private TransitionAnimationObject _defaultPagePopEnterAnimation;
 
-        [SerializeField] private SimpleTransitionAnimationObject _defaultPagePopExitAnimation;
+        [SerializeField] private TransitionAnimationObject _defaultPagePopExitAnimation;
 
-        [SerializeField] private SimpleTransitionAnimationObject _defaultModalEnterAnimation;
+        [SerializeField] private TransitionAnimationObject _defaultModalEnterAnimation;
 
-        [SerializeField] private SimpleTransitionAnimationObject _defaultModalExitAnimation;
+        [SerializeField] private TransitionAnimationObject _defaultModalExitAnimation;
 
-        [SerializeField] private SimpleTransitionAnimationObject _defaultModalBackdropEnterAnimation;
+        [SerializeField] private TransitionAnimationObject _defaultModalBackdropEnterAnimation;
 
-        [SerializeField] private SimpleTransitionAnimationObject _defaultModalBackdropExitAnimation;
+        [SerializeField] private TransitionAnimationObject _defaultModalBackdropExitAnimation;
 
         [SerializeField] private ModalBackdrop _defaultModalBackdropPrefab;
 
@@ -254,7 +255,8 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
         }
 
 #if UNITY_EDITOR
-        [MenuItem("Assets/Create/ScreenNavigator/Config", priority = -1)]
+        
+        [MenuItem("Assets/Create/Screen Navigator Settings", priority = -1)]
         private static void Create()
         {
             var asset = PlayerSettings.GetPreloadedAssets().OfType<UnityScreenNavigatorSettings>().FirstOrDefault();
