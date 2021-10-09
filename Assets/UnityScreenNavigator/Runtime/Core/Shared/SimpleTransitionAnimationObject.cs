@@ -2,7 +2,7 @@
 
 namespace UnityScreenNavigator.Runtime.Core.Shared
 {
-    [CreateAssetMenu(menuName = "ScreenNavigator/Simple Transition Animation")]
+    [CreateAssetMenu(menuName = "Screen Navigator/Simple Transition Animation")]
     public sealed class SimpleTransitionAnimationObject : TransitionAnimationObject
     {
         [SerializeField] private float _duration = 0.3f;
