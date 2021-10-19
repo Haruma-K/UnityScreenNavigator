@@ -65,7 +65,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 set => _animationObject = value;
             }
 
-            public bool IsValid(string partnerTransitionIdentifier)
+            public bool IsValid(string partnerModalIdentifier)
             {
                 if (GetAnimation() == null)
                 {
@@ -77,13 +77,18 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 {
                     return true;
                 }
+                
+                if (string.IsNullOrEmpty(partnerModalIdentifier))
+                {
+                    return false;
+                }
 
                 if (_partnerSheetIdentifierRegexCache == null)
                 {
                     _partnerSheetIdentifierRegexCache = new Regex(_partnerModalIdentifierRegex);
                 }
 
-                return _partnerSheetIdentifierRegexCache.IsMatch(partnerTransitionIdentifier);
+                return _partnerSheetIdentifierRegexCache.IsMatch(partnerModalIdentifier);
             }
 
             public ITransitionAnimation GetAnimation()

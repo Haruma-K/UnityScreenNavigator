@@ -79,7 +79,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 set => _animationObject = value;
             }
 
-            public bool IsValid(string partnerTransitionIdentifier)
+            public bool IsValid(string partnerPageIdentifier)
             {
                 if (GetAnimation() == null)
                 {
@@ -91,13 +91,18 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 {
                     return true;
                 }
-
+                
+                if (string.IsNullOrEmpty(partnerPageIdentifier))
+                {
+                    return false;
+                }
+                
                 if (_partnerSheetIdentifierRegexCache == null)
                 {
                     _partnerSheetIdentifierRegexCache = new Regex(_partnerPageIdentifierRegex);
                 }
 
-                return _partnerSheetIdentifierRegexCache.IsMatch(partnerTransitionIdentifier);
+                return _partnerSheetIdentifierRegexCache.IsMatch(partnerPageIdentifier);
             }
 
             public ITransitionAnimation GetAnimation()

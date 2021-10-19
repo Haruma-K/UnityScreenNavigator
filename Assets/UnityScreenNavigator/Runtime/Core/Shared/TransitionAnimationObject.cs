@@ -7,10 +7,23 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
     /// </summary>
     public abstract class TransitionAnimationObject : ScriptableObject, ITransitionAnimation
     {
+        public RectTransform RectTransform { get; private set; }
+        public RectTransform PartnerRectTransform { get; private set; }
         public abstract float Duration { get; }
 
-        public abstract void Setup(RectTransform rectTransform);
+        void ITransitionAnimation.SetPartner(RectTransform partnerRectTransform)
+        {
+            PartnerRectTransform = partnerRectTransform;
+        }
+
+        void ITransitionAnimation.Setup(RectTransform rectTransform)
+        {
+            RectTransform = rectTransform;
+            Setup();
+        }
 
         public abstract void SetTime(float time);
+
+        public abstract void Setup();
     }
 }

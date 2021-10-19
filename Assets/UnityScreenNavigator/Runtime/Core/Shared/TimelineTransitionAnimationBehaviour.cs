@@ -12,7 +12,7 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
 
         public override float Duration => (float)_timelineAsset.duration;
 
-        protected override void OnSetup()
+        public override void Setup()
         {
             _director.playableAsset = _timelineAsset;
             _director.time = 0;

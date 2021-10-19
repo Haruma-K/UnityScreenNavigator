@@ -114,7 +114,11 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 _canvasGroup.alpha = 0.0f;
             }
 
-            _canvasGroup.interactable = false;
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                _canvasGroup.interactable = false;
+            }
+
             var routine = push ? WillPushEnter() : WillPopEnter();
             var handle = CoroutineManager.Instance.Run(routine);
 
@@ -143,6 +147,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                         anim = UnityScreenNavigatorSettings.Instance.GetDefaultModalTransitionAnimation(true);
                     }
 
+                    anim.SetPartner(partnerModal?.transform as RectTransform);
                     anim.Setup(_rectTransform);
                     yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
                 }
@@ -162,7 +167,10 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 DidPopEnter();
             }
 
-            _canvasGroup.interactable = true;
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                _canvasGroup.interactable = true;
+            }
         }
 
         internal AsyncProcessHandle BeforeExit(bool push, Modal partnerModal)
@@ -179,7 +187,11 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 _canvasGroup.alpha = 1.0f;
             }
 
-            _canvasGroup.interactable = false;
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                _canvasGroup.interactable = false;
+            }
+
             var routine = push ? WillPushExit() : WillPopExit();
             var handle = CoroutineManager.Instance.Run(routine);
 
@@ -206,6 +218,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                         anim = UnityScreenNavigatorSettings.Instance.GetDefaultModalTransitionAnimation(false);
                     }
 
+                    anim.SetPartner(partnerModal?.transform as RectTransform);
                     anim.Setup(_rectTransform);
                     yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
                 }

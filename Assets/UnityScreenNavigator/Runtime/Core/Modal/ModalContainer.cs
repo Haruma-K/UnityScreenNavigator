@@ -58,7 +58,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             _backdropPrefab = _overrideBackdropPrefab
                 ? _overrideBackdropPrefab
-                : UnityScreenNavigatorSettings.Instance.DefaultModalBackdropPrefab;
+                : UnityScreenNavigatorSettings.Instance.ModalBackdropPrefab;
         }
 
         private void OnDestroy()
@@ -263,10 +263,10 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             if (exitModal != null)
             {
-                animationHandles.Add(exitModal.Exit(true, playAnimation, exitModal));
+                animationHandles.Add(exitModal.Exit(true, playAnimation, enterModal));
             }
 
-            animationHandles.Add(enterModal.Enter(true, playAnimation, enterModal));
+            animationHandles.Add(enterModal.Enter(true, playAnimation, exitModal));
 
             foreach (var coroutineHandle in animationHandles)
             {

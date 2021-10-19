@@ -12,6 +12,8 @@ namespace Demo.Scripts
         private int _characterId;
         private int _rank;
 
+        public RectTransform ImageTransform => (RectTransform)_image.transform;
+
         public void Setup(int characterId, int rank)
         {
             _characterId = characterId;
