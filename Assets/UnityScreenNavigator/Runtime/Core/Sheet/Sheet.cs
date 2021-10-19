@@ -106,7 +106,12 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         {
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
-            _canvasGroup.interactable = false;
+
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                _canvasGroup.interactable = false;
+            }
+
             _canvasGroup.alpha = 0.0f;
 
             var handle = CoroutineManager.Instance.Run(WillEnter());
@@ -133,6 +138,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                     anim = UnityScreenNavigatorSettings.Instance.GetDefaultSheetTransitionAnimation(true);
                 }
 
+                anim.SetPartner(partnerSheet?.transform as RectTransform);
                 anim.Setup(_rectTransform);
                 yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
             }
@@ -143,7 +149,11 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         internal void AfterEnter(Sheet partnerSheet)
         {
             DidEnter();
-            _canvasGroup.interactable = true;
+            
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                _canvasGroup.interactable = true;
+            }
         }
 
         internal AsyncProcessHandle BeforeExit(Sheet partnerSheet)
@@ -155,7 +165,11 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         {
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
-            _canvasGroup.interactable = false;
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                _canvasGroup.interactable = false;
+            }
+
             _canvasGroup.alpha = 1.0f;
 
             var handle = CoroutineManager.Instance.Run(WillExit());
@@ -180,6 +194,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                     anim = UnityScreenNavigatorSettings.Instance.GetDefaultSheetTransitionAnimation(false);
                 }
 
+                anim.SetPartner(partnerSheet?.transform as RectTransform);
                 anim.Setup(_rectTransform);
                 yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
             }

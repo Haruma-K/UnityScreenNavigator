@@ -47,7 +47,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 var anim = _animationContainer.GetAnimation(true);
                 if (anim == null)
                 {
-                    anim = UnityScreenNavigatorSettings.Instance.DefaultModalBackdropEnterAnimation;
+                    anim = UnityScreenNavigatorSettings.Instance.ModalBackdropEnterAnimation;
                 }
 
                 anim.Setup(_rectTransform);
@@ -73,7 +73,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 var anim = _animationContainer.GetAnimation(false);
                 if (anim == null)
                 {
-                    anim = UnityScreenNavigatorSettings.Instance.DefaultModalBackdropExitAnimation;
+                    anim = UnityScreenNavigatorSettings.Instance.ModalBackdropExitAnimation;
                 }
 
                 anim.Setup(_rectTransform);

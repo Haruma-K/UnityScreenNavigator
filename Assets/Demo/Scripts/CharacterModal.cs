@@ -14,7 +14,9 @@ namespace Demo.Scripts
         [SerializeField] private SheetContainer _imageContainer;
         [SerializeField] private CharacterModalThumbnailGrid thumbnailGrid;
         [SerializeField] private Button _expandButton;
-
+        
+        public RectTransform CharacterImageRectTransform => (RectTransform)_imageContainer.transform;
+        
         private readonly (int sheetId, CharacterModalImageSheet sheet)[] _imageSheets =
             new (int sheetId, CharacterModalImageSheet sheet)[ImageCount];
 

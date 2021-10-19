@@ -65,7 +65,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 set => _animationObject = value;
             }
 
-            public bool IsValid(string partnerTransitionIdentifier)
+            public bool IsValid(string partnerSheetIdentifier)
             {
                 if (GetAnimation() == null)
                 {
@@ -77,13 +77,18 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 {
                     return true;
                 }
+                
+                if (string.IsNullOrEmpty(partnerSheetIdentifier))
+                {
+                    return false;
+                }
 
                 if (_partnerSheetIdentifierRegexCache == null)
                 {
                     _partnerSheetIdentifierRegexCache = new Regex(_partnerSheetIdentifierRegex);
                 }
 
-                return _partnerSheetIdentifierRegexCache.IsMatch(partnerTransitionIdentifier);
+                return _partnerSheetIdentifierRegexCache.IsMatch(partnerSheetIdentifier);
             }
 
             public ITransitionAnimation GetAnimation()

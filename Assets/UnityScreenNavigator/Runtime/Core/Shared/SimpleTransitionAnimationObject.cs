@@ -5,6 +5,7 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
     [CreateAssetMenu(menuName = "Screen Navigator/Simple Transition Animation")]
     public sealed class SimpleTransitionAnimationObject : TransitionAnimationObject
     {
+        [SerializeField] private float _delay;
         [SerializeField] private float _duration = 0.3f;
         [SerializeField] private EaseType _easeType = EaseType.QuarticEaseOut;
         [SerializeField] private SheetAlignment _beforeAlignment = SheetAlignment.Center;
@@ -17,7 +18,6 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
         private Vector3 _afterPosition;
         private Vector3 _beforePosition;
         private CanvasGroup _canvasGroup;
-        private RectTransform _rectTransform;
 
         public override float Duration => _duration;
 
@@ -31,14 +31,13 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
             return anim;
         }
 
-        public override void Setup(RectTransform sheet)
+        public override void Setup()
         {
-            _rectTransform = (RectTransform)sheet.transform;
-            _beforePosition = _beforeAlignment.ToPosition(_rectTransform);
-            _afterPosition = _afterAlignment.ToPosition(_rectTransform);
-            if (!sheet.gameObject.TryGetComponent<CanvasGroup>(out var canvasGroup))
+            _beforePosition = _beforeAlignment.ToPosition(RectTransform);
+            _afterPosition = _afterAlignment.ToPosition(RectTransform);
+            if (!RectTransform.gameObject.TryGetComponent<CanvasGroup>(out var canvasGroup))
             {
-                canvasGroup = sheet.gameObject.AddComponent<CanvasGroup>();
+                canvasGroup = RectTransform.gameObject.AddComponent<CanvasGroup>();
             }
 
             _canvasGroup = canvasGroup;
@@ -46,13 +45,14 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
 
         public override void SetTime(float time)
         {
-            var progress = _duration <= 0.0f ? 0.0f : Mathf.Clamp01(time / _duration);
+            time = Mathf.Max(0, time - _delay);
+            var progress = _duration <= 0.0f ? 1.0f : Mathf.Clamp01(time / _duration);
             progress = Easings.Interpolate(progress, _easeType);
             var position = Vector3.Lerp(_beforePosition, _afterPosition, progress);
             var scale = Vector3.Lerp(_beforeScale, _afterScale, progress);
             var alpha = Mathf.Lerp(_beforeAlpha, _afterAlpha, progress);
-            _rectTransform.anchoredPosition = position;
-            _rectTransform.localScale = scale;
+            RectTransform.anchoredPosition = position;
+            RectTransform.localScale = scale;
             _canvasGroup.alpha = alpha;
         }
 

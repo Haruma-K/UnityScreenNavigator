@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Modal;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
-
 #if UNITY_EDITOR
 using UnityEditor;
 
@@ -17,192 +16,116 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
         private const string DefaultModalBackdropPrefabKey = "DefaultModalBackdrop";
         private static UnityScreenNavigatorSettings _instance;
 
-        [SerializeField] private TransitionAnimationObject _defaultSheetEnterAnimation;
+        [SerializeField] private TransitionAnimationObject _sheetEnterAnimation;
 
-        [SerializeField] private TransitionAnimationObject _defaultSheetExitAnimation;
+        [SerializeField] private TransitionAnimationObject _sheetExitAnimation;
 
-        [SerializeField] private TransitionAnimationObject _defaultPagePushEnterAnimation;
+        [SerializeField] private TransitionAnimationObject _pagePushEnterAnimation;
 
-        [SerializeField] private TransitionAnimationObject _defaultPagePushExitAnimation;
+        [SerializeField] private TransitionAnimationObject _pagePushExitAnimation;
 
-        [SerializeField] private TransitionAnimationObject _defaultPagePopEnterAnimation;
+        [SerializeField] private TransitionAnimationObject _pagePopEnterAnimation;
 
-        [SerializeField] private TransitionAnimationObject _defaultPagePopExitAnimation;
+        [SerializeField] private TransitionAnimationObject _pagePopExitAnimation;
 
-        [SerializeField] private TransitionAnimationObject _defaultModalEnterAnimation;
+        [SerializeField] private TransitionAnimationObject _modalEnterAnimation;
 
-        [SerializeField] private TransitionAnimationObject _defaultModalExitAnimation;
+        [SerializeField] private TransitionAnimationObject _modalExitAnimation;
 
-        [SerializeField] private TransitionAnimationObject _defaultModalBackdropEnterAnimation;
+        [SerializeField] private TransitionAnimationObject _modalBackdropEnterAnimation;
 
-        [SerializeField] private TransitionAnimationObject _defaultModalBackdropExitAnimation;
+        [SerializeField] private TransitionAnimationObject _modalBackdropExitAnimation;
 
-        [SerializeField] private ModalBackdrop _defaultModalBackdropPrefab;
+        [SerializeField] private ModalBackdrop _modalBackdropPrefab;
 
         [SerializeField] private AssetLoaderObject _assetLoader;
 
-        public ITransitionAnimation DefaultSheetEnterAnimation
+        [SerializeField] private bool _enableInteractionInTransition;
+
+        private IAssetLoader _defaultAssetLoader;
+        private ModalBackdrop _defaultModalBackdrop;
+
+        public ITransitionAnimation SheetEnterAnimation => _sheetEnterAnimation != null
+            ? Instantiate(_sheetEnterAnimation)
+            : SimpleTransitionAnimationObject.CreateInstance(beforeAlpha: 0.0f, easeType: EaseType.Linear);
+
+        public ITransitionAnimation SheetExitAnimation => _sheetExitAnimation != null
+            ? Instantiate(_sheetExitAnimation)
+            : SimpleTransitionAnimationObject.CreateInstance(afterAlpha: 0.0f, easeType: EaseType.Linear);
+
+        public ITransitionAnimation PagePushEnterAnimation => _pagePushEnterAnimation != null
+            ? Instantiate(_pagePushEnterAnimation)
+            : SimpleTransitionAnimationObject.CreateInstance(beforeAlignment: SheetAlignment.Right,
+                afterAlignment: SheetAlignment.Center);
+
+        public ITransitionAnimation PagePushExitAnimation => _pagePushExitAnimation != null
+            ? Instantiate(_pagePushExitAnimation)
+            : SimpleTransitionAnimationObject.CreateInstance(beforeAlignment: SheetAlignment.Center,
+                afterAlignment: SheetAlignment.Left);
+
+        public ITransitionAnimation PagePopEnterAnimation => _pagePopEnterAnimation != null
+            ? Instantiate(_pagePopEnterAnimation)
+            : SimpleTransitionAnimationObject.CreateInstance(beforeAlignment: SheetAlignment.Left,
+                afterAlignment: SheetAlignment.Center);
+
+        public ITransitionAnimation PagePopExitAnimation => _pagePopExitAnimation != null
+            ? Instantiate(_pagePopExitAnimation)
+            : SimpleTransitionAnimationObject.CreateInstance(beforeAlignment: SheetAlignment.Center,
+                afterAlignment: SheetAlignment.Right);
+
+        public ITransitionAnimation ModalEnterAnimation => _modalEnterAnimation != null
+            ? Instantiate(_modalEnterAnimation)
+            : SimpleTransitionAnimationObject.CreateInstance(beforeScale: Vector3.one * 0.3f, beforeAlpha: 0.0f);
+
+        public ITransitionAnimation ModalExitAnimation => _modalExitAnimation != null
+            ? Instantiate(_modalExitAnimation)
+            : SimpleTransitionAnimationObject.CreateInstance(afterScale: Vector3.one * 0.3f, afterAlpha: 0.0f);
+
+        public ITransitionAnimation ModalBackdropEnterAnimation => _modalBackdropEnterAnimation != null
+            ? Instantiate(_modalBackdropEnterAnimation)
+            : SimpleTransitionAnimationObject.CreateInstance(beforeAlpha: 0.0f, easeType: EaseType.Linear);
+
+        public ITransitionAnimation ModalBackdropExitAnimation => _modalBackdropExitAnimation != null
+            ? Instantiate(_modalBackdropExitAnimation)
+            : SimpleTransitionAnimationObject.CreateInstance(afterAlpha: 0.0f, easeType: EaseType.Linear);
+
+        public ModalBackdrop ModalBackdropPrefab
         {
             get
             {
-                if (_defaultSheetEnterAnimation == null)
+                if (_modalBackdropPrefab != null)
                 {
-                    _defaultSheetEnterAnimation =
-                        SimpleTransitionAnimationObject.CreateInstance(beforeAlpha: 0.0f, easeType: EaseType.Linear);
+                    return _modalBackdropPrefab;
                 }
 
-                return Instantiate(_defaultSheetEnterAnimation);
+                if (_defaultModalBackdrop == null)
+                {
+                    _defaultModalBackdrop = Resources.Load<ModalBackdrop>(DefaultModalBackdropPrefabKey);
+                }
+
+                return _defaultModalBackdrop;
             }
         }
 
-        public ITransitionAnimation DefaultSheetExitAnimation
+        public IAssetLoader AssetLoader
         {
             get
             {
-                if (_defaultSheetExitAnimation == null)
+                if (_assetLoader != null)
                 {
-                    _defaultSheetExitAnimation =
-                        SimpleTransitionAnimationObject.CreateInstance(afterAlpha: 0.0f, easeType: EaseType.Linear);
+                    return _assetLoader;
                 }
 
-                return Instantiate(_defaultSheetExitAnimation);
+                if (_defaultAssetLoader == null)
+                {
+                    _defaultAssetLoader = CreateInstance<ResourcesAssetLoaderObject>();
+                }
+
+                return _defaultAssetLoader;
             }
         }
 
-        public ITransitionAnimation DefaultPagePushEnterAnimation
-        {
-            get
-            {
-                if (_defaultPagePushEnterAnimation == null)
-                {
-                    _defaultPagePushEnterAnimation =
-                        SimpleTransitionAnimationObject.CreateInstance(beforeAlignment: SheetAlignment.Right,
-                            afterAlignment: SheetAlignment.Center);
-                }
-
-                return Instantiate(_defaultPagePushEnterAnimation);
-            }
-        }
-
-        public ITransitionAnimation DefaultPagePushExitAnimation
-        {
-            get
-            {
-                if (_defaultPagePushExitAnimation == null)
-                {
-                    _defaultPagePushExitAnimation =
-                        SimpleTransitionAnimationObject.CreateInstance(beforeAlignment: SheetAlignment.Center,
-                            afterAlignment: SheetAlignment.Left);
-                }
-
-                return Instantiate(_defaultPagePushExitAnimation);
-            }
-        }
-
-        public ITransitionAnimation DefaultPagePopEnterAnimation
-        {
-            get
-            {
-                if (_defaultPagePopEnterAnimation == null)
-                {
-                    _defaultPagePopEnterAnimation =
-                        SimpleTransitionAnimationObject.CreateInstance(beforeAlignment: SheetAlignment.Left,
-                            afterAlignment: SheetAlignment.Center);
-                }
-
-                return Instantiate(_defaultPagePopEnterAnimation);
-            }
-        }
-
-        public ITransitionAnimation DefaultPagePopExitAnimation
-        {
-            get
-            {
-                if (_defaultPagePopExitAnimation == null)
-                {
-                    _defaultPagePopExitAnimation =
-                        SimpleTransitionAnimationObject.CreateInstance(beforeAlignment: SheetAlignment.Center,
-                            afterAlignment: SheetAlignment.Right);
-                }
-
-                return Instantiate(_defaultPagePopExitAnimation);
-            }
-        }
-
-        public ITransitionAnimation DefaultModalEnterAnimation
-        {
-            get
-            {
-                if (_defaultModalEnterAnimation == null)
-                {
-                    _defaultModalEnterAnimation =
-                        SimpleTransitionAnimationObject.CreateInstance(beforeScale: Vector3.one * 0.3f,
-                            beforeAlpha: 0.0f);
-                }
-
-                return Instantiate(_defaultModalEnterAnimation);
-            }
-        }
-
-        public ITransitionAnimation DefaultModalExitAnimation
-        {
-            get
-            {
-                if (_defaultModalExitAnimation == null)
-                {
-                    _defaultModalExitAnimation =
-                        SimpleTransitionAnimationObject.CreateInstance(afterScale: Vector3.one * 0.3f,
-                            afterAlpha: 0.0f);
-                }
-
-                return Instantiate(_defaultModalExitAnimation);
-            }
-        }
-
-        public ITransitionAnimation DefaultModalBackdropEnterAnimation
-        {
-            get
-            {
-                if (_defaultModalBackdropEnterAnimation == null)
-                {
-                    _defaultModalBackdropEnterAnimation =
-                        SimpleTransitionAnimationObject.CreateInstance(beforeAlpha: 0.0f, easeType: EaseType.Linear);
-                }
-
-                return Instantiate(_defaultModalBackdropEnterAnimation);
-            }
-        }
-
-        public ITransitionAnimation DefaultModalBackdropExitAnimation
-        {
-            get
-            {
-                if (_defaultModalBackdropExitAnimation == null)
-                {
-                    _defaultModalBackdropExitAnimation =
-                        SimpleTransitionAnimationObject.CreateInstance(afterAlpha: 0.0f, easeType: EaseType.Linear);
-                }
-
-                return Instantiate(_defaultModalBackdropExitAnimation);
-            }
-        }
-
-        public ModalBackdrop DefaultModalBackdropPrefab
-        {
-            get
-            {
-                if (_defaultModalBackdropPrefab == null)
-                {
-                    _defaultModalBackdropPrefab = Resources.Load<ModalBackdrop>(DefaultModalBackdropPrefabKey);
-                }
-
-                return _defaultModalBackdropPrefab;
-            }
-        }
-
-        public IAssetLoader AssetLoader => _assetLoader != null
-            ? _assetLoader
-            : _assetLoader = CreateInstance<ResourcesAssetLoaderObject>();
+        public bool EnableInteractionInTransition => _enableInteractionInTransition;
 
         public static UnityScreenNavigatorSettings Instance
         {
@@ -211,7 +134,8 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
 #if UNITY_EDITOR
                 if (_instance == null)
                 {
-                    var asset = PlayerSettings.GetPreloadedAssets().OfType<UnityScreenNavigatorSettings>().FirstOrDefault();
+                    var asset = PlayerSettings.GetPreloadedAssets().OfType<UnityScreenNavigatorSettings>()
+                        .FirstOrDefault();
                     _instance = asset != null ? asset : CreateInstance<UnityScreenNavigatorSettings>();
                 }
 
@@ -238,32 +162,32 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
         {
             if (push)
             {
-                return enter ? DefaultPagePushEnterAnimation : DefaultPagePushExitAnimation;
+                return enter ? PagePushEnterAnimation : PagePushExitAnimation;
             }
 
-            return enter ? DefaultPagePopEnterAnimation : DefaultPagePopExitAnimation;
+            return enter ? PagePopEnterAnimation : PagePopExitAnimation;
         }
 
         public ITransitionAnimation GetDefaultModalTransitionAnimation(bool enter)
         {
-            return enter ? DefaultModalEnterAnimation : DefaultModalExitAnimation;
+            return enter ? ModalEnterAnimation : ModalExitAnimation;
         }
 
         public ITransitionAnimation GetDefaultSheetTransitionAnimation(bool enter)
         {
-            return enter ? DefaultSheetEnterAnimation : DefaultSheetExitAnimation;
+            return enter ? SheetEnterAnimation : SheetExitAnimation;
         }
 
 #if UNITY_EDITOR
-        
+
         [MenuItem("Assets/Create/Screen Navigator Settings", priority = -1)]
         private static void Create()
         {
             var asset = PlayerSettings.GetPreloadedAssets().OfType<UnityScreenNavigatorSettings>().FirstOrDefault();
             if (asset != null)
             {
-                throw new InvalidOperationException(
-                    $"{nameof(UnityScreenNavigatorSettings)} already exists in preloaded assets");
+                var path = AssetDatabase.GetAssetPath(asset);
+                throw new InvalidOperationException($"{nameof(UnityScreenNavigatorSettings)} already exists at {path}");
             }
 
             var assetPath = EditorUtility.SaveFilePanelInProject($"Save {nameof(UnityScreenNavigatorSettings)}",

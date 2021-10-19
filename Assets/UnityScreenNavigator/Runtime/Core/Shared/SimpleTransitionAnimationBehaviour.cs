@@ -17,15 +17,13 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
         private Vector3 _afterPosition;
         private Vector3 _beforePosition;
         private CanvasGroup _canvasGroup;
-        private RectTransform _rectTransform;
 
         public override float Duration => _delay + _duration;
 
-        protected override void OnSetup()
+        public override void Setup()
         {
-            _rectTransform = (RectTransform)transform;
-            _beforePosition = _beforeAlignment.ToPosition(_rectTransform);
-            _afterPosition = _afterAlignment.ToPosition(_rectTransform);
+            _beforePosition = _beforeAlignment.ToPosition(RectTransform);
+            _afterPosition = _afterAlignment.ToPosition(RectTransform);
             if (!gameObject.TryGetComponent<CanvasGroup>(out var canvasGroup))
             {
                 canvasGroup = gameObject.AddComponent<CanvasGroup>();
@@ -36,14 +34,14 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
 
         public override void SetTime(float time)
         {
-            time = Mathf.Max(0, time - _delay);
-            var progress = _duration <= 0 ? 1 : Mathf.Clamp01(time / _duration);
+            time = Mathf.Max(0.0f, time - _delay);
+            var progress = _duration <= 0.0f ? 1.0f : Mathf.Clamp01(time / _duration);
             progress = Easings.Interpolate(progress, _easeType);
             var position = Vector3.Lerp(_beforePosition, _afterPosition, progress);
             var scale = Vector3.Lerp(_beforeScale, _afterScale, progress);
             var alpha = Mathf.Lerp(_beforeAlpha, _afterAlpha, progress);
-            _rectTransform.anchoredPosition = position;
-            _rectTransform.localScale = scale;
+            RectTransform.anchoredPosition = position;
+            RectTransform.localScale = scale;
             _canvasGroup.alpha = alpha;
         }
 

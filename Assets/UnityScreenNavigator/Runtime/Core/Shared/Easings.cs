@@ -42,7 +42,7 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
         BounceEaseInOut
     }
 
-    internal static class Easings
+    public static class Easings
     {
         /// <summary>
         ///     Constant Pi.

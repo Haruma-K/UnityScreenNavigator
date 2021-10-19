@@ -129,7 +129,10 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         {
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
-            _canvasGroup.interactable = false;
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                _canvasGroup.interactable = false;
+            }
             _canvasGroup.alpha = 0.0f;
 
             var routine = push ? WillPushEnter() : WillPopEnter();
@@ -158,6 +161,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                     anim = UnityScreenNavigatorSettings.Instance.GetDefaultPageTransitionAnimation(push, true);
                 }
 
+                anim.SetPartner(partnerPage?.transform as RectTransform);
                 anim.Setup(_rectTransform);
                 yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
             }
@@ -176,7 +180,10 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 DidPopEnter();
             }
 
-            _canvasGroup.interactable = true;
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                _canvasGroup.interactable = true;
+            }
         }
 
         internal AsyncProcessHandle BeforeExit(bool push, Page partnerPage)
@@ -188,7 +195,11 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         {
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
-            _canvasGroup.interactable = false;
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                _canvasGroup.interactable = false;
+            }
+
             _canvasGroup.alpha = 1.0f;
 
             var routine = push ? WillPushExit() : WillPopExit();
@@ -215,6 +226,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                     anim = UnityScreenNavigatorSettings.Instance.GetDefaultPageTransitionAnimation(push, false);
                 }
 
+                anim.SetPartner(partnerPage?.transform as RectTransform);
                 anim.Setup(_rectTransform);
                 yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
             }

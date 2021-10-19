@@ -7,15 +7,23 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
     /// </summary>
     public abstract class TransitionAnimationBehaviour : MonoBehaviour, ITransitionAnimation
     {
+        public RectTransform RectTransform { get; private set; }
+        public RectTransform PartnerRectTransform { get; private set; }
         public abstract float Duration { get; }
 
-        public void Setup(RectTransform rectTransform)
+        void ITransitionAnimation.SetPartner(RectTransform partnerRectTransform)
         {
-            OnSetup();
+            PartnerRectTransform = partnerRectTransform;
         }
 
-        public abstract void SetTime(float time);
+        void ITransitionAnimation.Setup(RectTransform rectTransform)
+        {
+            RectTransform = rectTransform;
+            Setup();
+        }
+        
+        public abstract void Setup();
 
-        protected abstract void OnSetup();
+        public abstract void SetTime(float time);
     }
 }
