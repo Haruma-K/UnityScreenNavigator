@@ -14,6 +14,8 @@ Unityでページやモーダルの画面遷移、遷移アニメーション、
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<details>
+<summary>Details</summary>
 
 - [概要](#%E6%A6%82%E8%A6%81)
     - [特徴](#%E7%89%B9%E5%BE%B4)
@@ -51,6 +53,7 @@ Unityでページやモーダルの画面遷移、遷移アニメーション、
     - [Containerのマスクを外す](#container%E3%81%AE%E3%83%9E%E3%82%B9%E3%82%AF%E3%82%92%E5%A4%96%E3%81%99)
 - [ライセンス](#%E3%83%A9%E3%82%A4%E3%82%BB%E3%83%B3%E3%82%B9)
 
+</details>
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## 概要
