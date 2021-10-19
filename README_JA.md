@@ -16,7 +16,7 @@ Unityでページやモーダルの画面遷移、遷移アニメーション、
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 <!-- param::title::詳細:: -->
 <details>
-<summary>Details</summary>
+<summary>詳細</summary>
 
 - [概要](#%E6%A6%82%E8%A6%81)
     - [特徴](#%E7%89%B9%E5%BE%B4)
