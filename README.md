@@ -12,9 +12,20 @@ Transition pages and modals, play transition animation, stack their history and 
 
 ## Table of Contents
 
-<!-- START doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 <!-- param::isNotitle::true:: -->
-<!-- END doctoc -->
+
+- [Overview](#overview)
+    - [Features](#features)
+    - [Demo](#demo)
+- [Setup](#setup)
+    - [Requirement](#requirement)
+    - [Install](#install)
+- [Usage](#usage)
+- [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Overview
 
