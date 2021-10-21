@@ -63,7 +63,7 @@ Unityでページやモーダルの画面遷移、遷移アニメーション、
 * ページやモーダル、タブとその画面遷移を簡単かつ柔軟に構築
 * 画面のロードから破棄までライフサイクルとメモリを管理
 * 複雑な画面遷移アニメーションをアニメーターと分業して実装可能なワークフロー
-* 余計な機能（ex. ステートマシン）を含まない、よく分離された単機能ライブラリ
+* 余計な機能（ex. GUIライブラリやステートマシンなど）を含まない、よく分離された単機能ライブラリ
 * その他、履歴のスタッキングや遷移中のクリック防止などの機能を標準実装
 
 #### デモ
@@ -113,9 +113,9 @@ Unity 2019.4 以上
 #### 画面と遷移の概念
 Unity Screen Navigatorは、画面を「ページ」「モーダル」「シート」の3つに分類します。
 
-「ページ」は遷移履歴をスタッキング可能な画面です。  
-前のページから次のページへ遷移すると、前のページは履歴にスタッキングされます。  
-次のページから戻ると前のページが状態を保ったまま再表示されます。
+「ページ」は順番に遷移をしていく画面です。  
+例えば、ページAからページBへ遷移すると、ページAは履歴にスタッキングされます。  
+ページBから戻るとページAが状態を保ったまま再表示されます。
 
 <p align="center">
   <img width=400 src="https://user-images.githubusercontent.com/47441314/136680850-2aca1977-02c2-4730-a0d8-603934f71c80.gif" alt="Demo">
@@ -155,13 +155,13 @@ Unity Screen Navigatorは、画面を「ページ」「モーダル」「シー�
 ```cs
 PageContainer pageContainer;
 
-// Push the page named "ExamplePage".
+// 「ExamplePage」に遷移する
 var handle = pageContainer.Push("ExamplePage", true);
 
-// Wait for the transition to finish.
+// 遷移の終了を待機する
 yield return handle;
-//await handle.Task; // You can also use await.
-//handle.OnTerminate += () => { }; // You can also use callback.
+//await handle.Task; // awaitでも待機できます
+//handle.OnTerminate += () => { }; // コールバックも使えます
 ```
 
 また、アクティブなページを破棄して前のページを表示するには、`PageContainer.Pop()`を使います。
@@ -169,10 +169,10 @@ yield return handle;
 ```cs
 PageContainer pageContainer;
 
-// Pop the active page.
+// アクティブなページから戻る
 var handle = pageContainer.Pop(true);
 
-// Wait for the transition to finish.
+// 遷移の終了を待機する
 yield return handle;
 ```
 
@@ -199,13 +199,13 @@ yield return handle;
 ```cs
 ModalContainer modalContainer;
 
-// Push the modal named "ExampleModal".
+// 「ExampleModal」に遷移する
 var handle = modalContainer.Push("ExampleModal", true);
 
-// Wait for the transition to finish.
+// 遷移の終了を待機する
 yield return handle;
-//await handle.Task; // You can also use await.
-//handle.OnTerminate += () => { }; // You can also use callback.
+//await handle.Task; // awaitでも待機できます
+//handle.OnTerminate += () => { }; // コールバックも使えます
 ```
 
 また、アクティブなモーダルを破棄して前のモーダルを表示するには、`ModalContainer.Pop()`を使います。
@@ -278,7 +278,7 @@ yield return handle;
 ```
 
 #### コンテナを取得する方法
-各コンテナ（PageContainer・ModalContainer・SheetContainer）には、インスタンスを取得するための静的メソッドが用意されています。
+各コンテナ（`PageContainer`/`ModalContainer`/`SheetContainer`）には、インスタンスを取得するための静的メソッドが用意されています。
 
 以下のように`Container.Of()`を使うと、与えたTransformやRectTransformのから最も近い親にアタッチされているコンテナを取得できます。
 
@@ -300,10 +300,10 @@ var sheetContainer = SheetContainer.Find("SomeSheetContainer");
 ## 画面遷移アニメーション
 
 #### 共通の遷移アニメーションを設定する
-デフォルトでは、画面の種類に応じた標準的な遷移アニメーションが設定されています。  
+デフォルトでは、画面の種類ごとに標準的な遷移アニメーションが設定されています。  
 
-独自の遷移アニメーションを設定したい場合には、まず`TransitionAnimationObject`を継承したクラスを作成します。  
-このクラスにはアニメーションの挙動を定義するためのプロパティやメソッドが定義されています。
+独自の遷移アニメーションを作成する場合には、`TransitionAnimationObject`を継承したクラスを作成します。  
+このクラスはアニメーションの挙動を定義するためのプロパティやメソッドを持ちます。
 
 ```cs
 // アニメーションの時間（秒）
@@ -316,9 +316,9 @@ public abstract void Setup();
 public abstract void SetTime(float time);
 ```
 
-具体的な実装方法は [SimpleTransitionAnimationObject](https://github.com/Haruma-K/UnityScreenNavigator/blob/master/Assets/UnityScreenNavigator/Runtime/Core/Shared/SimpleTransitionAnimationObject.cs) を参考にしてください。
+実際の実装方法は [SimpleTransitionAnimationObject](https://github.com/Haruma-K/UnityScreenNavigator/blob/master/Assets/UnityScreenNavigator/Runtime/Core/Shared/SimpleTransitionAnimationObject.cs) を参考にしてください。
 
-クラスを作ったら、このScriptableObjectをインスタンス化し、`UnityScreenNavigatorSettings`に設定します。  
+次にこのScriptableObjectをインスタンス化し、`UnityScreenNavigatorSettings`に設定します。  
 `UnityScreenNavigatorSettings`は`Assets > Create > Screen Navigator Settings`から作成できます。
 
 <p align="center">
@@ -335,25 +335,25 @@ Page、Modal、SheetコンポーネントにはそれぞれAnimation Container�
   <img width=500 src="https://user-images.githubusercontent.com/47441314/137632127-2e224b47-3ef1-4fdd-a64a-986b38d5ea6a.png">
 </p>
 
-`Asset Type`を`Scriptable Object`に設定すると、前節で説明した`TransitionAnimationObject`によりアニメーションを設定できます。
+`Asset Type`を`Scriptable Object`に設定した上で、前節で説明した`TransitionAnimationObject`を`Animation Object`にアサインすると、この画面の遷移アニメーションを変更できます。
 
-また、ScriptableObjectではなくMonoBehaviourとしてアニメーションを作ることもできます。  
+また、ScriptableObjectではなくMonoBehaviourを使うこともできます。  
 この場合、まず`TransitionAnimationBehaviour`を継承したクラスを作成します。  
-具体的な実装方法は [SimpleTransitionAnimationBehaviour](https://github.com/Haruma-K/UnityScreenNavigator/blob/master/Assets/UnityScreenNavigator/Runtime/Core/Shared/SimpleTransitionAnimationBehaviour.cs) を参考にしてください。
+実際の実装方法は [SimpleTransitionAnimationBehaviour](https://github.com/Haruma-K/UnityScreenNavigator/blob/master/Assets/UnityScreenNavigator/Runtime/Core/Shared/SimpleTransitionAnimationBehaviour.cs) を参考にしてください。
 
 クラスを作ったら、このコンポーネントをアタッチした上で、`Asset Type`を`Mono Behaviour`にして参照をアサインします。
 
 #### 相手画面に応じて遷移アニメーションを変更する
-一方の画面が出ていきつつもう片方の画面が入ってくるような遷移の場合、自身に対して相手の画面が存在します。
+例えば画面Aが入ってきて画面Bが出ていくとき、画面Bを画面Aの「相手画面」と呼びます。
 
-`Partner Page Identifier Regex`に相手画面の名前を入力すると、そのアニメーションは相手画面がその名前だった時のみ適用されます。
+下図のプロパティに相手画面の名前を入力すると、相手画面と名前が一致したときのみその遷移アニメーションが適用されます。
 
 <p align="center">
   <img width=500 src="https://user-images.githubusercontent.com/47441314/137632918-9d777817-d2dc-43c9-bd7e-c6a1713a5f26.png">
 </p>
 
-画面の名前はデフォルトではPrefabの名前と一致します。  
-`Use Prefab Name As Identifer`のチェックを外した上で`Identifier`プロパティに文字列を入力することで、明示的に名前を指定することも可能です。
+デフォルトでは、Prefab名が画面名として使われます。  
+明示的に命名したい場合、`Use Prefab Name As Identifer`のチェックを外した上で`Identifier`プロパティに名前を入力します。
 
 <p align="center">
   <img width=500 src="https://user-images.githubusercontent.com/47441314/137632986-f5727a42-4c27-48aa-930d-e7b0673b978f.png">
@@ -364,20 +364,20 @@ Page、Modal、SheetコンポーネントにはそれぞれAnimation Container�
 
 #### 画面遷移アニメーションと描画順
 相手画面が存在するページやシートの遷移アニメーションでは描画順が重要になることがあります。  
-例えば片方が他方に覆い被さるように遷移するアニメーションを使用するケースが考えられます。
+例えば画面が相手画面に覆い被さるようなアニメーションです。
 
-描画順を明示的に制御したい場合には、`Rendering Order`プロパティを使用します。
+描画順を制御したい場合には、`Rendering Order`プロパティを使用します。
 
 <p align="center">
   <img width=500 src="https://user-images.githubusercontent.com/47441314/137633021-4e864c77-baa0-4d42-a8e7-b0183f7302f5.png">
 </p>
 
-画面遷移時にはこの値が小さいものが先に描画されます。
+画面遷移時にはこの値が小さいものから順に描画されます。
 
-なおモーダルは必ず新しいものが覆い被さるように遷移するため、`Rendering Order`プロパティを持ちません。
+なおモーダルは常に新しいものが手前に表示されるため、`Rendering Order`プロパティを持ちません。
 
 #### シンプルな遷移アニメーションを簡単に作る
-シンプルな遷移アニメーション用の実装として、`SimpleTransitionAnimationObject`を用意しています。
+シンプルな遷移アニメーションの実装として`SimpleTransitionAnimationObject`を使うことができます。
 
 これを使うには、`Assets > Create > Screen Navigator > Simple Transition Animation`を選択します。  
 すると以下のようなScriptableObjectが生成されるので、Inspectorからアニメーションを設定します。
@@ -409,15 +409,15 @@ Page、Modal、SheetコンポーネントにはそれぞれAnimation Container�
 
 #### 相手画面とのインタラクティブなアニメーションの実装
 相手画面の状態を参照したアニメーションを作成することもできます。  
-以下は、前のモーダルに表示された画像を拡大しつつシームレスに次のダイアログを表示する例です。
+以下の例では、前のモーダルの画像を拡大しつつシームレスに次のダイアログに遷移しています。
 
 <p align="center">
   <img width=500 src="https://user-images.githubusercontent.com/47441314/137315378-974395a8-f910-41a9-8e07-2964efded848.gif">
 </p>
 
-これを実装するには、`TransitionAnimationObject`や`TransitionAnimationBehaviour`を継承したクラスで、  
-`PartnerRectTransform`プロパティを参照することで相手画面を取得します。  
-相手画面が存在しない遷移であった場合には`PartnerRectTransform`はnullになります。
+これを実装するには、まず`TransitionAnimationObject`や`TransitionAnimationBehaviour`を継承したクラスを作成します。  
+そして`PartnerRectTransform`プロパティを参照することで相手画面を取得します。  
+相手画面が存在しない場合には`PartnerRectTransform`はnullになります。
 
 具体的な実装方法は、デモに含まれる [CharacterImageModalTransitionAnimation](https://github.com/Haruma-K/UnityScreenNavigator/blob/master/Assets/Demo/Scripts/CharacterImageModalTransitionAnimation.cs) を参考にしてください。
 
@@ -429,7 +429,7 @@ Timelineを使って画面遷移アニメーションを作成することもで
   <img width=500 src="https://user-images.githubusercontent.com/47441314/137634258-135b454e-04b5-49e8-a87a-bfb6ede03f49.gif">
 </p>
 
-Timelineによる実装を行うにはまず適当なGameObjectに`Timeline Transition Animation Behaviour`をアタッチします。  
+これを実装するためにはまず適当なGameObjectに`Timeline Transition Animation Behaviour`をアタッチします。  
 プロパティに`Playable Director`と`Timeline Asset`をアサインしておきます。
 
 <p align="center">
@@ -442,7 +442,7 @@ Timelineによる実装を行うにはまず適当なGameObjectに`Timeline Tran
   <img width=500 src="https://user-images.githubusercontent.com/47441314/137633492-4d837177-a381-486f-8942-df26e522da91.png">
 </p>
 
-最後にこの`Timeline Transition Animation Behaviour`を前述の`Animation Container`にアサインします。
+最後にこの`Timeline Transition Animation Behaviour`を`Animation Container`にアサインします。
 
 <p align="center">
   <img width=500 src="https://user-images.githubusercontent.com/47441314/137633821-1fa1a8d6-ca41-49ca-aacf-dcf7f744c0b1.png">
