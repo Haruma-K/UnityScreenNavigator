@@ -4,7 +4,7 @@
 
 [日本語ドキュメント(Japanese Documents Available)](README_JA.md)
 
-Transition pages and modals, play transition animation, stack their history and manage their lifecycle in Unity uGUI.
+Transition screens, play transition animation, stack their history and manage their lifecycle in Unity uGUI.
 
 <p align="center">
   <img width=700 src="https://user-images.githubusercontent.com/47441314/137313323-b2f24a0c-1ee3-4df0-a175-05fba32d9af3.gif" alt="Demo">
