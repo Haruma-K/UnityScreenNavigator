@@ -14,6 +14,8 @@ Transition pages and modals, play transition animation, stack their history and 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<details>
+<summary>Details</summary>
 
 - [Overview](#overview)
     - [Features](#features)
@@ -51,6 +53,7 @@ Transition pages and modals, play transition animation, stack their history and 
     - [Disable masking for container](#disable-masking-for-container)
 - [License](#license)
 
+</details>
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Overview
