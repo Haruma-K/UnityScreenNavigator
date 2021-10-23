@@ -1,7 +1,7 @@
 {
   "name": "com.harumak.unityscreennavigator",
   "displayName": "UnityScreenNavigator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "unity": "2019.4",
   "license": "MIT",
   "dependencies": {
@@ -11,5 +11,5 @@
     "url": "https://github.com/Haruma-K"
   },
   "type": "tool",
-  "description": "Transition pages and modals, and manage their history and lifecycle."
+  "description": "Transition pages and modals, play transition animation, stack their history and manage their lifecycle in Unity uGUI."
 }
