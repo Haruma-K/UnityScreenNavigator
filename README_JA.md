@@ -4,7 +4,7 @@
 
 [English Documents Available(英語ドキュメント)](README.md)
 
-Unityでページやモーダルの画面遷移、遷移アニメーション、遷移履歴のスタック、ライフサイクルマネジメントを行うためのライブラリです。
+UnityのuGUIでページやモーダルの画面遷移、遷移アニメーション、遷移履歴のスタック、ライフサイクルマネジメントを行うためのライブラリです。
 
 <p align="center">
   <img width=700 src="https://user-images.githubusercontent.com/47441314/137313323-b2f24a0c-1ee3-4df0-a175-05fba32d9af3.gif" alt="Demo">
@@ -82,7 +82,8 @@ Unityでページやモーダルの画面遷移、遷移アニメーション、
 ## セットアップ
 
 #### 要件
-Unity 2019.4 以上
+* Unity 2019.4 以上
+* uGUI (UIElementsには非対応)
 
 #### インストール
 1. Window > Package ManagerからPackage Managerを開く
@@ -230,8 +231,10 @@ yield return handle;
 このGameObjectは任意の名前をつけてPrefab化して、Resourcesフォルダ配下に配置しておきます。
 
 このResourcesフォルダ以下のパスを`SheetContainer.Register()`に与えることでシートが生成されます。  
-また、生成後に`SheetContainer.Show()`を呼ぶことでシートを表示できます。  
-以下は`Assets/Resources/ExampleSheet.prefab`に配置したシートを読み込む例です。
+生成後に`SheetContainer.Show()`を呼ぶことでアクティブなシートを切り替えられます。  
+この時、すでにアクティブなシートが存在した場合にはそのシートは非アクティブになります。
+
+以下は`Assets/Resources/ExampleSheet.prefab`に配置したシートを表示する例です。
 
 ```cs
 SheetContainer sheetContainer;
@@ -455,11 +458,11 @@ Timelineを使って画面遷移アニメーションを作成することもで
 </p>
 
 ## ライフサイクルイベント
-画面遷移が行われる際には、各画面のライフサイクルに紐づいたイベントが実行されます。  
-これをフックすることで、各画面の初期化処理や遷移前後の処理を記述することができます。
+画面遷移中には、画面のライフサイクルに紐づいたイベントが実行されます。  
+これをフックすることで画面の初期化時や遷移前後の処理を作成することができます。
 
 #### ページのライフサイクルイベント
-`Page`クラスを継承したクラスを作って以下のようにメソッドをオーバーライドすることで、  
+`Page`クラスを継承したクラスで以下のようにメソッドをオーバーライドすることで、  
 そのページのライフサイクルに紐づく処理を記述することができます。
 
 ```cs
@@ -491,7 +494,7 @@ public class SomePage : Page
 }
 ```
 
-また、`IPageContainerCallbackReceiver`を実装したクラスを`PageContainer.AddCallbackReceiver()`に渡すことで、遷移イベントをフックできます。
+また、`IPageContainerCallbackReceiver`を実装したクラスを`PageContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
 
 ```cs
 public interface IPageContainerCallbackReceiver
@@ -511,7 +514,7 @@ public interface IPageContainerCallbackReceiver
 `PageContainer.AddCallbackReceiver()`を呼ばなくても初期化時に`PageContainer`に登録されます。
 
 #### モーダルのライフサイクルイベント
-`Modal`クラスを継承したクラスを作って以下のようにメソッドをオーバーライドすることで、  
+`Modal`クラスを継承したクラスで以下のようにメソッドをオーバーライドすることで、  
 そのモーダルのライフサイクルに紐づく処理を記述することができます。
 
 ```cs
@@ -543,7 +546,7 @@ public class SomeModal : Modal
 }
 ```
 
-また、`IModalContainerCallbackReceiver`を実装したクラスを`ModalContainer.AddCallbackReceiver()`に渡すことで、遷移イベントをフックできます。
+また、`IModalContainerCallbackReceiver`を実装したクラスを`ModalContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
 
 ```cs
 public interface IModalContainerCallbackReceiver
@@ -563,7 +566,7 @@ public interface IModalContainerCallbackReceiver
 `ModalContainer.AddCallbackReceiver()`を呼ばなくても初期化時に`ModalContainer`に登録されます。
 
 #### シートのライフサイクルイベント
-`Sheet`クラスを継承したクラスを作って以下のようにメソッドをオーバーライドすることで、  
+`Sheet`クラスを継承したクラスで以下のようにメソッドをオーバーライドすることで、  
 そのシートのライフサイクルに紐づく処理を記述することができます。
 
 ```cs
@@ -587,7 +590,7 @@ public class SomeSheet : Sheet
 }
 ```
 
-また、`ISheetContainerCallbackReceiver`を実装したクラスを`SheetContainer.AddCallbackReceiver()`に渡すことで、遷移イベントをフックできます。
+また、`ISheetContainerCallbackReceiver`を実装したクラスを`SheetContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
 
 ```cs
 public interface ISheetContainerCallbackReceiver
@@ -743,7 +746,7 @@ yield return container.Pop(true);
 また、`Modal Container`ごとに背景を設定するには、`Modal Container`の`Override Backdrop Prefab`にPrefabをアサインします。
 
 #### 遷移中のインタラクションを有効にする
-各画面の遷移開始から遷移が終了するまでは、画面のクリックなどのインタラクションは全て無効になります。
+遷移開始から終了までは、画面のクリックなどのインタラクションは全て無効になります。
 
 設定を変更すると、遷移中のインタラクションを有効にすることができます。  
 有効にするには`UnityScreenNavigatorSettings`の`Enable Interaction In Transition`をtrueに設定します。
@@ -758,7 +761,7 @@ yield return container.Pop(true);
 インタラクションを有効にする場合には遷移のタイミングを自身で適切に制御する必要があります。
 
 #### Containerのマスクを外す
-デフォルトでは、コンテナの配下の画面のうち、はコンテナの外に出た部分はマスクされます。  
+デフォルトでは、コンテナの配下の画面のうち、コンテナの外に出た部分はマスクされます。  
 コンテナ外の画面も表示したい場合には、コンテナのGameObjectにアタッチされている`Rect Mask 2D`コンポーネントのチェックボックスを外してください。
 
 <p align="center">
