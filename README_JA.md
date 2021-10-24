@@ -4,7 +4,7 @@
 
 [English Documents Available(英語ドキュメント)](README.md)
 
-UnityのuGUIで画面遷移、遷移アニメーション、遷移履歴のスタック、ライフサイクルマネジメントを行うためのライブラリです。
+UnityのuGUIで画面遷移、画面遷移アニメーション、遷移履歴のスタック、画面のライフサイクルマネジメントを行うためのライブラリです。
 
 <p align="center">
   <img width=700 src="https://user-images.githubusercontent.com/47441314/137313323-b2f24a0c-1ee3-4df0-a175-05fba32d9af3.gif" alt="Demo">
