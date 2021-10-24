@@ -4,7 +4,7 @@
 
 [日本語ドキュメント(Japanese Documents Available)](README_JA.md)
 
-Transition pages and modals, play transition animation, stack their history and manage their lifecycle in Unity uGUI.
+Library for screen transitions, transition animations, transition history stacking, and lifecycle management in Unity's uGUI.
 
 <p align="center">
   <img width=700 src="https://user-images.githubusercontent.com/47441314/137313323-b2f24a0c-1ee3-4df0-a175-05fba32d9af3.gif" alt="Demo">
@@ -59,11 +59,11 @@ Transition pages and modals, play transition animation, stack their history and 
 ## Overview
 
 #### Features
-* You can build pages, modals, tabs and their transitions easily and flexibly.
-* Lifecycle of screens from load to destroy and memory management.
+* You can create pages, modals, tabs and their transitions easily and flexibly.
+* Manage screen lifecycle and memory from load to destroy.
 * Separated workflow with animators for complex screen transition animations.
 * Well-separated library with no extra functions (ex. GUI library, state machine).
-* And standard features such as history stacking and prevention of clicking during transitions.
+* And standard features such as history stacking and click prevention during transitions.
 
 #### Demo
 You can play the demo scene with the following steps.
@@ -113,21 +113,22 @@ If you want to set the target version, specify it like follow.
 Unity Screen Navigator classifies screens into three types: "Page", "Modal" and "Sheet".
 
 "Page" is a screen that transitions in sequence.  
-For example, when you transition from the Page A to Page B, Page A will be stacked in the history. And when you return from Page B, Page A will be redisplayed with its states intact.
+For example, when you transition from the Page A to Page B, Page A will be stacked in the history.  
+And when you return from Page B, Page A will be redisplayed with its states intact.
 
 <p align="center">
   <img width=400 src="https://user-images.githubusercontent.com/47441314/136680850-2aca1977-02c2-4730-a0d8-603934f71c80.gif" alt="Demo">
 </p>
 
-"Modal" is a screen that appears as a stack on the window.  
+"Modal" is a screen that is stacked in a window.  
 When it is displayed, all interactions except for the foreground modal will be blocked.
 
 <p align="center">
   <img width=400 src="https://user-images.githubusercontent.com/47441314/136698982-21ff5172-e38d-4d80-a976-a7ecc511c048.gif" alt="Demo">
 </p>
 
-"Sheet" does not have transition history, and simply allows you to switch between views.  
-You can use this to implement a tab-like GUI.
+And "Sheet" is used for tab-like GUI.  
+History is not managed, and only one active screen is displayed.
 
 <p align="center">
   <img width=400 src="https://user-images.githubusercontent.com/47441314/136700074-2a4fa134-dc5d-4b72-90d8-f6b12c91fc0f.gif" alt="Demo">
@@ -141,7 +142,7 @@ And, the area of each screen can be freely specified (not necessarily the entire
 </p>
 
 #### Create page and transition
-To create the page transition, first attach the "Page Container" component to an arbitrary GameObject under the Canvas.  
+To create the page transition, first attach the "Page Container" component to an GameObject under the Canvas.  
 The pages will be displayed to fit it, so adjust the size.
 
 Next, attach the `Page` component to the root GameObject of the page view.  
@@ -177,7 +178,7 @@ yield return handle;
 If you want to skip a certain page when call `Pop()`, you can [disable stacking to history](#Dont-stack-pages-in-history) by using the optional argument.
 
 #### Create modal and transition
-To create the modal transition, first attach the "Modal Container" component to an arbitrary GameObject under the Canvas.  
+To create the modal transition, first attach the "Modal Container" component to an GameObject under the Canvas.  
 In general, modals are designed to cover the entire window with their backdrop and block clicks.  
 Therefore, the size of the RectTransform of the GameObject should basically be set to match the window size.
 
@@ -221,8 +222,8 @@ yield return handle;
 Note that [you can change the modal backdrop](#Change-the-backdrop-of-modals) as you like.
 
 #### Create sheet and transition
-To create the sheet transition, first attach the "Sheet Container" component to an arbitrary GameObject under the Canvas.  
-The sheets will be displayed to fit the it, so adjust the size.
+To create the sheet transition, first attach the "Sheet Container" component to an GameObject under the Canvas.  
+The sheets will be displayed to fit it, so adjust the size.
 
 Next, attach the `Sheet` component to the root GameObject of the sheet view.  
 Place this GameObject under the Resources folder with an arbitrary name.
@@ -279,7 +280,7 @@ yield return handle;
 #### Getting containers with static methods
 Each container (`PageContainer`/`ModalContainer`/`SheetContainer`) has static methods to get the instance.
 
-Using the `Container.Of()` as follows, you can get the container that is attached to the nearest parent from he given Transform or RectTransform.
+Using the `Container.Of()` as follows, you can get the container that is attached to the nearest parent from the given Transform or RectTransform.
 
 ```cs
 var pageContainer = PageContainer.Of(transform);
@@ -308,7 +309,7 @@ This class has a property and methods to define the animation behavior.
 // Duration (sec).
 public abstract float Duration { get; }
 
-// Initialization.
+// Initialize.
 public abstract void Setup();
 
 // Define the state at this time.
@@ -408,7 +409,7 @@ Description of each property is as follows.
 
 #### Implement interactive animation with partner screen
 You can also create animations that refer to the state of the partner screen.  
-In the following example, the image of the previous modal is enlarged while seamlessly transitioning to the next dialog.
+In the following example, the image of the previous modal is enlarged while seamlessly transitioning to the next modal.
 
 <p align="center">
   <img width=500 src="https://user-images.githubusercontent.com/47441314/137315378-974395a8-f910-41a9-8e07-2964efded848.gif">
@@ -454,8 +455,6 @@ In addition, I recommend [UnityUIPlayables](https://github.com/Haruma-K/UnityUIP
 </p>
 
 ## Lifecycle Events
-During screen transitions, events associated with the screen lifecycle are executed.  
-By using these events, you can create processes when the screen is initialized and before and after transition.
 
 #### Lifecycle events of the page
 By overriding following methods in the class derived from the `Page` class,  

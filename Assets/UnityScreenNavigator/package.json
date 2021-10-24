@@ -11,5 +11,5 @@
     "url": "https://github.com/Haruma-K"
   },
   "type": "tool",
-  "description": "Transition pages and modals, play transition animation, stack their history and manage their lifecycle in Unity uGUI."
+  "description": "Library for screen transitions, transition animations, transition history stacking, and lifecycle management in Unity's uGUI."
 }

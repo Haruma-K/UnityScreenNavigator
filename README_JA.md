@@ -4,7 +4,7 @@
 
 [English Documents Available(英語ドキュメント)](README.md)
 
-UnityのuGUIでページやモーダルの画面遷移、遷移アニメーション、遷移履歴のスタック、ライフサイクルマネジメントを行うためのライブラリです。
+UnityのuGUIで画面遷移、遷移アニメーション、遷移履歴のスタック、ライフサイクルマネジメントを行うためのライブラリです。
 
 <p align="center">
   <img width=700 src="https://user-images.githubusercontent.com/47441314/137313323-b2f24a0c-1ee3-4df0-a175-05fba32d9af3.gif" alt="Demo">
@@ -122,15 +122,16 @@ Unity Screen Navigatorは、画面を「ページ」「モーダル」「シー�
   <img width=400 src="https://user-images.githubusercontent.com/47441314/136680850-2aca1977-02c2-4730-a0d8-603934f71c80.gif" alt="Demo">
 </p>
 
-「モーダル」は画面上に積み重なるように表示される画面です。  
+「モーダル」は画面上に積み重なっていく画面です。  
 モーダルの表示中は最前面にあるモーダル以外のインタラクションはブロックされます。
 
 <p align="center">
   <img width=400 src="https://user-images.githubusercontent.com/47441314/136698982-21ff5172-e38d-4d80-a976-a7ecc511c048.gif" alt="Demo">
 </p>
 
-「シート」は履歴を持たず、単純に表示を切り替えるだけの画面です。    
-タブのようなGUIを実現するために使います。
+「シート」はタブのようなGUIに使われます。  
+履歴を持たず、一つのアクティブな画面だけが表示されます。    
+
 
 <p align="center">
   <img width=400 src="https://user-images.githubusercontent.com/47441314/136700074-2a4fa134-dc5d-4b72-90d8-f6b12c91fc0f.gif" alt="Demo">
