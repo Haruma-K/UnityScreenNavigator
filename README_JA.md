@@ -215,10 +215,10 @@ yield return handle;
 ```cs
 ModalContainer modalContainer;
 
-// Pop the active modal.
+// アクティブなモーダルから戻る
 var handle = modalContainer.Pop(true);
 
-// Wait for the transition to finish.
+// 遷移の終了を待機する
 yield return handle;
 ```
 
@@ -240,11 +240,11 @@ yield return handle;
 ```cs
 SheetContainer sheetContainer;
 
-// Instantiate the sheet named "ExampleSheet"
+// 「ExampleSheet」をインスタンス化する
 var registerHandle = sheetContainer.Register("ExampleSheet");
 yield return registerHandle;
 
-// Show the sheet named "ExampleSheet"
+// 「ExampleSheet」を表示する
 var showHandle = sheetContainer.Show("ExampleSheet", false);
 yield return showHandle;
 ```
@@ -256,7 +256,7 @@ yield return showHandle;
 ```cs
 SheetContainer sheetContainer;
 
-// Instantiate the sheet named "ExampleSheet" and get the sheet id.
+// 「ExampleSheet」をインスタンス化してシートIDを得る
 var sheetId = 0;
 var registerHandle = sheetContainer.Register("ExampleSheet", x =>
 {
@@ -264,7 +264,7 @@ var registerHandle = sheetContainer.Register("ExampleSheet", x =>
 });
 yield return registerHandle;
 
-// Show the sheet with sheetId.
+// シートIDを使ってシートを表示する
 var showHandle = sheetContainer.Show(sheetId, false);
 yield return showHandle;
 ```
@@ -274,10 +274,10 @@ yield return showHandle;
 ```cs
 SheetContainer sheetContainer;
 
-// Hide the active sheet.
+// アクティブなシートを非表示にする
 var handle = sheetContainer.Hide(true);
 
-// Wait for the transition to finish.
+// 遷移の終了を待機する
 yield return handle;
 ```
 
