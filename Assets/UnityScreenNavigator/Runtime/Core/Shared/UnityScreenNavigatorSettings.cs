@@ -144,7 +144,7 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
 #else
                 if (_instance == null)
                 {
-                    _instance = CreateInstance<ScreenNavigatorSettings>();
+                    _instance = CreateInstance<UnityScreenNavigatorSettings>();
                 }
 
                 return _instance;

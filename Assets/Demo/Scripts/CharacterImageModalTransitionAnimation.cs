@@ -1,5 +1,4 @@
-﻿using TMPro.EditorUtilities;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Shared;
 
 namespace Demo.Scripts

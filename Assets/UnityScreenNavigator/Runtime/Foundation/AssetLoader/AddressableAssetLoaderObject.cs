@@ -1,3 +1,4 @@
+#if USE_ADDLESSABLES
 using UnityEngine;
 
 namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader
@@ -23,3 +24,4 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader
         }
     }
 }
+#endif
