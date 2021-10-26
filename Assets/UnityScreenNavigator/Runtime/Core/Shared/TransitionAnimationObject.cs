@@ -20,6 +20,7 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
         {
             RectTransform = rectTransform;
             Setup();
+            SetTime(0.0f);
         }
 
         public abstract void SetTime(float time);
