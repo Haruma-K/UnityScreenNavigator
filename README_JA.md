@@ -77,7 +77,7 @@ UnityのuGUIで画面遷移、画面遷移アニメーション、遷移履歴�
 なお、本デモで使用している画像の一部は以下のフリーコンテンツを利用させていただいております。  
 著作権情報などの詳細は以下のウェブサイトを参照してください。
 
-* [ジュエルセイバーFREE](https://docs.google.com/a/brilliantservice.co.jp/forms/d/1N4xCA6lY_5d_pNC0TSLJMg-GqJyY2jDhmOvegN1QRjU/viewform)
+* [ジュエルセイバーFREE](http://www.jewel-s.jp/)
 
 ## セットアップ
 
