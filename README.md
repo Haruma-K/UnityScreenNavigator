@@ -28,6 +28,7 @@ Library for screen transitions, transition animations, transition history stacki
     - [Create page and transition](#create-page-and-transition)
     - [Create modal and transition](#create-modal-and-transition)
     - [Create sheet and transition](#create-sheet-and-transition)
+    - [How to wait for the transition](#how-to-wait-for-the-transition)
     - [Getting containers with static methods](#getting-containers-with-static-methods)
 - [Screen Transition Animation](#screen-transition-animation)
     - [Setting common transition animations](#setting-common-transition-animations)
