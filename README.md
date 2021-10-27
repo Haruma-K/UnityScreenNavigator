@@ -75,7 +75,7 @@ You can play the demo scene with the following steps.
 Please note that some of the images used in this demo are from the following free contents.  
 For more information, including copyright, please refer to the following website.
 
-* [JewelSaviorFREE](https://docs.google.com/a/brilliantservice.co.jp/forms/d/1N4xCA6lY_5d_pNC0TSLJMg-GqJyY2jDhmOvegN1QRjU/viewform)
+* [JewelSaviorFREE](http://www.jewel-s.jp/)
 
 ## Setup
 
