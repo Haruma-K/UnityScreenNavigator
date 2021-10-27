@@ -277,6 +277,29 @@ var handle = sheetContainer.Hide(true);
 yield return handle;
 ```
 
+#### How to wait for the transition
+Each method for transition returns `AsyncProcessHandle` as the return value.  
+Using this object, you can wait for the transition process to finish.
+
+You can use coroutines, asynchronous methods, and callbacks to do this.  
+To wait in a coroutine, use `yield return` as shown below.
+
+```cs
+yield return pageContainer.Push("ExamplePage", true);
+```
+
+To wait in an asynchronous method, use await for `AsyncProcessHandle.Task` as follows.
+
+```cs
+await pageContainer.Push("ExamplePage", true).Task;
+```
+
+And use `AsyncProcessHandle.OnTerminate` if you want to use a callback.
+
+```cs
+pageContainer.Push("ExamplePage", true).OnTerminate += () => { };
+```
+
 #### Getting containers with static methods
 Each container (`PageContainer`/`ModalContainer`/`SheetContainer`) has static methods to get the instance.
 

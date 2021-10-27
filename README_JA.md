@@ -281,6 +281,29 @@ var handle = sheetContainer.Hide(true);
 yield return handle;
 ```
 
+#### 遷移処理を待機する方法
+画面遷移のための各メソッドは、戻り値として`AsyncProcessHandle`を返します。  
+このオブジェクトを使用すると、遷移処理が終了するまで待機することができます。
+
+また待機方法としては、コルーチン、非同期メソッド、コールバックに対応しています。  
+コルーチン内で待機するには以下のように`yield return`を使用します。
+
+```cs
+yield return pageContainer.Push("ExamplePage", true);
+```
+
+非同期メソッド内で待機するには以下のように`AsyncProcessHandle.Task`に対してawaitを使います。
+
+```cs
+await pageContainer.Push("ExamplePage", true).Task;
+```
+
+コールバックを使う場合には`AsyncProcessHandle.OnTerminate`を使います。
+
+```cs
+pageContainer.Push("ExamplePage", true).OnTerminate += () => { };
+```
+
 #### コンテナを取得する方法
 各コンテナ（`PageContainer`/`ModalContainer`/`SheetContainer`）には、インスタンスを取得するための静的メソッドが用意されています。
 
