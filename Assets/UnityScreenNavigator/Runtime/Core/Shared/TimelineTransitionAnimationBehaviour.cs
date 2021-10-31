@@ -1,4 +1,4 @@
-#if USE_TIMELINE
+#if USN_USE_TIMELINE
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
