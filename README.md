@@ -628,6 +628,30 @@ public interface ISheetContainerCallbackReceiver
 Note that if you implement `ISheetContainerCallbackReceiver` to `MonoBehaviour` and attach it to GameObject of the page,  
 it will be registered to `SheetContainer` without calling `SheetContainer.AddCallbackReceiver()`.
 
+#### Use async methods instead of coroutines
+You can also use asynchronous methods instead of coroutines to define lifecycle events, as shown below.
+
+```cs
+using System.Threading.Tasks;
+using UnityScreenNavigator.Runtime.Core.Page;
+
+public class SomePage : Page
+{
+    // 非同期メソッドを使ってライフサイクルイベントを定義する
+    public override async Task Initialize()
+    {
+        await Task.Delay(100);
+    }
+}
+```
+
+To use asynchronous methods, add `Scripting Define Symbols` in the following steps.
+
+* Player Settings > Other Settings
+* Add `USN_USE_ASYNC_METHODS` to `Scripting Define Symbols`.
+
+Note that `Scripting Define Symbols` needs to be set for all platforms.
+
 ## Loading Screen Resources
 
 #### Change the loading method of screen resources

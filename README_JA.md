@@ -634,6 +634,30 @@ public interface ISheetContainerCallbackReceiver
 なお`ISheetContainerCallbackReceiver`を`MonoBehaviour`に実装してシートのGameObjectにアタッチしておけば、  
 `SheetContainer.AddCallbackReceiver()`を呼ばなくても初期化時に`SheetContainer`に登録されます。
 
+#### コルーチンの代わりに非同期メソッドを使う
+以下のように、コルーチンの代わりに非同期メソッドを使用してライフサイクルイベントを定義することもできます。
+
+```cs
+using System.Threading.Tasks;
+using UnityScreenNavigator.Runtime.Core.Page;
+
+public class SomePage : Page
+{
+    // 非同期メソッドを使ってライフサイクルイベントを定義する
+    public override async Task Initialize()
+    {
+        await Task.Delay(100);
+    }
+}
+```
+
+非同期メソッドを使うには、以下の手順で`Scripting Define Symbols`を追加します。
+
+* Player Settings > Other Settingsを開く
+* Scripting Define Symbolsに`USN_USE_ASYNC_METHODS`を追加
+
+`Scripting Define Symbols`は全てのプラットフォームに対して設定する必要がある点に注意してください。
+
 ## 画面リソースのロード
 
 #### 画面リソースの読み込み方法を変更する
