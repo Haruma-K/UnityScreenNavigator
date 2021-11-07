@@ -42,6 +42,7 @@ Library for screen transitions, transition animations, transition history stacki
     - [Lifecycle events of the page](#lifecycle-events-of-the-page)
     - [Lifecycle events of the modal](#lifecycle-events-of-the-modal)
     - [Lifecycle events of the sheet](#lifecycle-events-of-the-sheet)
+    - [Use async methods instead of coroutines](#use-async-methods-instead-of-coroutines)
 - [Loading Screen Resources](#loading-screen-resources)
     - [Change the loading method of screen resources](#change-the-loading-method-of-screen-resources)
     - [Use Addressable Asset System for the loading](#use-addressable-asset-system-for-the-loading)
