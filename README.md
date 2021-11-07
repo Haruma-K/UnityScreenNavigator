@@ -638,7 +638,7 @@ using UnityScreenNavigator.Runtime.Core.Page;
 
 public class SomePage : Page
 {
-    // 非同期メソッドを使ってライフサイクルイベントを定義する
+    // Using asynchronous methods to define lifecycle events
     public override async Task Initialize()
     {
         await Task.Delay(100);
