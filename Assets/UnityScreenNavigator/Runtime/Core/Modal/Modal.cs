@@ -5,6 +5,11 @@ using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.Animation;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 
+#if USN_USE_ASYNC_METHODS
+using System;
+using System.Threading.Tasks;
+#endif
+
 namespace UnityScreenNavigator.Runtime.Core.Modal
 {
     [DisallowMultipleComponent]
@@ -37,51 +42,93 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             set => _canvasGroup.interactable = value;
         }
 
+#if USN_USE_ASYNC_METHODS
+        public virtual Task Initialize()
+        {
+            return Task.CompletedTask;
+        }
+#else
         public virtual IEnumerator Initialize()
         {
             yield break;
         }
+#endif
 
+#if USN_USE_ASYNC_METHODS
+        public virtual Task WillPushEnter()
+        {
+            return Task.CompletedTask;
+        }
+#else
         public virtual IEnumerator WillPushEnter()
         {
             yield break;
         }
+#endif
 
         public virtual void DidPushEnter()
         {
         }
 
+#if USN_USE_ASYNC_METHODS
+        public virtual Task WillPushExit()
+        {
+            return Task.CompletedTask;
+        }
+#else
         public virtual IEnumerator WillPushExit()
         {
             yield break;
         }
+#endif
 
         public virtual void DidPushExit()
         {
         }
 
+#if USN_USE_ASYNC_METHODS
+        public virtual Task WillPopEnter()
+        {
+            return Task.CompletedTask;
+        }
+#else
         public virtual IEnumerator WillPopEnter()
         {
             yield break;
         }
+#endif
 
         public virtual void DidPopEnter()
         {
         }
 
+#if USN_USE_ASYNC_METHODS
+        public virtual Task WillPopExit()
+        {
+            return Task.CompletedTask;
+        }
+#else
         public virtual IEnumerator WillPopExit()
         {
             yield break;
         }
+#endif
 
         public virtual void DidPopExit()
         {
         }
 
+#if USN_USE_ASYNC_METHODS
+        public virtual Task Cleanup()
+        {
+            return Task.CompletedTask;
+        }
+#else
         public virtual IEnumerator Cleanup()
         {
             yield break;
         }
+#endif
 
         internal AsyncProcessHandle AfterLoad(RectTransform parentTransform)
         {
@@ -97,7 +144,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _rectTransform.FillParent(_parentTransform);
             _canvasGroup.alpha = 0.0f;
 
-            return CoroutineManager.Instance.Run(Initialize());
+            return CoroutineManager.Instance.Run(CreateCoroutine(Initialize()));
         }
 
         internal AsyncProcessHandle BeforeEnter(bool push, Modal partnerModal)
@@ -120,7 +167,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
 
             var routine = push ? WillPushEnter() : WillPopEnter();
-            var handle = CoroutineManager.Instance.Run(routine);
+            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routine));
 
             while (!handle.IsTerminated)
             {
@@ -193,7 +240,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
 
             var routine = push ? WillPushExit() : WillPopExit();
-            var handle = CoroutineManager.Instance.Run(routine);
+            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routine));
 
             while (!handle.IsTerminated)
             {
@@ -241,7 +288,31 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         internal AsyncProcessHandle BeforeRelease()
         {
-            return CoroutineManager.Instance.Run(Cleanup());
+            return CoroutineManager.Instance.Run(CreateCoroutine(Cleanup()));
+        }
+
+#if USN_USE_ASYNC_METHODS
+        private IEnumerator CreateCoroutine(Task target)
+#else
+        private IEnumerator CreateCoroutine(IEnumerator target)
+#endif
+        {
+#if USN_USE_ASYNC_METHODS
+            async void WaitTaskAndCallback(Task task, Action callback)
+            {
+                await task;
+                callback?.Invoke();
+            }
+            
+            var isCompleted = false;
+            WaitTaskAndCallback(target, () =>
+            {
+                isCompleted = true;
+            });
+            return new WaitUntil(() => isCompleted);
+#else
+            return target;
+#endif
         }
     }
 }

@@ -1,4 +1,4 @@
-#if USE_ADDLESSABLES
+#if USN_USE_ADDRESSABLES
 using UnityEngine;
 
 namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader

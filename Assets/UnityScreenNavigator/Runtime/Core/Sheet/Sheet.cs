@@ -5,6 +5,11 @@ using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.Animation;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 
+#if USN_USE_ASYNC_METHODS
+using System;
+using System.Threading.Tasks;
+#endif
+
 namespace UnityScreenNavigator.Runtime.Core.Sheet
 {
     [DisallowMultipleComponent]
@@ -36,33 +41,61 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             set => _canvasGroup.interactable = value;
         }
 
+#if USN_USE_ASYNC_METHODS
+        public virtual Task Initialize()
+        {
+            return Task.CompletedTask;
+        }
+#else
         public virtual IEnumerator Initialize()
         {
             yield break;
         }
+#endif
 
+#if USN_USE_ASYNC_METHODS
+        public virtual Task WillEnter()
+        {
+            return Task.CompletedTask;
+        }
+#else
         public virtual IEnumerator WillEnter()
         {
             yield break;
         }
+#endif
 
         public virtual void DidEnter()
         {
         }
 
+#if USN_USE_ASYNC_METHODS
+        public virtual Task WillExit()
+        {
+            return Task.CompletedTask;
+        }
+#else
         public virtual IEnumerator WillExit()
         {
             yield break;
         }
+#endif
 
         public virtual void DidExit()
         {
         }
 
+#if USN_USE_ASYNC_METHODS
+        public virtual Task Cleanup()
+        {
+            return Task.CompletedTask;
+        }
+#else
         public virtual IEnumerator Cleanup()
         {
             yield break;
         }
+#endif
 
         internal AsyncProcessHandle AfterLoad(RectTransform parentTransform)
         {
@@ -94,7 +127,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             _rectTransform.SetSiblingIndex(siblingIndex);
 
             gameObject.SetActive(false);
-            return CoroutineManager.Instance.Run(Initialize());
+            return CoroutineManager.Instance.Run(CreateCoroutine(Initialize()));
         }
 
         internal AsyncProcessHandle BeforeEnter(Sheet partnerSheet)
@@ -114,7 +147,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
             _canvasGroup.alpha = 0.0f;
 
-            var handle = CoroutineManager.Instance.Run(WillEnter());
+            var handle = CoroutineManager.Instance.Run(CreateCoroutine(WillEnter()));
             while (!handle.IsTerminated)
             {
                 yield return null;
@@ -172,7 +205,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
             _canvasGroup.alpha = 1.0f;
 
-            var handle = CoroutineManager.Instance.Run(WillExit());
+            var handle = CoroutineManager.Instance.Run(CreateCoroutine(WillExit()));
             while (!handle.IsTerminated)
             {
                 yield return null;
@@ -210,7 +243,31 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         internal AsyncProcessHandle BeforeRelease()
         {
-            return CoroutineManager.Instance.Run(Cleanup());
+            return CoroutineManager.Instance.Run(CreateCoroutine(Cleanup()));
+        }
+
+#if USN_USE_ASYNC_METHODS
+        private IEnumerator CreateCoroutine(Task target)
+#else
+        private IEnumerator CreateCoroutine(IEnumerator target)
+#endif
+        {
+#if USN_USE_ASYNC_METHODS
+            async void WaitTaskAndCallback(Task task, Action callback)
+            {
+                await task;
+                callback?.Invoke();
+            }
+            
+            var isCompleted = false;
+            WaitTaskAndCallback(target, () =>
+            {
+                isCompleted = true;
+            });
+            return new WaitUntil(() => isCompleted);
+#else
+            return target;
+#endif
         }
     }
 }

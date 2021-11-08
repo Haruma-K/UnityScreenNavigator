@@ -43,6 +43,7 @@ UnityのuGUIで画面遷移、画面遷移アニメーション、遷移履歴�
     - [ページのライフサイクルイベント](#%E3%83%9A%E3%83%BC%E3%82%B8%E3%81%AE%E3%83%A9%E3%82%A4%E3%83%95%E3%82%B5%E3%82%A4%E3%82%AF%E3%83%AB%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88)
     - [モーダルのライフサイクルイベント](#%E3%83%A2%E3%83%BC%E3%83%80%E3%83%AB%E3%81%AE%E3%83%A9%E3%82%A4%E3%83%95%E3%82%B5%E3%82%A4%E3%82%AF%E3%83%AB%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88)
     - [シートのライフサイクルイベント](#%E3%82%B7%E3%83%BC%E3%83%88%E3%81%AE%E3%83%A9%E3%82%A4%E3%83%95%E3%82%B5%E3%82%A4%E3%82%AF%E3%83%AB%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88)
+    - [コルーチンの代わりに非同期メソッドを使う](#%E3%82%B3%E3%83%AB%E3%83%BC%E3%83%81%E3%83%B3%E3%81%AE%E4%BB%A3%E3%82%8F%E3%82%8A%E3%81%AB%E9%9D%9E%E5%90%8C%E6%9C%9F%E3%83%A1%E3%82%BD%E3%83%83%E3%83%89%E3%82%92%E4%BD%BF%E3%81%86)
 - [画面リソースのロード](#%E7%94%BB%E9%9D%A2%E3%83%AA%E3%82%BD%E3%83%BC%E3%82%B9%E3%81%AE%E3%83%AD%E3%83%BC%E3%83%89)
     - [画面リソースの読み込み方法を変更する](#%E7%94%BB%E9%9D%A2%E3%83%AA%E3%82%BD%E3%83%BC%E3%82%B9%E3%81%AE%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E6%96%B9%E6%B3%95%E3%82%92%E5%A4%89%E6%9B%B4%E3%81%99%E3%82%8B)
     - [Addressableアセットシステムを使って読み込む](#addressable%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%82%80)
@@ -633,6 +634,30 @@ public interface ISheetContainerCallbackReceiver
 
 なお`ISheetContainerCallbackReceiver`を`MonoBehaviour`に実装してシートのGameObjectにアタッチしておけば、  
 `SheetContainer.AddCallbackReceiver()`を呼ばなくても初期化時に`SheetContainer`に登録されます。
+
+#### コルーチンの代わりに非同期メソッドを使う
+以下のように、コルーチンの代わりに非同期メソッドを使用してライフサイクルイベントを定義することもできます。
+
+```cs
+using System.Threading.Tasks;
+using UnityScreenNavigator.Runtime.Core.Page;
+
+public class SomePage : Page
+{
+    // 非同期メソッドを使ってライフサイクルイベントを定義する
+    public override async Task Initialize()
+    {
+        await Task.Delay(100);
+    }
+}
+```
+
+非同期メソッドを使うには、以下の手順で`Scripting Define Symbols`を追加します。
+
+* Player Settings > Other Settingsを開く
+* Scripting Define Symbolsに`USN_USE_ASYNC_METHODS`を追加
+
+`Scripting Define Symbols`は全てのプラットフォームに対して設定する必要がある点に注意してください。
 
 ## 画面リソースのロード
 

@@ -42,6 +42,7 @@ Library for screen transitions, transition animations, transition history stacki
     - [Lifecycle events of the page](#lifecycle-events-of-the-page)
     - [Lifecycle events of the modal](#lifecycle-events-of-the-modal)
     - [Lifecycle events of the sheet](#lifecycle-events-of-the-sheet)
+    - [Use async methods instead of coroutines](#use-async-methods-instead-of-coroutines)
 - [Loading Screen Resources](#loading-screen-resources)
     - [Change the loading method of screen resources](#change-the-loading-method-of-screen-resources)
     - [Use Addressable Asset System for the loading](#use-addressable-asset-system-for-the-loading)
@@ -627,6 +628,30 @@ public interface ISheetContainerCallbackReceiver
 
 Note that if you implement `ISheetContainerCallbackReceiver` to `MonoBehaviour` and attach it to GameObject of the page,  
 it will be registered to `SheetContainer` without calling `SheetContainer.AddCallbackReceiver()`.
+
+#### Use async methods instead of coroutines
+You can also use asynchronous methods instead of coroutines to define lifecycle events, as shown below.
+
+```cs
+using System.Threading.Tasks;
+using UnityScreenNavigator.Runtime.Core.Page;
+
+public class SomePage : Page
+{
+    // Using asynchronous methods to define lifecycle events
+    public override async Task Initialize()
+    {
+        await Task.Delay(100);
+    }
+}
+```
+
+To use asynchronous methods, add `Scripting Define Symbols` in the following steps.
+
+* Player Settings > Other Settings
+* Add `USN_USE_ASYNC_METHODS` to `Scripting Define Symbols`.
+
+Note that `Scripting Define Symbols` needs to be set for all platforms.
 
 ## Loading Screen Resources
 
