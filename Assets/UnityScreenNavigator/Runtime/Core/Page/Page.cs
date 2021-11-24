@@ -27,7 +27,6 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         private PageTransitionAnimationContainer _animationContainer = new PageTransitionAnimationContainer();
 
         private CanvasGroup _canvasGroup;
-        private bool _isInitialized;
         private RectTransform _parentTransform;
         private RectTransform _rectTransform;
 
@@ -147,14 +146,9 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         internal AsyncProcessHandle AfterLoad(RectTransform parentTransform)
         {
-            if (!_isInitialized)
-            {
-                _rectTransform = (RectTransform)transform;
-                _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
-                _lifecycleEvents.Add(this);
-                _isInitialized = true;
-            }
-
+            _rectTransform = (RectTransform)transform;
+            _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
+            _lifecycleEvents.Add(this);
             _identifier = _usePrefabNameAsIdentifier ? gameObject.name.Replace("(Clone)", string.Empty) : _identifier;
             _parentTransform = parentTransform;
             _rectTransform.FillParent(_parentTransform);

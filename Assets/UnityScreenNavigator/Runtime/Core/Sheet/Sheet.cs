@@ -24,7 +24,6 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         private SheetTransitionAnimationContainer _animationContainer = new SheetTransitionAnimationContainer();
 
         private CanvasGroup _canvasGroup;
-        private bool _isInitialized;
         private RectTransform _parentTransform;
         private RectTransform _rectTransform;
 
@@ -112,14 +111,9 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         internal AsyncProcessHandle AfterLoad(RectTransform parentTransform)
         {
-            if (!_isInitialized)
-            {
-                _rectTransform = (RectTransform)transform;
-                _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
-                _lifecycleEvents.Add(this);
-                _isInitialized = true;
-            }
-
+            _rectTransform = (RectTransform)transform;
+            _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
+            _lifecycleEvents.Add(this);
             _parentTransform = parentTransform;
             _rectTransform.FillParent(_parentTransform);
 
