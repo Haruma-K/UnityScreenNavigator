@@ -1,10 +1,11 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.Animation;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
-
 #if USN_USE_ASYNC_METHODS
 using System;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 namespace UnityScreenNavigator.Runtime.Core.Sheet
 {
     [DisallowMultipleComponent]
-    public class Sheet : MonoBehaviour
+    public class Sheet : MonoBehaviour, ISheetLifecycleEvent
     {
         [SerializeField] private string _identifier;
 
@@ -26,6 +27,8 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         private bool _isInitialized;
         private RectTransform _parentTransform;
         private RectTransform _rectTransform;
+
+        private readonly List<ISheetLifecycleEvent> _lifecycleEvents = new List<ISheetLifecycleEvent>();
 
         public string Identifier
         {
@@ -97,12 +100,23 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         }
 #endif
 
+        public void AddLifecycleEvent(ISheetLifecycleEvent lifecycleEvent)
+        {
+            _lifecycleEvents.Add(lifecycleEvent);
+        }
+
+        public void RemoveLifecycleEvent(ISheetLifecycleEvent lifecycleEvent)
+        {
+            _lifecycleEvents.Remove(lifecycleEvent);
+        }
+
         internal AsyncProcessHandle AfterLoad(RectTransform parentTransform)
         {
             if (!_isInitialized)
             {
                 _rectTransform = (RectTransform)transform;
                 _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
+                _lifecycleEvents.Add(this);
                 _isInitialized = true;
             }
 
@@ -127,7 +141,8 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             _rectTransform.SetSiblingIndex(siblingIndex);
 
             gameObject.SetActive(false);
-            return CoroutineManager.Instance.Run(CreateCoroutine(Initialize()));
+
+            return CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.Initialize())));
         }
 
         internal AsyncProcessHandle BeforeEnter(Sheet partnerSheet)
@@ -147,7 +162,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
             _canvasGroup.alpha = 0.0f;
 
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(WillEnter()));
+            var handle = CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.WillEnter())));
             while (!handle.IsTerminated)
             {
                 yield return null;
@@ -181,8 +196,11 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         internal void AfterEnter(Sheet partnerSheet)
         {
-            DidEnter();
-            
+            foreach (var lifecycleEvent in _lifecycleEvents)
+            {
+                lifecycleEvent.DidEnter();
+            }
+
             if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
             {
                 _canvasGroup.interactable = true;
@@ -205,7 +223,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
             _canvasGroup.alpha = 1.0f;
 
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(WillExit()));
+            var handle = CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.WillExit())));
             while (!handle.IsTerminated)
             {
                 yield return null;
@@ -237,13 +255,33 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         internal void AfterExit(Sheet partnerSheet)
         {
-            DidExit();
+            foreach (var lifecycleEvent in _lifecycleEvents)
+            {
+                lifecycleEvent.DidExit();
+            }
+
             gameObject.SetActive(false);
         }
 
         internal AsyncProcessHandle BeforeRelease()
         {
-            return CoroutineManager.Instance.Run(CreateCoroutine(Cleanup()));
+            return CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.Cleanup())));
+        }
+
+#if USN_USE_ASYNC_METHODS
+        private IEnumerator CreateCoroutine(IEnumerable<Task> targets)
+#else
+        private IEnumerator CreateCoroutine(IEnumerable<IEnumerator> targets)
+#endif
+        {
+            foreach (var target in targets)
+            {
+                var handle = CoroutineManager.Instance.Run(CreateCoroutine(target));
+                if (!handle.IsTerminated)
+                {
+                    yield return handle;
+                }
+            }
         }
 
 #if USN_USE_ASYNC_METHODS

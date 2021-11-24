@@ -1,10 +1,11 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.Animation;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
-
 #if USN_USE_ASYNC_METHODS
 using System;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 namespace UnityScreenNavigator.Runtime.Core.Modal
 {
     [DisallowMultipleComponent]
-    public class Modal : MonoBehaviour
+    public class Modal : MonoBehaviour, IModalLifecycleEvent
     {
         [SerializeField] private bool _usePrefabNameAsIdentifier = true;
 
@@ -27,6 +28,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         private bool _isInitialized;
         private RectTransform _parentTransform;
         private RectTransform _rectTransform;
+
+        private readonly List<IModalLifecycleEvent> _lifecycleEvents = new List<IModalLifecycleEvent>();
 
         public string Identifier
         {
@@ -130,12 +133,23 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         }
 #endif
 
+        public void AddLifecycleEvent(IModalLifecycleEvent lifecycleEvent)
+        {
+            _lifecycleEvents.Add(lifecycleEvent);
+        }
+
+        public void RemoveLifecycleEvent(IModalLifecycleEvent lifecycleEvent)
+        {
+            _lifecycleEvents.Remove(lifecycleEvent);
+        }
+
         internal AsyncProcessHandle AfterLoad(RectTransform parentTransform)
         {
             if (!_isInitialized)
             {
                 _rectTransform = (RectTransform)transform;
                 _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
+                _lifecycleEvents.Add(this);
                 _isInitialized = true;
             }
 
@@ -144,7 +158,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _rectTransform.FillParent(_parentTransform);
             _canvasGroup.alpha = 0.0f;
 
-            return CoroutineManager.Instance.Run(CreateCoroutine(Initialize()));
+            return CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.Initialize())));
         }
 
         internal AsyncProcessHandle BeforeEnter(bool push, Modal partnerModal)
@@ -166,8 +180,10 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 _canvasGroup.interactable = false;
             }
 
-            var routine = push ? WillPushEnter() : WillPopEnter();
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routine));
+            var routines = push
+                ? _lifecycleEvents.Select(x => x.WillPushEnter())
+                : _lifecycleEvents.Select(x => x.WillPopEnter());
+            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
 
             while (!handle.IsTerminated)
             {
@@ -207,11 +223,17 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         {
             if (push)
             {
-                DidPushEnter();
+                foreach (var lifecycleEvent in _lifecycleEvents)
+                {
+                    lifecycleEvent.DidPushEnter();
+                }
             }
             else
             {
-                DidPopEnter();
+                foreach (var lifecycleEvent in _lifecycleEvents)
+                {
+                    lifecycleEvent.DidPopEnter();
+                }
             }
 
             if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
@@ -239,8 +261,10 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 _canvasGroup.interactable = false;
             }
 
-            var routine = push ? WillPushExit() : WillPopExit();
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routine));
+            var routines = push
+                ? _lifecycleEvents.Select(x => x.WillPushExit())
+                : _lifecycleEvents.Select(x => x.WillPopExit());
+            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
 
             while (!handle.IsTerminated)
             {
@@ -278,17 +302,39 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         {
             if (push)
             {
-                DidPushExit();
+                foreach (var lifecycleEvent in _lifecycleEvents)
+                {
+                    lifecycleEvent.DidPushExit();
+                }
             }
             else
             {
-                DidPopExit();
+                foreach (var lifecycleEvent in _lifecycleEvents)
+                {
+                    lifecycleEvent.DidPopExit();
+                }
             }
         }
 
         internal AsyncProcessHandle BeforeRelease()
         {
-            return CoroutineManager.Instance.Run(CreateCoroutine(Cleanup()));
+            return CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.Cleanup())));
+        }
+
+#if USN_USE_ASYNC_METHODS
+        private IEnumerator CreateCoroutine(IEnumerable<Task> targets)
+#else
+        private IEnumerator CreateCoroutine(IEnumerable<IEnumerator> targets)
+#endif
+        {
+            foreach (var target in targets)
+            {
+                var handle = CoroutineManager.Instance.Run(CreateCoroutine(target));
+                if (!handle.IsTerminated)
+                {
+                    yield return handle;
+                }
+            }
         }
 
 #if USN_USE_ASYNC_METHODS

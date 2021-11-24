@@ -520,7 +520,16 @@ public class SomePage : Page
 }
 ```
 
-また、`IPageContainerCallbackReceiver`を実装したクラスを`PageContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
+また、以下のように`IPageLifecycleEvent`を実装したクラスのインスタンスをPageに登録することで、外部からライフサイクルイベントを登録することもできます。  
+`IPageLifecycleEvent`には上記のメソッド群が定義されているインターフェースです。
+
+```cs
+IPageLifecycleEvent lifecycleEventImpl;
+Page page;
+page.AddLifecycleEvent(lifecycleEventImpl);
+```
+
+さらに、`IPageContainerCallbackReceiver`を実装したクラスを`PageContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
 
 ```cs
 public interface IPageContainerCallbackReceiver
@@ -572,7 +581,16 @@ public class SomeModal : Modal
 }
 ```
 
-また、`IModalContainerCallbackReceiver`を実装したクラスを`ModalContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
+また、以下のように`IModalLifecycleEvent`を実装したクラスのインスタンスをModalに登録することで、外部からライフサイクルイベントを登録することもできます。  
+`IModalLifecycleEvent`には上記のメソッド群が定義されているインターフェースです。
+
+```cs
+IModalLifecycleEvent lifecycleEventImpl;
+Modal modal;
+modal.AddLifecycleEvent(lifecycleEventImpl);
+```
+
+さらに、`IModalContainerCallbackReceiver`を実装したクラスを`ModalContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
 
 ```cs
 public interface IModalContainerCallbackReceiver
@@ -616,7 +634,16 @@ public class SomeSheet : Sheet
 }
 ```
 
-また、`ISheetContainerCallbackReceiver`を実装したクラスを`SheetContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
+また、以下のように`ISheetLifecycleEvent`を実装したクラスのインスタンスをSheetに登録することで、外部からライフサイクルイベントを登録することもできます。  
+`ISheetLifecycleEvent`には上記のメソッド群が定義されているインターフェースです。
+
+```cs
+ISheetLifecycleEvent lifecycleEventImpl;
+Sheet sheet;
+sheet.AddLifecycleEvent(lifecycleEventImpl);
+```
+
+さらに、`ISheetContainerCallbackReceiver`を実装したクラスを`SheetContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
 
 ```cs
 public interface ISheetContainerCallbackReceiver
