@@ -514,7 +514,16 @@ public class SomePage : Page
 }
 ```
 
-You can also hook transition events from the container by passing object that implements `IPageContainerCallbackReceiver` to `PageContainer.AddCallbackReceiver()`.
+You can also register lifecycle events externally by registering an object that implements `IPageLifecycleEvent` to Page as shown below.  
+`IPageLifecycleEvent` is an interface where the above methods are defined.
+
+```cs
+IPageLifecycleEvent lifecycleEventImpl;
+Page page;
+page.AddLifecycleEvent(lifecycleEventImpl);
+```
+
+And you can also hook transition events from the container by passing object that implements `IPageContainerCallbackReceiver` to `PageContainer.AddCallbackReceiver()`.
 
 ```cs
 public interface IPageContainerCallbackReceiver
@@ -566,7 +575,16 @@ public class SomeModal : Modal
 }
 ```
 
-You can also hook transition events from the container by passing object that implements `IModalContainerCallbackReceiver` to `ModalContainer.AddCallbackReceiver()`.
+You can also register lifecycle events externally by registering an object that implements `IModalLifecycleEvent` to ModalContainer as shown below.  
+`IModalLifecycleEvent` is an interface where the above methods are defined.
+
+```cs
+IModalLifecycleEvent lifecycleEventImpl;
+Modal modal;
+modal.AddLifecycleEvent(lifecycleEventImpl);
+```
+
+And you can also hook transition events from the container by passing object that implements `IModalContainerCallbackReceiver` to `ModalContainer.AddCallbackReceiver()`.
 
 ```cs
 public interface IModalContainerCallbackReceiver
@@ -610,7 +628,16 @@ public class SomeSheet : Sheet
 }
 ```
 
-You can also hook transition events from the container by passing object that implements `ISheetContainerCallbackReceiver` to `SheetContainer.AddCallbackReceiver()`.
+You can also register lifecycle events externally by registering an object that implements `ISheetLifecycleEvent` to SheetContainer as shown below.  
+`ISheetLifecycleEvent` is an interface where the above methods are defined.
+
+```cs
+ISheetLifecycleEvent lifecycleEventImpl;
+Sheet sheet;
+sheet.AddLifecycleEvent(lifecycleEventImpl);
+```
+
+And you can also hook transition events from the container by passing object that implements `ISheetContainerCallbackReceiver` to `SheetContainer.AddCallbackReceiver()`.
 
 ```cs
 public interface ISheetContainerCallbackReceiver
