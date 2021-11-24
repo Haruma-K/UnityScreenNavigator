@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Shared;
+using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 
@@ -25,6 +26,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         private readonly Dictionary<int, AssetLoadHandle<GameObject>> _assetLoadHandles
             = new Dictionary<int, AssetLoadHandle<GameObject>>();
 
+        private readonly List<ModalBackdrop> _backdrops = new List<ModalBackdrop>();
+
         private readonly List<IModalContainerCallbackReceiver> _callbackReceivers =
             new List<IModalContainerCallbackReceiver>();
 
@@ -34,7 +37,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             new Dictionary<string, AssetLoadHandle<GameObject>>();
 
         private ModalBackdrop _backdropPrefab;
-        private readonly List<ModalBackdrop> _backdrops = new List<ModalBackdrop>();
+        private CanvasGroup _canvasGroup;
 
         private IAssetLoader AssetLoader => UnityScreenNavigatorSettings.Instance.AssetLoader;
 
@@ -48,6 +51,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// </summary>
         public IReadOnlyList<Modal> Modals => _modals;
 
+        public bool Interactable
+        {
+            get => _canvasGroup.interactable;
+            set => _canvasGroup.interactable = value;
+        }
+
         private void Awake()
         {
             _callbackReceivers.AddRange(GetComponents<IModalContainerCallbackReceiver>());
@@ -59,6 +68,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _backdropPrefab = _overrideBackdropPrefab
                 ? _overrideBackdropPrefab
                 : UnityScreenNavigatorSettings.Instance.ModalBackdropPrefab;
+
+            _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
         }
 
         private void OnDestroy()
