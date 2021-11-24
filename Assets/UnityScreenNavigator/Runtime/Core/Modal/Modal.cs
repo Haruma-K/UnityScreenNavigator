@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace UnityScreenNavigator.Runtime.Core.Modal
 {
     [DisallowMultipleComponent]
-    public class Modal : MonoBehaviour
+    public class Modal : MonoBehaviour, IModalLifecycleEvent
     {
         [SerializeField] private bool _usePrefabNameAsIdentifier = true;
 
@@ -149,6 +149,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             {
                 _rectTransform = (RectTransform)transform;
                 _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
+                _lifecycleEvents.Add(this);
                 _isInitialized = true;
             }
 
