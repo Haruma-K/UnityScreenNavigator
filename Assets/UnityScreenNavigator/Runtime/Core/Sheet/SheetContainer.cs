@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Shared;
+using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 
@@ -30,6 +31,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         private readonly Dictionary<int, Sheet> _sheets = new Dictionary<int, Sheet>();
 
         private int? _activeSheetId;
+        private CanvasGroup _canvasGroup;
 
         private IAssetLoader AssetLoader => UnityScreenNavigatorSettings.Instance.AssetLoader;
 
@@ -58,6 +60,12 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// </summary>
         public IReadOnlyDictionary<int, Sheet> Sheets => _sheets;
 
+        public bool Interactable
+        {
+            get => _canvasGroup.interactable;
+            set => _canvasGroup.interactable = value;
+        }
+
         private void Awake()
         {
             _callbackReceivers.AddRange(GetComponents<ISheetContainerCallbackReceiver>());
@@ -66,6 +74,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             {
                 InstanceCacheByName.Add(_name, this);
             }
+            _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
         }
 
         private void OnDestroy()
