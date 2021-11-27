@@ -251,7 +251,7 @@ var showHandle = sheetContainer.Show("ExampleSheet", false);
 yield return showHandle;
 ```
 
-なお、`Regsiter()`メソッドにより同じリソースキーのシートを複数インスタンス化する場合には、  
+なお、`Register()`メソッドにより同じリソースキーのシートを複数インスタンス化する場合には、  
 リソースキーによるインスタンスの同一性を担保することができません。  
 このようなケースでは以下のように、リソースキーの代わりにシートIDを使います。
 
