@@ -6,6 +6,7 @@ using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.Animation;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
+using UnityScreenNavigator.Runtime.Foundation.PriorityCollection;
 #if USN_USE_ASYNC_METHODS
 using System;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         private RectTransform _parentTransform;
         private RectTransform _rectTransform;
 
-        private readonly List<IPageLifecycleEvent> _lifecycleEvents = new List<IPageLifecycleEvent>();
+        private readonly PriorityList<IPageLifecycleEvent> _lifecycleEvents = new PriorityList<IPageLifecycleEvent>();
 
         public string Identifier
         {
@@ -134,9 +135,9 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         }
 #endif
 
-        public void AddLifecycleEvent(IPageLifecycleEvent lifecycleEvent)
+        public void AddLifecycleEvent(IPageLifecycleEvent lifecycleEvent, int priority = 0)
         {
-            _lifecycleEvents.Add(lifecycleEvent);
+            _lifecycleEvents.Add(lifecycleEvent, priority);
         }
 
         public void RemoveLifecycleEvent(IPageLifecycleEvent lifecycleEvent)
@@ -148,7 +149,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         {
             _rectTransform = (RectTransform)transform;
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
-            _lifecycleEvents.Add(this);
+            _lifecycleEvents.Add(this, 0);
             _identifier = _usePrefabNameAsIdentifier ? gameObject.name.Replace("(Clone)", string.Empty) : _identifier;
             _parentTransform = parentTransform;
             _rectTransform.FillParent(_parentTransform);

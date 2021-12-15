@@ -526,7 +526,10 @@ public class SomePage : Page
 ```cs
 IPageLifecycleEvent lifecycleEventImpl;
 Page page;
-page.AddLifecycleEvent(lifecycleEventImpl);
+// 第二引数で実行優先度を指定できる
+// 0未満: Pageのライフサイクルイベントよりも前に実行
+// 1以上: Pageのライフサイクルイベントよりも後に実行
+page.AddLifecycleEvent(lifecycleEventImpl, -1);
 ```
 
 さらに、`IPageContainerCallbackReceiver`を実装したクラスを`PageContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
@@ -587,7 +590,10 @@ public class SomeModal : Modal
 ```cs
 IModalLifecycleEvent lifecycleEventImpl;
 Modal modal;
-modal.AddLifecycleEvent(lifecycleEventImpl);
+// 第二引数で実行優先度を指定できる
+// 0未満: Modalのライフサイクルイベントよりも前に実行
+// 1以上: Modalのライフサイクルイベントよりも後に実行
+modal.AddLifecycleEvent(lifecycleEventImpl, -1);
 ```
 
 さらに、`IModalContainerCallbackReceiver`を実装したクラスを`ModalContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
@@ -640,7 +646,10 @@ public class SomeSheet : Sheet
 ```cs
 ISheetLifecycleEvent lifecycleEventImpl;
 Sheet sheet;
-sheet.AddLifecycleEvent(lifecycleEventImpl);
+// 第二引数で実行優先度を指定できる
+// 0未満: Sheetのライフサイクルイベントよりも前に実行
+// 1以上: Sheetのライフサイクルイベントよりも後に実行
+sheet.AddLifecycleEvent(lifecycleEventImpl, -1);
 ```
 
 さらに、`ISheetContainerCallbackReceiver`を実装したクラスを`SheetContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
