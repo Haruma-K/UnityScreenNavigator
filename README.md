@@ -520,7 +520,10 @@ You can also register lifecycle events externally by registering an object that 
 ```cs
 IPageLifecycleEvent lifecycleEventImpl;
 Page page;
-page.AddLifecycleEvent(lifecycleEventImpl);
+// You can specify the execution priority with the second argument.
+// Less than 0: executed before Page lifecycle event.
+// Greater than 1: executed after Page lifecycle event.
+page.AddLifecycleEvent(lifecycleEventImpl, -1);
 ```
 
 And you can also hook transition events from the container by passing object that implements `IPageContainerCallbackReceiver` to `PageContainer.AddCallbackReceiver()`.
@@ -581,7 +584,10 @@ You can also register lifecycle events externally by registering an object that 
 ```cs
 IModalLifecycleEvent lifecycleEventImpl;
 Modal modal;
-modal.AddLifecycleEvent(lifecycleEventImpl);
+// You can specify the execution priority with the second argument.
+// Less than 0: executed before Modal lifecycle event.
+// Greater than 1: executed after Modal lifecycle event.
+modal.AddLifecycleEvent(lifecycleEventImpl, -1);
 ```
 
 And you can also hook transition events from the container by passing object that implements `IModalContainerCallbackReceiver` to `ModalContainer.AddCallbackReceiver()`.
@@ -634,7 +640,10 @@ You can also register lifecycle events externally by registering an object that 
 ```cs
 ISheetLifecycleEvent lifecycleEventImpl;
 Sheet sheet;
-sheet.AddLifecycleEvent(lifecycleEventImpl);
+// You can specify the execution priority with the second argument.
+// Less than 0: executed before Sheet lifecycle event.
+// Greater than 1: executed after Sheet lifecycle event.
+sheet.AddLifecycleEvent(lifecycleEventImpl, -1);
 ```
 
 And you can also hook transition events from the container by passing object that implements `ISheetContainerCallbackReceiver` to `SheetContainer.AddCallbackReceiver()`.
