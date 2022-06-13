@@ -854,6 +854,16 @@ yield return container.Pop(true);
   <img width=500 src="https://user-images.githubusercontent.com/47441314/137837996-42eacaae-8852-40f4-acfd-41f8bf9110a3.png">
 </p>
 
+#### 再生中の遷移アニメーションの情報を取得する
+再生中の遷移アニメーションの情報は `Page`、`Modal`、`Sheet` クラスの以下のプロパティから取得できます。
+
+| プロパティ名 | 説明 |
+|-|-|
+| IsTransitioning | 遷移中かどうか。 |
+| TransitionAnimationType | 遷移アニメーションの種類。遷移中じゃない場合にはnullを返す。 |
+| TransitionAnimationProgress | 遷移アニメーションの進捗。 |
+| TransitionAnimationProgressChanged | 遷移アニメーションの進捗が変わった時のイベント。 |
+
 ## ライセンス
 本ソフトウェアはMITライセンスで公開しています。  
 ライセンスの範囲内で自由に使っていただけますが、著作権表示とライセンス表示が必須となります。

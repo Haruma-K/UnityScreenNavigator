@@ -849,6 +849,16 @@ If you want to show the screen outside the container, uncheck the `Rect Mask 2D`
   <img width=500 src="https://user-images.githubusercontent.com/47441314/137837996-42eacaae-8852-40f4-acfd-41f8bf9110a3.png">
 </p>
 
+#### Get information about playing animation information
+You can get the information about the transition animation currently playing from the following properties of the `Page`, `Modal`, `Sheet` classes.
+
+| Property Name | Description |
+|-|-|
+| IsTransitioning | Whether in transition or not. |
+| TransitionAnimationType | Type of the transition animation. If not in transition, return null. |
+| TransitionAnimationProgress | Progress of the transition animation. |
+| TransitionAnimationProgressChanged | Event when the progress of the transition animation changes. |
+
 ## License
 This software is released under the MIT License.  
 You are free to use it within the scope of the license.  
