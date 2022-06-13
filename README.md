@@ -53,6 +53,7 @@ Library for screen transitions, transition animations, transition history stacki
     - [Change the backdrop of modals](#change-the-backdrop-of-modals)
     - [Enable interaction during transitions](#enable-interaction-during-transitions)
     - [Disable masking for container](#disable-masking-for-container)
+    - [Get information about playing animation information](#get-information-about-playing-animation-information)
 - [License](#license)
 
 </details>
