@@ -54,6 +54,7 @@ UnityのuGUIで画面遷移、画面遷移アニメーション、遷移履歴�
     - [モーダルの背景を変更する](#%E3%83%A2%E3%83%BC%E3%83%80%E3%83%AB%E3%81%AE%E8%83%8C%E6%99%AF%E3%82%92%E5%A4%89%E6%9B%B4%E3%81%99%E3%82%8B)
     - [遷移中のインタラクションを有効にする](#%E9%81%B7%E7%A7%BB%E4%B8%AD%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%A9%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E3%82%92%E6%9C%89%E5%8A%B9%E3%81%AB%E3%81%99%E3%82%8B)
     - [Containerのマスクを外す](#container%E3%81%AE%E3%83%9E%E3%82%B9%E3%82%AF%E3%82%92%E5%A4%96%E3%81%99)
+    - [再生中の遷移アニメーションの情報を取得する](#%E5%86%8D%E7%94%9F%E4%B8%AD%E3%81%AE%E9%81%B7%E7%A7%BB%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E6%83%85%E5%A0%B1%E3%82%92%E5%8F%96%E5%BE%97%E3%81%99%E3%82%8B)
 - [ライセンス](#%E3%83%A9%E3%82%A4%E3%82%BB%E3%83%B3%E3%82%B9)
 
 </details>
@@ -853,6 +854,16 @@ yield return container.Pop(true);
 <p align="center">
   <img width=500 src="https://user-images.githubusercontent.com/47441314/137837996-42eacaae-8852-40f4-acfd-41f8bf9110a3.png">
 </p>
+
+#### 再生中の遷移アニメーションの情報を取得する
+再生中の遷移アニメーションの情報は `Page`、`Modal`、`Sheet` クラスの以下のプロパティから取得できます。
+
+| プロパティ名 | 説明 |
+|-|-|
+| IsTransitioning | 遷移中かどうか。 |
+| TransitionAnimationType | 遷移アニメーションの種類。遷移中じゃない場合にはnullを返す。 |
+| TransitionAnimationProgress | 遷移アニメーションの進捗。 |
+| TransitionAnimationProgressChanged | 遷移アニメーションの進捗が変わった時のイベント。 |
 
 ## ライセンス
 本ソフトウェアはMITライセンスで公開しています。  

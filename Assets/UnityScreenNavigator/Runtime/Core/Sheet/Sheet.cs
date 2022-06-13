@@ -1,10 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
-using UnityScreenNavigator.Runtime.Foundation.Animation;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 using UnityScreenNavigator.Runtime.Foundation.PriorityCollection;
 #if USN_USE_ASYNC_METHODS
@@ -27,6 +27,17 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         private CanvasGroup _canvasGroup;
         private RectTransform _parentTransform;
         private RectTransform _rectTransform;
+        private Progress<float> _transitionProgressReporter;
+
+        private Progress<float> TransitionProgressReporter
+        {
+            get
+            {
+                if (_transitionProgressReporter == null)
+                    _transitionProgressReporter = new Progress<float>(SetTransitionProgress);
+                return _transitionProgressReporter;
+            }
+        }
 
         private readonly PriorityList<ISheetLifecycleEvent> _lifecycleEvents = new PriorityList<ISheetLifecycleEvent>();
 
@@ -43,6 +54,24 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             get => _canvasGroup.interactable;
             set => _canvasGroup.interactable = value;
         }
+
+        public bool IsTransitioning { get; private set; }
+
+        /// <summary>
+        ///     Return the transition animation type currently playing.
+        ///     If not in transition, return null.
+        /// </summary>
+        public SheetTransitionAnimationType? TransitionAnimationType { get; private set; }
+
+        /// <summary>
+        ///     Progress of the transition animation.
+        /// </summary>
+        public float TransitionAnimationProgress { get; private set; }
+
+        /// <summary>
+        ///     Event when the transition animation progress changes.
+        /// </summary>
+        public event Action<float> TransitionAnimationProgressChanged;
 
 #if USN_USE_ASYNC_METHODS
         public virtual Task Initialize()
@@ -126,9 +155,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 var childPage = child.GetComponent<Sheet>();
                 siblingIndex = i;
                 if (_renderingOrder >= childPage._renderingOrder)
-                {
                     continue;
-                }
 
                 break;
             }
@@ -147,21 +174,20 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         private IEnumerator BeforeEnterRoutine(Sheet partnerSheet)
         {
+            IsTransitioning = true;
+            TransitionAnimationType = SheetTransitionAnimationType.Enter;
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
+            SetTransitionProgress(0.0f);
 
             if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
                 _canvasGroup.interactable = false;
-            }
 
             _canvasGroup.alpha = 0.0f;
 
             var handle = CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.WillEnter())));
             while (!handle.IsTerminated)
-            {
                 yield return null;
-            }
         }
 
         internal AsyncProcessHandle Enter(bool playAnimation, Sheet partnerSheet)
@@ -177,29 +203,27 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             {
                 var anim = _animationContainer.GetAnimation(true, partnerSheet?._identifier);
                 if (anim == null)
-                {
                     anim = UnityScreenNavigatorSettings.Instance.GetDefaultSheetTransitionAnimation(true);
-                }
 
                 anim.SetPartner(partnerSheet?.transform as RectTransform);
                 anim.Setup(_rectTransform);
-                yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
+                yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
             }
 
             _rectTransform.FillParent(_parentTransform);
+            SetTransitionProgress(1.0f);
         }
 
         internal void AfterEnter(Sheet partnerSheet)
         {
             foreach (var lifecycleEvent in _lifecycleEvents)
-            {
                 lifecycleEvent.DidEnter();
-            }
 
             if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
                 _canvasGroup.interactable = true;
-            }
+
+            IsTransitioning = false;
+            TransitionAnimationType = null;
         }
 
         internal AsyncProcessHandle BeforeExit(Sheet partnerSheet)
@@ -209,20 +233,19 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         private IEnumerator BeforeExitRoutine(Sheet partnerSheet)
         {
+            IsTransitioning = true;
+            TransitionAnimationType = SheetTransitionAnimationType.Exit;
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
+            SetTransitionProgress(0.0f);
             if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
                 _canvasGroup.interactable = false;
-            }
 
             _canvasGroup.alpha = 1.0f;
 
             var handle = CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.WillExit())));
             while (!handle.IsTerminated)
-            {
                 yield return null;
-            }
         }
 
         internal AsyncProcessHandle Exit(bool playAnimation, Sheet partnerSheet)
@@ -236,26 +259,26 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             {
                 var anim = _animationContainer.GetAnimation(false, partnerSheet?.Identifier);
                 if (anim == null)
-                {
                     anim = UnityScreenNavigatorSettings.Instance.GetDefaultSheetTransitionAnimation(false);
-                }
 
                 anim.SetPartner(partnerSheet?.transform as RectTransform);
                 anim.Setup(_rectTransform);
-                yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
+                yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
             }
 
             _canvasGroup.alpha = 0.0f;
+            SetTransitionProgress(1.0f);
         }
 
         internal void AfterExit(Sheet partnerSheet)
         {
             foreach (var lifecycleEvent in _lifecycleEvents)
-            {
                 lifecycleEvent.DidExit();
-            }
 
             gameObject.SetActive(false);
+
+            IsTransitioning = false;
+            TransitionAnimationType = null;
         }
 
         internal AsyncProcessHandle BeforeRelease()
@@ -273,9 +296,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             {
                 var handle = CoroutineManager.Instance.Run(CreateCoroutine(target));
                 if (!handle.IsTerminated)
-                {
                     yield return handle;
-                }
             }
         }
 
@@ -301,6 +322,12 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 #else
             return target;
 #endif
+        }
+
+        private void SetTransitionProgress(float progress)
+        {
+            TransitionAnimationProgress = progress;
+            TransitionAnimationProgressChanged?.Invoke(progress);
         }
     }
 }
