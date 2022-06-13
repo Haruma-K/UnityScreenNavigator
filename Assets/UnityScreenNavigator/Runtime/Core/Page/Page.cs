@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
-using UnityScreenNavigator.Runtime.Foundation.Animation;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 using UnityScreenNavigator.Runtime.Foundation.PriorityCollection;
 #if USN_USE_ASYNC_METHODS
@@ -58,7 +57,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             get => _canvasGroup.interactable;
             set => _canvasGroup.interactable = value;
         }
-        
+
         public bool IsTransitioning { get; private set; }
 
         /// <summary>
@@ -192,9 +191,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 var childPage = child.GetComponent<Page>();
                 siblingIndex = i;
                 if (_renderingOrder >= childPage._renderingOrder)
-                {
                     continue;
-                }
 
                 break;
             }
@@ -215,14 +212,13 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         private IEnumerator BeforeEnterRoutine(bool push, Page partnerPage)
         {
             IsTransitioning = true;
-            TransitionAnimationType = push ? PageTransitionAnimationType.PushEnter : PageTransitionAnimationType.PopEnter;
+            TransitionAnimationType =
+                push ? PageTransitionAnimationType.PushEnter : PageTransitionAnimationType.PopEnter;
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
             SetTransitionProgress(0.0f);
             if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
                 _canvasGroup.interactable = false;
-            }
 
             _canvasGroup.alpha = 0.0f;
 
@@ -232,9 +228,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
 
             while (!handle.IsTerminated)
-            {
                 yield return null;
-            }
         }
 
         internal AsyncProcessHandle Enter(bool push, bool playAnimation, Page partnerPage)
@@ -250,9 +244,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             {
                 var anim = _animationContainer.GetAnimation(push, true, partnerPage?.Identifier);
                 if (anim == null)
-                {
                     anim = UnityScreenNavigatorSettings.Instance.GetDefaultPageTransitionAnimation(push, true);
-                }
 
                 anim.SetPartner(partnerPage?.transform as RectTransform);
                 anim.Setup(_rectTransform);
@@ -266,25 +258,15 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         internal void AfterEnter(bool push, Page partnerPage)
         {
             if (push)
-            {
                 foreach (var lifecycleEvent in _lifecycleEvents)
-                {
                     lifecycleEvent.DidPushEnter();
-                }
-            }
             else
-            {
                 foreach (var lifecycleEvent in _lifecycleEvents)
-                {
                     lifecycleEvent.DidPopEnter();
-                }
-            }
 
             if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
                 _canvasGroup.interactable = true;
-            }
-            
+
             IsTransitioning = false;
             TransitionAnimationType = null;
         }
@@ -302,9 +284,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             _rectTransform.FillParent(_parentTransform);
             SetTransitionProgress(0.0f);
             if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
                 _canvasGroup.interactable = false;
-            }
 
             _canvasGroup.alpha = 1.0f;
 
@@ -314,9 +294,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
 
             while (!handle.IsTerminated)
-            {
                 yield return null;
-            }
         }
 
         internal AsyncProcessHandle Exit(bool push, bool playAnimation, Page partnerPage)
@@ -330,9 +308,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             {
                 var anim = _animationContainer.GetAnimation(push, false, partnerPage?.Identifier);
                 if (anim == null)
-                {
                     anim = UnityScreenNavigatorSettings.Instance.GetDefaultPageTransitionAnimation(push, false);
-                }
 
                 anim.SetPartner(partnerPage?.transform as RectTransform);
                 anim.Setup(_rectTransform);
@@ -346,19 +322,11 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         internal void AfterExit(bool push, Page partnerPage)
         {
             if (push)
-            {
                 foreach (var lifecycleEvent in _lifecycleEvents)
-                {
                     lifecycleEvent.DidPushExit();
-                }
-            }
             else
-            {
                 foreach (var lifecycleEvent in _lifecycleEvents)
-                {
                     lifecycleEvent.DidPopExit();
-                }
-            }
 
             gameObject.SetActive(false);
             IsTransitioning = false;
@@ -380,9 +348,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             {
                 var handle = CoroutineManager.Instance.Run(CreateCoroutine(target));
                 if (!handle.IsTerminated)
-                {
                     yield return handle;
-                }
             }
         }
 
@@ -409,7 +375,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             return target;
 #endif
         }
-        
+
         private void SetTransitionProgress(float progress)
         {
             TransitionAnimationProgress = progress;
