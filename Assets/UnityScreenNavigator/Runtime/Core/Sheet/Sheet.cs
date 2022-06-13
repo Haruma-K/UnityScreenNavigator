@@ -62,7 +62,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         ///     Return the transition animation type currently playing.
         ///     If not in transition, return null.
         /// </summary>
-        public SheetTransitionAnimationType? TransitionType { get; private set; }
+        public SheetTransitionAnimationType? TransitionAnimationType { get; private set; }
 
         /// <summary>
         ///     Progress of the transition animation.
@@ -178,7 +178,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         private IEnumerator BeforeEnterRoutine(Sheet partnerSheet)
         {
             IsTransitioning = true;
-            TransitionType = SheetTransitionAnimationType.Enter;
+            TransitionAnimationType = SheetTransitionAnimationType.Enter;
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
             SetTransitionProgress(0.0f);
@@ -236,7 +236,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             }
             
             IsTransitioning = false;
-            TransitionType = null;
+            TransitionAnimationType = null;
         }
 
         internal AsyncProcessHandle BeforeExit(Sheet partnerSheet)
@@ -247,7 +247,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         private IEnumerator BeforeExitRoutine(Sheet partnerSheet)
         {
             IsTransitioning = true;
-            TransitionType = SheetTransitionAnimationType.Exit;
+            TransitionAnimationType = SheetTransitionAnimationType.Exit;
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
             SetTransitionProgress(0.0f);
@@ -299,7 +299,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             gameObject.SetActive(false);
             
             IsTransitioning = false;
-            TransitionType = null;
+            TransitionAnimationType = null;
         }
 
         internal AsyncProcessHandle BeforeRelease()

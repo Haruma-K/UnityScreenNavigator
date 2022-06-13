@@ -65,7 +65,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         ///     Return the transition animation type currently playing.
         ///     If not in transition, return null.
         /// </summary>
-        public PageTransitionAnimationType? TransitionType { get; private set; }
+        public PageTransitionAnimationType? TransitionAnimationType { get; private set; }
 
         /// <summary>
         ///     Progress of the transition animation.
@@ -215,7 +215,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         private IEnumerator BeforeEnterRoutine(bool push, Page partnerPage)
         {
             IsTransitioning = true;
-            TransitionType = push ? PageTransitionAnimationType.PushEnter : PageTransitionAnimationType.PopEnter;
+            TransitionAnimationType = push ? PageTransitionAnimationType.PushEnter : PageTransitionAnimationType.PopEnter;
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
             SetTransitionProgress(0.0f);
@@ -286,7 +286,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             }
             
             IsTransitioning = false;
-            TransitionType = null;
+            TransitionAnimationType = null;
         }
 
         internal AsyncProcessHandle BeforeExit(bool push, Page partnerPage)
@@ -297,7 +297,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         private IEnumerator BeforeExitRoutine(bool push, Page partnerPage)
         {
             IsTransitioning = true;
-            TransitionType = push ? PageTransitionAnimationType.PushExit : PageTransitionAnimationType.PopExit;
+            TransitionAnimationType = push ? PageTransitionAnimationType.PushExit : PageTransitionAnimationType.PopExit;
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
             SetTransitionProgress(0.0f);
@@ -362,7 +362,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             gameObject.SetActive(false);
             IsTransitioning = false;
-            TransitionType = null;
+            TransitionAnimationType = null;
         }
 
         internal AsyncProcessHandle BeforeRelease()

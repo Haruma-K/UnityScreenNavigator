@@ -63,7 +63,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         ///     Return the transition animation type currently playing.
         ///     If not in transition, return null.
         /// </summary>
-        public ModalTransitionAnimationType? TransitionType { get; private set; }
+        public ModalTransitionAnimationType? TransitionAnimationType { get; private set; }
 
         /// <summary>
         ///     Progress of the transition animation.
@@ -196,7 +196,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             IsTransitioning = true;
             if (push)
             {
-                TransitionType = ModalTransitionAnimationType.Enter;
+                TransitionAnimationType = ModalTransitionAnimationType.Enter;
                 gameObject.SetActive(true);
                 _rectTransform.FillParent(_parentTransform);
                 _canvasGroup.alpha = 0.0f;
@@ -271,7 +271,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
             
             IsTransitioning = false;
-            TransitionType = null;
+            TransitionAnimationType = null;
         }
 
         internal AsyncProcessHandle BeforeExit(bool push, Modal partnerModal)
@@ -284,7 +284,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             IsTransitioning = true;
             if (!push)
             {
-                TransitionType = ModalTransitionAnimationType.Exit;
+                TransitionAnimationType = ModalTransitionAnimationType.Exit;
                 gameObject.SetActive(true);
                 _rectTransform.FillParent(_parentTransform);
                 _canvasGroup.alpha = 1.0f;
@@ -352,7 +352,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
             
             IsTransitioning = false;
-            TransitionType = null;
+            TransitionAnimationType = null;
         }
 
         internal AsyncProcessHandle BeforeRelease()
