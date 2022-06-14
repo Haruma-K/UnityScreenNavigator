@@ -55,6 +55,7 @@ UnityのuGUIで画面遷移、画面遷移アニメーション、遷移履歴�
     - [遷移中のインタラクションを有効にする](#%E9%81%B7%E7%A7%BB%E4%B8%AD%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%A9%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E3%82%92%E6%9C%89%E5%8A%B9%E3%81%AB%E3%81%99%E3%82%8B)
     - [Containerのマスクを外す](#container%E3%81%AE%E3%83%9E%E3%82%B9%E3%82%AF%E3%82%92%E5%A4%96%E3%81%99)
     - [再生中の遷移アニメーションの情報を取得する](#%E5%86%8D%E7%94%9F%E4%B8%AD%E3%81%AE%E9%81%B7%E7%A7%BB%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E6%83%85%E5%A0%B1%E3%82%92%E5%8F%96%E5%BE%97%E3%81%99%E3%82%8B)
+    - [画面ロード時に読み込み済みの Prefab インスタンスを使用する](#%E7%94%BB%E9%9D%A2%E3%83%AD%E3%83%BC%E3%83%89%E6%99%82%E3%81%AB%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E6%B8%88%E3%81%BF%E3%81%AE-prefab-%E3%82%A4%E3%83%B3%E3%82%B9%E3%82%BF%E3%83%B3%E3%82%B9%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%99%E3%82%8B)
 - [ライセンス](#%E3%83%A9%E3%82%A4%E3%82%BB%E3%83%B3%E3%82%B9)
 
 </details>
@@ -724,6 +725,8 @@ public abstract void Release(AssetLoadHandle handle);
 
 `UnityScreenNavigatorSettings`は`Assets > Create > Screen Navigator Settings`から作成できます。
 
+また、各 `Container` の `AssetLoader` プロパティに値を設定することで、Container ごとに使用する `IAssetLoader` を設定できます。
+
 #### Addressableアセットシステムを使って読み込む
 Addressableアセットシステム用の`IAssetLoader`の実装は標準で用意しています。  
 アドレスを使って各画面を読み込みたい場合には以下の手順で設定します。
@@ -864,6 +867,16 @@ yield return container.Pop(true);
 | TransitionAnimationType | 遷移アニメーションの種類。遷移中じゃない場合にはnullを返す。 |
 | TransitionAnimationProgress | 遷移アニメーションの進捗。 |
 | TransitionAnimationProgressChanged | 遷移アニメーションの進捗が変わった時のイベント。 |
+
+#### 画面ロード時に読み込み済みの Prefab インスタンスを使用する
+`PreloadedAssetLoaderObject` を使用すると、画面読み込み時に Resources や Addressables を経由せず、読み込み済みの Prefab インスタンスを直接できます。  
+Assets > Create > Resource Loader > Preloaded Asset Loader から作成した Scriptable Object に以下のようにキーと Prefab を入力することで使用できます。
+
+<p align="center">
+  <img width=500 src="https://user-images.githubusercontent.com/47441314/173617407-a87a6b89-bfe2-498f-83c5-1af8cc4fa3bd.png">
+</p>
+
+また、ランタイム用の実装として `PreloadedAssetLoader` も用意しています。
 
 ## ライセンス
 本ソフトウェアはMITライセンスで公開しています。  
