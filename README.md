@@ -54,6 +54,7 @@ Library for screen transitions, transition animations, transition history stacki
     - [Enable interaction during transitions](#enable-interaction-during-transitions)
     - [Disable masking for container](#disable-masking-for-container)
     - [Get information about playing animation information](#get-information-about-playing-animation-information)
+    - [Use loaded Prefab instances when loading screens](#use-loaded-prefab-instances-when-loading-screens)
 - [License](#license)
 
 </details>
