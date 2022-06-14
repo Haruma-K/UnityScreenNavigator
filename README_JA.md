@@ -724,6 +724,8 @@ public abstract void Release(AssetLoadHandle handle);
 
 `UnityScreenNavigatorSettings`は`Assets > Create > Screen Navigator Settings`から作成できます。
 
+また、各 `Container` の `AssetLoader` プロパティに値を設定することで、Container ごとに使用する `IAssetLoader` を設定できます。
+
 #### Addressableアセットシステムを使って読み込む
 Addressableアセットシステム用の`IAssetLoader`の実装は標準で用意しています。  
 アドレスを使って各画面を読み込みたい場合には以下の手順で設定します。
@@ -864,6 +866,16 @@ yield return container.Pop(true);
 | TransitionAnimationType | 遷移アニメーションの種類。遷移中じゃない場合にはnullを返す。 |
 | TransitionAnimationProgress | 遷移アニメーションの進捗。 |
 | TransitionAnimationProgressChanged | 遷移アニメーションの進捗が変わった時のイベント。 |
+
+#### 画面ロード時に読み込み済みの Prefab インスタンスを使用する
+`PreloadedAssetLoaderObject` を使用すると、画面読み込み時に Resources や Addressables を経由せず、読み込み済みの Prefab インスタンスを直接できます。  
+Assets > Create > Resource Loader > Preloaded Asset Loader から作成した Scriptable Object に以下のようにキーと Prefab を入力することで使用できます。
+
+<p align="center">
+  <img width=500 src="https://user-images.githubusercontent.com/47441314/173617407-a87a6b89-bfe2-498f-83c5-1af8cc4fa3bd.png">
+</p>
+
+また、ランタイム用の実装として `PreloadedAssetLoader` も用意しています。
 
 ## ライセンス
 本ソフトウェアはMITライセンスで公開しています。  

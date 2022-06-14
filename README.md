@@ -718,6 +718,8 @@ After create it, assign it's instance to `AssetLoader` property of `UnityScreenN
 
 You can create `UnityScreenNavigatorSettings` from `Assets > Create > Screen Navigator Settings`.
 
+You can also set the `IAssetLoader`for each container by setting the `AssetLoader` property of each `Container`.
+
 #### Use Addressable Asset System for the loading
 An implementation of `IAssetLoader` for the Addressable Asset System is provided by default.  
 If you want to load each screen with an address, follow the steps below to set it up.
@@ -859,6 +861,16 @@ You can get the information about the transition animation currently playing fro
 | TransitionAnimationType | Type of the transition animation. If not in transition, return null. |
 | TransitionAnimationProgress | Progress of the transition animation. |
 | TransitionAnimationProgressChanged | Event when the progress of the transition animation changes. |
+
+#### Use loaded Prefab instances when loading screens
+The `PreloadedAssetLoaderObject` allows you to load preloaded prefab instances directly, instead of using Resources or Addressables when loading the screen.
+You can use it by entering the key and prefab in the Scriptable Object created from Assets > Create > Resource Loader > Preloaded Asset Loader as shown below.
+
+<p align="center">
+  <img width=500 src="https://user-images.githubusercontent.com/47441314/173617407-a87a6b89-bfe2-498f-83c5-1af8cc4fa3bd.png">
+</p>
+
+I also provide `PreloadedAssetLoader` implementation for runtime.
 
 ## License
 This software is released under the MIT License.  
