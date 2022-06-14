@@ -36,7 +36,17 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         private bool _isActivePageStacked;
 
-        private IAssetLoader AssetLoader => UnityScreenNavigatorSettings.Instance.AssetLoader;
+        private IAssetLoader _assetLoader;
+        
+        /// <summary>
+        ///     By default, <see cref="IAssetLoader" /> in <see cref="UnityScreenNavigatorSettings" /> is used.
+        ///     If this property is set, it is used instead.
+        /// </summary>
+        public IAssetLoader AssetLoader
+        {
+            get => _assetLoader ?? UnityScreenNavigatorSettings.Instance.AssetLoader;
+            set => _assetLoader = value;
+        }
 
         /// <summary>
         ///     True if in transition.

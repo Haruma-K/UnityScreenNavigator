@@ -33,7 +33,17 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         private int? _activeSheetId;
         private CanvasGroup _canvasGroup;
 
-        private IAssetLoader AssetLoader => UnityScreenNavigatorSettings.Instance.AssetLoader;
+        private IAssetLoader _assetLoader;
+        
+        /// <summary>
+        ///     By default, <see cref="IAssetLoader" /> in <see cref="UnityScreenNavigatorSettings" /> is used.
+        ///     If this property is set, it is used instead.
+        /// </summary>
+        public IAssetLoader AssetLoader
+        {
+            get => _assetLoader ?? UnityScreenNavigatorSettings.Instance.AssetLoader;
+            set => _assetLoader = value;
+        }
 
         public int? ActiveSheetId => _activeSheetId;
 
