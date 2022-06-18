@@ -57,14 +57,20 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader
         [Serializable]
         public sealed class KeyAssetPair
         {
-            [SerializeField] private bool _useAssetNameAsKey;
+            public enum KeySourceType
+            {
+                InputField,
+                AssetName
+            }
+            
+            [SerializeField] private KeySourceType _keySource;
             [SerializeField] private string _key;
             [SerializeField] private Object _asset;
 
-            public bool UseAssetNameAsKey
+            public KeySourceType KeySource
             {
-                get => _useAssetNameAsKey;
-                set => _useAssetNameAsKey = value;
+                get => _keySource;
+                set => _keySource = value;
             }
 
             public string Key
@@ -81,7 +87,7 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader
 
             private string GetKey()
             {
-                if (_useAssetNameAsKey)
+                if (_keySource == KeySourceType.AssetName)
                     return _asset == null ? "" : _asset.name;
                 return _key;
             }

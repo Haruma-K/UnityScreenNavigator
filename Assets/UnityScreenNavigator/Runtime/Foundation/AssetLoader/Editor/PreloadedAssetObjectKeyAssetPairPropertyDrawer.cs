@@ -16,7 +16,7 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader.Editor
 
             _property = new PropertyData
             {
-                UseAssetNameAsKeyProperty = property.FindPropertyRelative("_useAssetNameAsKey"),
+                KeySourceProperty = property.FindPropertyRelative("_keySource"),
                 KeyProperty = property.FindPropertyRelative("_key"),
                 AssetProperty = property.FindPropertyRelative("_asset")
             };
@@ -36,9 +36,11 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader.Editor
                     using (new EditorGUI.IndentLevelScope())
                     {
                         fieldRect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-                        EditorGUI.PropertyField(new Rect(fieldRect), _property.UseAssetNameAsKeyProperty);
+                        EditorGUI.PropertyField(new Rect(fieldRect), _property.KeySourceProperty);
 
-                        GUI.enabled = !_property.UseAssetNameAsKeyProperty.boolValue;
+                        var keySource =
+                            (PreloadedAssetLoaderObject.KeyAssetPair.KeySourceType)_property.KeySourceProperty.intValue;
+                        GUI.enabled = keySource == PreloadedAssetLoaderObject.KeyAssetPair.KeySourceType.InputField;
                         fieldRect.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
                         EditorGUI.PropertyField(new Rect(fieldRect), _property.KeyProperty);
                         GUI.enabled = true;
@@ -64,7 +66,7 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader.Editor
         {
             public SerializedProperty AssetProperty;
             public SerializedProperty KeyProperty;
-            public SerializedProperty UseAssetNameAsKeyProperty;
+            public SerializedProperty KeySourceProperty;
         }
     }
 }
