@@ -868,7 +868,7 @@ The `PreloadedAssetLoaderObject` allows you to load preloaded prefab instances d
 You can use it by entering the key and prefab in the Scriptable Object created from Assets > Create > Resource Loader > Preloaded Asset Loader as shown below.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/173617407-a87a6b89-bfe2-498f-83c5-1af8cc4fa3bd.png">
+  <img width=500 src="https://user-images.githubusercontent.com/47441314/174422762-5942a833-3a89-43bb-ab5f-a59eecaff1f6.png">
 </p>
 
 I also provide `PreloadedAssetLoader` implementation for runtime.
