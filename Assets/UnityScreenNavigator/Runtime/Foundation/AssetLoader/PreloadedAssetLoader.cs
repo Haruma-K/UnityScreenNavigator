@@ -47,5 +47,15 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader
         {
             // This class does not release any objects.
         }
+
+        /// <summary>
+        ///     Add a object to <see cref="PreloadedObjects" />. The asset name is used as the key.
+        ///     If you want to set your own key, add item to <see cref="PreloadedObjects" /> directly.
+        /// </summary>
+        /// <param name="obj"></param>
+        public void AddObject(Object obj)
+        {
+            PreloadedObjects.Add(obj.name, obj);
+        }
     }
 }

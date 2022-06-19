@@ -16,8 +16,27 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader
 
         private void OnEnable()
         {
+            if (!Application.isPlaying)
+                return;
+
             foreach (var preloadedObject in _preloadedObjects)
+            {
+                if (string.IsNullOrEmpty(preloadedObject.Key))
+                    continue;
+
+                if (_loader.PreloadedObjects.ContainsKey(preloadedObject.Key))
+                    continue;
+
                 _loader.PreloadedObjects.Add(preloadedObject.Key, preloadedObject.Asset);
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (!Application.isPlaying)
+                return;
+
+            _loader.PreloadedObjects.Clear();
         }
 
         public override AssetLoadHandle<T> Load<T>(string key)
@@ -36,14 +55,27 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader
         }
 
         [Serializable]
-        public class KeyAssetPair
+        public sealed class KeyAssetPair
         {
+            public enum KeySourceType
+            {
+                InputField,
+                AssetName
+            }
+            
+            [SerializeField] private KeySourceType _keySource;
             [SerializeField] private string _key;
             [SerializeField] private Object _asset;
 
+            public KeySourceType KeySource
+            {
+                get => _keySource;
+                set => _keySource = value;
+            }
+
             public string Key
             {
-                get => _key;
+                get => GetKey();
                 set => _key = value;
             }
 
@@ -51,6 +83,13 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader
             {
                 get => _asset;
                 set => _asset = value;
+            }
+
+            private string GetKey()
+            {
+                if (_keySource == KeySourceType.AssetName)
+                    return _asset == null ? "" : _asset.name;
+                return _key;
             }
         }
     }
