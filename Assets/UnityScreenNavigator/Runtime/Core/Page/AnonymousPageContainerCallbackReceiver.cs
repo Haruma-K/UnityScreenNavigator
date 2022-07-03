@@ -16,22 +16,22 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             OnAfterPop = onAfterPop;
         }
 
-        public void BeforePush(Page enterPage, Page exitPage)
+        void IPageContainerCallbackReceiver.BeforePush(Page enterPage, Page exitPage)
         {
             OnBeforePush?.Invoke((enterPage, exitPage));
         }
 
-        public void AfterPush(Page enterPage, Page exitPage)
+        void IPageContainerCallbackReceiver.AfterPush(Page enterPage, Page exitPage)
         {
             OnAfterPush?.Invoke((enterPage, exitPage));
         }
 
-        public void BeforePop(Page enterPage, Page exitPage)
+        void IPageContainerCallbackReceiver.BeforePop(Page enterPage, Page exitPage)
         {
             OnBeforePop?.Invoke((enterPage, exitPage));
         }
 
-        public void AfterPop(Page enterPage, Page exitPage)
+        void IPageContainerCallbackReceiver.AfterPop(Page enterPage, Page exitPage)
         {
             OnAfterPop?.Invoke((enterPage, exitPage));
         }
