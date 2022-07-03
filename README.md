@@ -516,16 +516,24 @@ public class SomePage : Page
 }
 ```
 
-You can also register lifecycle events externally by registering an object that implements `IPageLifecycleEvent` to Page as shown below.  
-`IPageLifecycleEvent` is an interface where the above methods are defined.
+You can also register lifecycle events externally by `Page.AddLifecycleEvents()` as below.
 
 ```cs
+// IPageLifecycleEvent is the interface that has lifecycle events described above.
+// You can specify the execution priority with the second argument.
+//  Less than 0: executed before Page lifecycle event.
+//  Greater than 0: executed after Page lifecycle event.
 IPageLifecycleEvent lifecycleEventImpl;
 Page page;
-// You can specify the execution priority with the second argument.
-// Less than 0: executed before Page lifecycle event.
-// Greater than 1: executed after Page lifecycle event.
 page.AddLifecycleEvent(lifecycleEventImpl, -1);
+
+// It is also possible to register only some lifecycle events as follows.
+IEnumerator OnWillPushEnter()
+{
+    // Some code.
+    yield break;
+}
+page.AddLifecycleEvent(onWillPushEnter: OnWillPushEnter);
 ```
 
 And you can also hook transition events from the container by passing object that implements `IPageContainerCallbackReceiver` to `PageContainer.AddCallbackReceiver()`.
@@ -580,16 +588,24 @@ public class SomeModal : Modal
 }
 ```
 
-You can also register lifecycle events externally by registering an object that implements `IModalLifecycleEvent` to ModalContainer as shown below.  
-`IModalLifecycleEvent` is an interface where the above methods are defined.
+You can also register lifecycle events externally by `Modal.AddLifecycleEvents()` as below.
 
 ```cs
+// IModalLifecycleEvent is the interface that has lifecycle events described above.
+// You can specify the execution priority with the second argument.
+//  Less than 0: executed before Modal lifecycle event.
+//  Greater than 0: executed after Modal lifecycle event.
 IModalLifecycleEvent lifecycleEventImpl;
 Modal modal;
-// You can specify the execution priority with the second argument.
-// Less than 0: executed before Modal lifecycle event.
-// Greater than 1: executed after Modal lifecycle event.
-modal.AddLifecycleEvent(lifecycleEventImpl, -1);
+Modal.AddLifecycleEvent(lifecycleEventImpl, -1);
+
+// It is also possible to register only some lifecycle events as follows.
+IEnumerator OnWillPushEnter()
+{
+    // Some code.
+    yield break;
+}
+modal.AddLifecycleEvent(onWillPushEnter: OnWillPushEnter);
 ```
 
 And you can also hook transition events from the container by passing object that implements `IModalContainerCallbackReceiver` to `ModalContainer.AddCallbackReceiver()`.
@@ -636,16 +652,24 @@ public class SomeSheet : Sheet
 }
 ```
 
-You can also register lifecycle events externally by registering an object that implements `ISheetLifecycleEvent` to SheetContainer as shown below.  
-`ISheetLifecycleEvent` is an interface where the above methods are defined.
+You can also register lifecycle events externally by `Sheet.AddLifecycleEvents()` as below.
 
 ```cs
+// ISheetLifecycleEvent is the interface that has lifecycle events described above.
+// You can specify the execution priority with the second argument.
+//  Less than 0: executed before Sheet lifecycle event.
+//  Greater than 0: executed after Sheet lifecycle event.
 ISheetLifecycleEvent lifecycleEventImpl;
 Sheet sheet;
-// You can specify the execution priority with the second argument.
-// Less than 0: executed before Sheet lifecycle event.
-// Greater than 1: executed after Sheet lifecycle event.
-sheet.AddLifecycleEvent(lifecycleEventImpl, -1);
+Sheet.AddLifecycleEvent(lifecycleEventImpl, -1);
+
+// It is also possible to register only some lifecycle events as follows.
+IEnumerator OnWillEnter()
+{
+    // Some code.
+    yield break;
+}
+sheet.AddLifecycleEvent(onWillEnter: OnWillEnter);
 ```
 
 And you can also hook transition events from the container by passing object that implements `ISheetContainerCallbackReceiver` to `SheetContainer.AddCallbackReceiver()`.

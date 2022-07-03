@@ -522,16 +522,24 @@ public class SomePage : Page
 }
 ```
 
-また、以下のように`IPageLifecycleEvent`を実装したクラスのインスタンスをPageに登録することで、外部からライフサイクルイベントを登録することもできます。  
-`IPageLifecycleEvent`には上記のメソッド群が定義されているインターフェースです。
+また、以下のように `Page.AddLifecycleEvent()` により外部からライフサイクルイベントを登録することもできます。
 
 ```cs
+// IPageLifecycleEventは上記のライフサイクルイベントが定義されているインターフェース
+// 第二引数で実行優先度を指定できる
+//  0未満: Pageのライフサイクルイベントよりも前に実行
+//  1以上: Pageのライフサイクルイベントよりも後に実行
 IPageLifecycleEvent lifecycleEventImpl;
 Page page;
-// 第二引数で実行優先度を指定できる
-// 0未満: Pageのライフサイクルイベントよりも前に実行
-// 1以上: Pageのライフサイクルイベントよりも後に実行
 page.AddLifecycleEvent(lifecycleEventImpl, -1);
+
+// 以下のように一部のライフサイクルイベントだけを登録することもできる
+IEnumerator OnWillPushEnter()
+{
+    // 何かしらの処理
+    yield break;
+}
+page.AddLifecycleEvent(onWillPushEnter: OnWillPushEnter);
 ```
 
 さらに、`IPageContainerCallbackReceiver`を実装したクラスを`PageContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
@@ -586,16 +594,24 @@ public class SomeModal : Modal
 }
 ```
 
-また、以下のように`IModalLifecycleEvent`を実装したクラスのインスタンスをModalに登録することで、外部からライフサイクルイベントを登録することもできます。  
-`IModalLifecycleEvent`には上記のメソッド群が定義されているインターフェースです。
+また、以下のように `Modal.AddLifecycleEvent()` により外部からライフサイクルイベントを登録することもできます。
 
 ```cs
+// IModalLifecycleEventは上記のライフサイクルイベントが定義されているインターフェース
+// 第二引数で実行優先度を指定できる
+//  0未満: Modalのライフサイクルイベントよりも前に実行
+//  1以上: Modalのライフサイクルイベントよりも後に実行
 IModalLifecycleEvent lifecycleEventImpl;
 Modal modal;
-// 第二引数で実行優先度を指定できる
-// 0未満: Modalのライフサイクルイベントよりも前に実行
-// 1以上: Modalのライフサイクルイベントよりも後に実行
 modal.AddLifecycleEvent(lifecycleEventImpl, -1);
+
+// 以下のように一部のライフサイクルイベントだけを登録することもできる
+IEnumerator OnWillPushEnter()
+{
+    // 何かしらの処理
+    yield break;
+}
+modal.AddLifecycleEvent(onWillPushEnter: OnWillPushEnter);
 ```
 
 さらに、`IModalContainerCallbackReceiver`を実装したクラスを`ModalContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
@@ -642,16 +658,24 @@ public class SomeSheet : Sheet
 }
 ```
 
-また、以下のように`ISheetLifecycleEvent`を実装したクラスのインスタンスをSheetに登録することで、外部からライフサイクルイベントを登録することもできます。  
-`ISheetLifecycleEvent`には上記のメソッド群が定義されているインターフェースです。
+また、以下のように `Sheet.AddLifecycleEvent()` により外部からライフサイクルイベントを登録することもできます。
 
 ```cs
+// IModalLifecycleEventは上記のライフサイクルイベントが定義されているインターフェース
+// 第二引数で実行優先度を指定できる
+//  0未満: Modalのライフサイクルイベントよりも前に実行
+//  1以上: Modalのライフサイクルイベントよりも後に実行
 ISheetLifecycleEvent lifecycleEventImpl;
 Sheet sheet;
-// 第二引数で実行優先度を指定できる
-// 0未満: Sheetのライフサイクルイベントよりも前に実行
-// 1以上: Sheetのライフサイクルイベントよりも後に実行
 sheet.AddLifecycleEvent(lifecycleEventImpl, -1);
+
+// 以下のように一部のライフサイクルイベントだけを登録することもできる
+IEnumerator OnWillEnter()
+{
+    // 何かしらの処理
+    yield break;
+}
+modal.AddLifecycleEvent(onWillEnter: OnWillEnter);
 ```
 
 さらに、`ISheetContainerCallbackReceiver`を実装したクラスを`SheetContainer.AddCallbackReceiver()`に渡すことで、コンテナから遷移イベントをフックできます。
