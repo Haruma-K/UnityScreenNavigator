@@ -192,6 +192,20 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         {
             return CoroutineManager.Instance.Run(PushRoutine(resourceKey, playAnimation, onLoad, loadAsync));
         }
+        
+        /// <summary>
+        ///     Push new modal.
+        /// </summary>
+        /// <param name="resourceKey"></param>
+        /// <param name="playAnimation"></param>
+        /// <param name="onLoad"></param>
+        /// <param name="loadAsync"></param>
+        /// <returns></returns>
+        public AsyncProcessHandle Push<TModal>(string resourceKey, bool playAnimation, Action<TModal> onLoad = null,
+            bool loadAsync = true) where TModal : Modal
+        {
+            return CoroutineManager.Instance.Run(PushRoutine(resourceKey, playAnimation, onLoad, loadAsync));
+        }
 
         /// <summary>
         ///     Pop current modal.
@@ -203,8 +217,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             return CoroutineManager.Instance.Run(PopRoutine(playAnimation));
         }
 
-        private IEnumerator PushRoutine(string resourceKey, bool playAnimation, Action<Modal> onLoad = null,
-            bool loadAsync = true)
+        private IEnumerator PushRoutine<TModal>(string resourceKey, bool playAnimation, Action<TModal> onLoad = null,
+            bool loadAsync = true) where TModal : Modal
         {
             if (resourceKey == null)
             {
@@ -237,12 +251,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _backdrops.Add(backdrop);
 
             var instance = Instantiate(assetLoadHandle.Result);
-            var enterModal = instance.GetComponent<Modal>();
-            if (enterModal == null)
-            {
-                throw new InvalidOperationException(
-                    $"Cannot transition because the \"{nameof(Modal)}\" component is not attached to the specified resource \"{resourceKey}\".");
-            }
+            if (!instance.TryGetComponent<TModal>(out var enterModal))
+                enterModal = instance.AddComponent<TModal>();
 
             var modalId = enterModal.GetInstanceID();
             _assetLoadHandles.Add(modalId, assetLoadHandle);
