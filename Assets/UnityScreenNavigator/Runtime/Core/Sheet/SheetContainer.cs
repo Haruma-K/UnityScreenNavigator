@@ -231,8 +231,22 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             return CoroutineManager.Instance.Run(RegisterRoutine(resourceKey, onLoad, loadAsync));
         }
 
-        private IEnumerator RegisterRoutine(string resourceKey,
-            Action<(int sheetId, Sheet instance)> onLoad = null, bool loadAsync = true)
+        /// <summary>
+        ///     Register a sheet.
+        /// </summary>
+        /// <param name="resourceKey"></param>
+        /// <param name="onLoad"></param>
+        /// <param name="loadAsync"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public AsyncProcessHandle Register<TSheet>(string resourceKey,
+            Action<(int sheetId, TSheet instance)> onLoad = null, bool loadAsync = true) where TSheet : Sheet
+        {
+            return CoroutineManager.Instance.Run(RegisterRoutine(resourceKey, onLoad, loadAsync));
+        }
+
+        private IEnumerator RegisterRoutine<TSheet>(string resourceKey,
+            Action<(int sheetId, TSheet instance)> onLoad = null, bool loadAsync = true) where TSheet : Sheet
         {
             if (resourceKey == null)
             {
@@ -253,13 +267,9 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             }
 
             var instance = Instantiate(assetLoadHandle.Result);
-            var sheet = instance.GetComponent<Sheet>();
-            if (sheet == null)
-            {
-                throw new InvalidOperationException(
-                    $"Cannot register because the \"{nameof(Sheet)}\" component is not attached to the specified resource \"{resourceKey}\".");
-            }
-
+            if (!instance.TryGetComponent<TSheet>(out var sheet))
+                sheet = instance.AddComponent<TSheet>();
+            
             var sheetId = sheet.GetInstanceID();
             _sheets.Add(sheetId, sheet);
             _sheetNameToId[resourceKey] = sheetId;

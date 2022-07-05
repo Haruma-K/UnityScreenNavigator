@@ -186,6 +186,22 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         {
             return CoroutineManager.Instance.Run(PushRoutine(resourceKey, playAnimation, stack, onLoad, loadAsync));
         }
+        
+        /// <summary>
+        ///     Push new page.
+        /// </summary>
+        /// <param name="resourceKey"></param>
+        /// <param name="playAnimation"></param>
+        /// <param name="stack"></param>
+        /// <param name="onLoad"></param>
+        /// <param name="loadAsync"></param>
+        /// <typeparam name="TPage"></typeparam>
+        /// <returns></returns>
+        public AsyncProcessHandle Push<TPage>(string resourceKey, bool playAnimation, bool stack = true,
+            Action<TPage> onLoad = null, bool loadAsync = true) where TPage : Page
+        {
+            return CoroutineManager.Instance.Run(PushRoutine(resourceKey, playAnimation, stack, onLoad, loadAsync));
+        }
 
         /// <summary>
         ///     Pop current page.
@@ -197,8 +213,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             return CoroutineManager.Instance.Run(PopRoutine(playAnimation));
         }
 
-        private IEnumerator PushRoutine(string resourceKey, bool playAnimation, bool stack = true,
-            Action<Page> onLoad = null, bool loadAsync = true)
+        private IEnumerator PushRoutine<TPage>(string resourceKey, bool playAnimation, bool stack = true,
+            Action<TPage> onLoad = null, bool loadAsync = true) where TPage : Page
         {
             if (resourceKey == null)
             {
@@ -228,12 +244,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             }
 
             var instance = Instantiate(assetLoadHandle.Result);
-            var enterPage = instance.GetComponent<Page>();
-            if (enterPage == null)
-            {
-                throw new InvalidOperationException(
-                    $"Cannot transition because the \"{nameof(Page)}\" component is not attached to the specified resource \"{resourceKey}\".");
-            }
+            if (!instance.TryGetComponent<TPage>(out var enterPage))
+                enterPage = instance.AddComponent<TPage>();
 
             var pageId = enterPage.GetInstanceID();
             _assetLoadHandles.Add(pageId, assetLoadHandle);
