@@ -1,0 +1,17 @@
+{
+    "name": "UnityScreenNavigator.Editor",
+    "references": [
+        "GUID:2359c074672083046b6ff6b309700f8e"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
