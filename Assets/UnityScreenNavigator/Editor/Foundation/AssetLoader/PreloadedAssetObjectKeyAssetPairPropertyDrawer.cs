@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
 
-namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader.Editor
+namespace UnityScreenNavigator.Editor.Foundation.AssetLoader
 {
     [CustomPropertyDrawer(typeof(PreloadedAssetLoaderObject.KeyAssetPair))]
     internal sealed class PreloadedAssetObjectKeyAssetPairPropertyDrawer : PropertyDrawer
