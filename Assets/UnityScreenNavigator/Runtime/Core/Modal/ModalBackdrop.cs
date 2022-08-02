@@ -1,8 +1,8 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
-using UnityScreenNavigator.Runtime.Foundation.Animation;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 
 namespace UnityScreenNavigator.Runtime.Core.Modal
@@ -10,6 +10,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
     public sealed class ModalBackdrop : MonoBehaviour
     {
         [SerializeField] private ModalBackdropTransitionAnimationContainer _animationContainer;
+        [SerializeField] private bool _closeModalWhenClicked;
 
         private CanvasGroup _canvasGroup;
         private RectTransform _parentTransform;
@@ -21,13 +22,35 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         {
             _rectTransform = (RectTransform)transform;
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
+            
+            if (_closeModalWhenClicked)
+            {
+                if (!TryGetComponent<Image>(out var image))
+                {
+                    image = gameObject.AddComponent<Image>();
+                    image.color = Color.clear;
+                }
+                
+                if (!TryGetComponent<Button>(out var button))
+                {
+                    button = gameObject.AddComponent<Button>();
+                    button.transition = Selectable.Transition.None;
+                }
+                button.onClick.AddListener(() =>
+                {
+                    var modalContainer = ModalContainer.Of(transform);
+                    if (modalContainer.IsInTransition)
+                        return;
+                    modalContainer.Pop(true);
+                });
+            }
         }
 
         public void Setup(RectTransform parentTransform)
         {
             _parentTransform = parentTransform;
             _rectTransform.FillParent(_parentTransform);
-            _canvasGroup.interactable = false;
+            _canvasGroup.interactable = _closeModalWhenClicked;
             gameObject.SetActive(false);
         }
 
