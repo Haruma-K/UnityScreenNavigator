@@ -51,6 +51,7 @@ Library for screen transitions, transition animations, transition history stacki
 - [Other Features](#other-features)
     - [Don't stack pages in history](#dont-stack-pages-in-history)
     - [Change the backdrop of modals](#change-the-backdrop-of-modals)
+    - [Close the active modal when the backdrop is clicked](#close-the-active-modal-when-the-backdrop-is-clicked)
     - [Enable interaction during transitions](#enable-interaction-during-transitions)
     - [Disable masking for container](#disable-masking-for-container)
     - [Get information about playing animation information](#get-information-about-playing-animation-information)
