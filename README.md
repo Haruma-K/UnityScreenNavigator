@@ -827,7 +827,6 @@ PageContainer container;
 yield return container.Push("FooPage", true, stack: false);
 
 // Transition to BarPage, and FooPage is disposed.
-// BarPageに遷移し、FooPageは破棄される
 yield return container.Push("BarPage", true);
 
 // When Pop, it does not back to FooPage, but to the page before it.
@@ -853,6 +852,15 @@ To change the modal backdrop of the whole application, assign it to `Modal Backd
 You can create `UnityScreenNavigatorSettings` from `Assets > Create > Screen Navigator Settings`.
 
 You can also set the backdrop for each `Modal Container` by assigning the prefab to the `Override Backdrop Prefab` of the `Modal Container`.
+
+#### Close the active modal when the backdrop is clicked
+In default, the backdrop is not clickable.  
+If you want to close the active modal when the backdrop is clicked, first change the backdrop by the steps above.  
+Then, check the **Close Modal When Clicked** option of the **Modal Backdrop** component.
+
+<p align="center">
+  <img width=500 src="https://user-images.githubusercontent.com/47441314/182382933-14af7d19-50e4-4cbc-ac89-bd9702df26af.png">
+</p>
 
 #### Enable interaction during transitions
 From the start of transition to the end, all interactions such as clicking on the screen are disabled.

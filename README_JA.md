@@ -859,6 +859,15 @@ yield return container.Pop(true);
 
 また、`Modal Container`ごとに背景を設定するには、`Modal Container`の`Override Backdrop Prefab`にPrefabをアサインします。
 
+#### モーダルの背景がクリックされたらモーダルを閉じる
+デフォルトではモーダル背景はクリックできません。  
+モーダルの背景がクリックされたときに最前面のモーダルを閉じるには、まず上記の手順でモーダルの背景を変更します。  
+その上で **Modal Backdrop** の **Close Modal When Clicked** プロパティにチェックを入れます。
+
+<p align="center">
+  <img width=500 src="https://user-images.githubusercontent.com/47441314/182382933-14af7d19-50e4-4cbc-ac89-bd9702df26af.png">
+</p>
+
 #### 遷移中のインタラクションを有効にする
 遷移開始から終了までは、画面のクリックなどのインタラクションは全て無効になります。
 
