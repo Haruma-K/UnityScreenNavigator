@@ -95,7 +95,7 @@ For more information, including copyright, please refer to the following website
    * https://github.com/Haruma-K/UnityScreenNavigator.git?path=/Assets/UnityScreenNavigator
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/118421190-97842b00-b6fb-11eb-9f94-4dc94e82367a.png" alt="Package Manager">
+  <img width="80%" src="https://user-images.githubusercontent.com/47441314/118421190-97842b00-b6fb-11eb-9f94-4dc94e82367a.png" alt="Package Manager">
 </p>
 
 Or, open Packages/manifest.json and add the following to the dependencies block.
@@ -122,28 +122,28 @@ For example, when you transition from the Page A to Page B, Page A will be stack
 And when you return from Page B, Page A will be redisplayed with its states intact.
 
 <p align="center">
-  <img width=400 src="https://user-images.githubusercontent.com/47441314/136680850-2aca1977-02c2-4730-a0d8-603934f71c80.gif" alt="Demo">
+  <img width="50%" src="https://user-images.githubusercontent.com/47441314/136680850-2aca1977-02c2-4730-a0d8-603934f71c80.gif" alt="Demo">
 </p>
 
 "Modal" is a screen that is stacked in a window.  
 When it is displayed, all interactions except for the foreground modal will be blocked.
 
 <p align="center">
-  <img width=400 src="https://user-images.githubusercontent.com/47441314/136698982-21ff5172-e38d-4d80-a976-a7ecc511c048.gif" alt="Demo">
+  <img width="50%" src="https://user-images.githubusercontent.com/47441314/136698982-21ff5172-e38d-4d80-a976-a7ecc511c048.gif" alt="Demo">
 </p>
 
 And "Sheet" is used for tab-like GUI.  
 History is not managed, and only one active screen is displayed.
 
 <p align="center">
-  <img width=400 src="https://user-images.githubusercontent.com/47441314/136700074-2a4fa134-dc5d-4b72-90d8-f6b12c91fc0f.gif" alt="Demo">
+  <img width="50%" src="https://user-images.githubusercontent.com/47441314/136700074-2a4fa134-dc5d-4b72-90d8-f6b12c91fc0f.gif" alt="Demo">
 
 These screens can be nested.  
 And, the area of each screen can be freely specified (not necessarily the entire window).
 
 </p>
 <p align="center">
-  <img width=400 src="https://user-images.githubusercontent.com/47441314/137634860-ae202ce7-5d2d-48b1-a938-358381d16780.gif" alt="Demo">
+  <img width="50%" src="https://user-images.githubusercontent.com/47441314/137634860-ae202ce7-5d2d-48b1-a938-358381d16780.gif" alt="Demo">
 </p>
 
 #### Create page and transition
@@ -192,7 +192,7 @@ This root GameObject will be adjusted to fit the size of the `Modal Container`.
 So if you want to create the modal with margins, create a child GameObject with a smaller size and create the content inside it.
 
 <p align="center">
-  <img width=600 src="https://user-images.githubusercontent.com/47441314/136698661-e4e247b6-7938-4fb5-8f6f-f2897f42eebe.png" alt="Demo">
+  <img width="70%" src="https://user-images.githubusercontent.com/47441314/136698661-e4e247b6-7938-4fb5-8f6f-f2897f42eebe.png" alt="Demo">
 </p>
 
 Place this GameObject under the Resources folder with an arbitrary name.
@@ -350,7 +350,7 @@ Then, instantiate this Scriptable Object, and assign it to `UnityScreenNavigator
 You can create `UnityScreenNavigatorSettings` from `Assets > Create > Screen Navigator Settings`.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137321487-e2267184-6eba-46a7-9f4e-468176822408.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137321487-e2267184-6eba-46a7-9f4e-468176822408.png">
 </p>
 
 #### Setting transition animation for each screen
@@ -360,7 +360,7 @@ Each Page, Modal, and Sheet component has the `Animation Container` property.
 You can set the transition animation to it.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137632127-2e224b47-3ef1-4fdd-a64a-986b38d5ea6a.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137632127-2e224b47-3ef1-4fdd-a64a-986b38d5ea6a.png">
 </p>
 
 You can change the transition animation of this screen by setting the `Asset Type` to `Scriptable Object` and assigning the `TransitionAnimationObject` described in the previous section to `Animation Object`.
@@ -377,14 +377,14 @@ For example, when screen A enters and screen B exits, screen B is called the "Pa
 If you enter the name of the partner screen in the property shown below, the transition animation will be applied only when this name matches the partner screen name.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137632918-9d777817-d2dc-43c9-bd7e-c6a1713a5f26.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137632918-9d777817-d2dc-43c9-bd7e-c6a1713a5f26.png">
 </p>
 
 In default, the prefab name is used as the screen name.  
 If you want to name it explicitly, uncheck `Use Prefab Name As Identifier` and enter a name in the `Identifier` property.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137632986-f5727a42-4c27-48aa-930d-e7b0673b978f.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137632986-f5727a42-4c27-48aa-930d-e7b0673b978f.png">
 </p>
 
 In addition, regular expressions can be used for the `Partner Page Identifier Regex`.  
@@ -397,7 +397,7 @@ For example, an animation where the screen covers the partner screen.
 If you want to control the drawing order, use the `Rendering Order` property.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137633021-4e864c77-baa0-4d42-a8e7-b0183f7302f5.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137633021-4e864c77-baa0-4d42-a8e7-b0183f7302f5.png">
 </p>
 
 During screen transitions, the screen is drawn in the order of decreasing this value.
@@ -411,14 +411,14 @@ This can be created from `Assets > Create > Screen Navigator > Simple Transition
 Then, a ScriptableObject as shown below will be generated, and you can set up the animation from the Inspector.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137326944-112e0254-cd27-4d49-a32b-9c436b9537e4.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137326944-112e0254-cd27-4d49-a32b-9c436b9537e4.png">
 </p>
 
 You can also use `SimpleTransitionAnimationBehaviour` as a MonoBehaviour implementation of this.  
 This is used by attaching it directly to a GameObject.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137326555-90cdce8d-98da-4a00-99cc-5a65c1086760.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137326555-90cdce8d-98da-4a00-99cc-5a65c1086760.png">
 </p>
 
 Description of each property is as follows.
@@ -440,7 +440,7 @@ You can also create animations that refer to the state of the partner screen.
 In the following example, the image of the previous modal is enlarged while seamlessly transitioning to the next modal.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137315378-974395a8-f910-41a9-8e07-2964efded848.gif">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137315378-974395a8-f910-41a9-8e07-2964efded848.gif">
 </p>
 
 To implement this, first create a class that derived from `TransitionAnimationObject` or `TransitionAnimationBehaviour`.  
@@ -454,32 +454,32 @@ You can use Timeline to create transition animation.
 It is recommended to use Timeline for complex transition animation.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137634258-135b454e-04b5-49e8-a87a-bfb6ede03f49.gif">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137634258-135b454e-04b5-49e8-a87a-bfb6ede03f49.gif">
 </p>
 
 To implement this, first attach the `Timeline Transition Animation Behaviour` to a GameObject.  
 And assign `Playable Director` and `Timeline Asset` to properties.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137633599-dd8b204e-e6ec-46bf-b93c-ee54b4ac3d59.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137633599-dd8b204e-e6ec-46bf-b93c-ee54b4ac3d59.png">
 </p>
 
 `Play On Awake` property of `Playable Director` need to be unchecked.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137633492-4d837177-a381-486f-8942-df26e522da91.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137633492-4d837177-a381-486f-8942-df26e522da91.png">
 </p>
 
 Finally, assign this `Timeline Transition Animation Behaviour` to the `Animation Container`.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137633821-1fa1a8d6-ca41-49ca-aacf-dcf7f744c0b1.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137633821-1fa1a8d6-ca41-49ca-aacf-dcf7f744c0b1.png">
 </p>
 
 In addition, I recommend [UnityUIPlayables](https://github.com/Haruma-K/UnityUIPlayables) to create uGUI animations with Timeline.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/113313016-cf9afe80-9345-11eb-9aa9-422c53b5a3f8.gif">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/113313016-cf9afe80-9345-11eb-9aa9-422c53b5a3f8.gif">
 </p>
 
 ## Lifecycle Events
@@ -739,7 +739,7 @@ Please refer to [ResourcesAssetLoader](https://github.com/Haruma-K/UnityScreenNa
 After create it, assign it's instance to `AssetLoader` property of `UnityScreenNavigatorSettings`.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137721037-18c84aad-28d3-4dd8-9a4a-4450a80badd2.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137721037-18c84aad-28d3-4dd8-9a4a-4450a80badd2.png">
 </p>
 
 You can create `UnityScreenNavigatorSettings` from `Assets > Create > Screen Navigator Settings`.
@@ -847,7 +847,7 @@ Next, assign this prefab as the modal backdrop.
 To change the modal backdrop of the whole application, assign it to `Modal Backdrop Prefab` in `UnityScreenNavigatorSettings`.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137837643-f5c7cc13-a379-4c0f-9c34-1e9c19869136.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137837643-f5c7cc13-a379-4c0f-9c34-1e9c19869136.png">
 </p>
 
 You can create `UnityScreenNavigatorSettings` from `Assets > Create > Screen Navigator Settings`.
@@ -870,7 +870,7 @@ You can change the settings to enable interaction during the transition.
 To do this, set `Enable Interaction In Transition` in `UnityScreenNavigatorSettings` to `true`.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137836806-6bbbb7dd-cc06-47aa-a1b8-3fe7d427f9fa.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137836806-6bbbb7dd-cc06-47aa-a1b8-3fe7d427f9fa.png">
 </p>
 
 You can create `UnityScreenNavigatorSettings` from `Assets > Create > Screen Navigator Settings`.
@@ -883,7 +883,7 @@ By default, the part of the screen under the container that is outside the conta
 If you want to show the screen outside the container, uncheck the `Rect Mask 2D` component attached to the container's GameObject.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137837996-42eacaae-8852-40f4-acfd-41f8bf9110a3.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137837996-42eacaae-8852-40f4-acfd-41f8bf9110a3.png">
 </p>
 
 #### Get information about playing animation information
@@ -901,7 +901,7 @@ The `PreloadedAssetLoaderObject` allows you to load preloaded prefab instances d
 You can use it by entering the key and prefab in the Scriptable Object created from Assets > Create > Resource Loader > Preloaded Asset Loader as shown below.
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/174422762-5942a833-3a89-43bb-ab5f-a59eecaff1f6.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/174422762-5942a833-3a89-43bb-ab5f-a59eecaff1f6.png">
 </p>
 
 I also provide `PreloadedAssetLoader` implementation for runtime.
