@@ -7,7 +7,7 @@
 Library for screen transitions, transition animations, transition history stacking, and screen lifecycle management in Unity's uGUI.
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/47441314/137313323-b2f24a0c-1ee3-4df0-a175-05fba32d9af3.gif" alt="Demo">
+  <img width="80%" src="https://user-images.githubusercontent.com/47441314/137313323-b2f24a0c-1ee3-4df0-a175-05fba32d9af3.gif" alt="Demo">
 </p>
 
 ## Table of Contents
