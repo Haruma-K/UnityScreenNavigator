@@ -905,6 +905,46 @@ You can use it by entering the key and prefab in the Scriptable Object created f
 
 I also provide `PreloadedAssetLoader` implementation for runtime.
 
+## FAQ
+
+#### How to make each Screen with Scene instead of Prefab
+You can load the Screen placed in the Scene by implementing `AssetLoader`.
+Implement `IAssetLoader` to load the Scene file that contains the requested screen and return the GameObject of the screen.
+See [Change the loading method of screen resources](#change-the-loading-method-of-screen-resources) for details.
+
+#### How to separate view and logic
+I wrote the blog post below to demonstrate the concept and implementation.
+
+https://light11.hatenadiary.com/entry/2022/01/11/193925
+(Sorry but Japanese only)
+
+#### How to pass data to each screen
+First, as an example, data is passed to the screen when loading is completed in the demo scene, as shown below.
+
+https://github.com/Haruma-K/UnityScreenNavigator/blob/8a115b1b25ac1d9fcf4b1ab6d5f2c1cd1d915ee5/Assets/Demo/Scripts/CharacterModal.cs#L91
+
+However, there are many other possible ways to pass data.
+For example, there may be a case where you want to use a DI Container to set data.
+Therefore, it is the policy of this library not to implement and enforce a specific way.
+
+#### How to reuse popped pages or modals
+Popped pages and modals are immediately destroyed and cannot be reused.
+
+The essence of the desire for reuse can be categorized into the following two types.
+
+1. not wanting to load screen resources each time
+2. want to preserve the state of the screen
+
+Of these, the load time issue can be resolved by [Preloading](#preloading).
+As for state preserving, from the standpoint of maintainability, state and view should be decoupled so that they can be reconstructed.
+
+In addition, in general, from usability standpoint, it is "Tab" transition that should retain state.
+In this library as well, the state is always preserved in transitions using "Sheet" to implement tabs.
+See [Create sheet and transition](#create-sheet-and-transition) for details.
+
+And if reusable, users will need to manage the lifecycle by themselves. 
+In other words, when it is no longer needed, users must call the Cleanup method to destroy instance and clean up the memory.
+
 ## License
 This software is released under the MIT License.  
 You are free to use it within the scope of the license.  
