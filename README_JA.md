@@ -7,7 +7,7 @@
 UnityのuGUIで画面遷移、画面遷移アニメーション、遷移履歴のスタック、画面のライフサイクルマネジメントを行うためのライブラリです。
 
 <p align="center">
-  <img width=700 src="https://user-images.githubusercontent.com/47441314/137313323-b2f24a0c-1ee3-4df0-a175-05fba32d9af3.gif" alt="Demo">
+  <img width="80%" src="https://user-images.githubusercontent.com/47441314/137313323-b2f24a0c-1ee3-4df0-a175-05fba32d9af3.gif" alt="Demo">
 </p>
 
 ## 目次
@@ -52,6 +52,7 @@ UnityのuGUIで画面遷移、画面遷移アニメーション、遷移履歴�
 - [その他の機能](#%E3%81%9D%E3%81%AE%E4%BB%96%E3%81%AE%E6%A9%9F%E8%83%BD)
     - [ページを履歴にスタッキングしない](#%E3%83%9A%E3%83%BC%E3%82%B8%E3%82%92%E5%B1%A5%E6%AD%B4%E3%81%AB%E3%82%B9%E3%82%BF%E3%83%83%E3%82%AD%E3%83%B3%E3%82%B0%E3%81%97%E3%81%AA%E3%81%84)
     - [モーダルの背景を変更する](#%E3%83%A2%E3%83%BC%E3%83%80%E3%83%AB%E3%81%AE%E8%83%8C%E6%99%AF%E3%82%92%E5%A4%89%E6%9B%B4%E3%81%99%E3%82%8B)
+    - [モーダルの背景がクリックされたらモーダルを閉じる](#%E3%83%A2%E3%83%BC%E3%83%80%E3%83%AB%E3%81%AE%E8%83%8C%E6%99%AF%E3%81%8C%E3%82%AF%E3%83%AA%E3%83%83%E3%82%AF%E3%81%95%E3%82%8C%E3%81%9F%E3%82%89%E3%83%A2%E3%83%BC%E3%83%80%E3%83%AB%E3%82%92%E9%96%89%E3%81%98%E3%82%8B)
     - [遷移中のインタラクションを有効にする](#%E9%81%B7%E7%A7%BB%E4%B8%AD%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%A9%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E3%82%92%E6%9C%89%E5%8A%B9%E3%81%AB%E3%81%99%E3%82%8B)
     - [Containerのマスクを外す](#container%E3%81%AE%E3%83%9E%E3%82%B9%E3%82%AF%E3%82%92%E5%A4%96%E3%81%99)
     - [再生中の遷移アニメーションの情報を取得する](#%E5%86%8D%E7%94%9F%E4%B8%AD%E3%81%AE%E9%81%B7%E7%A7%BB%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E6%83%85%E5%A0%B1%E3%82%92%E5%8F%96%E5%BE%97%E3%81%99%E3%82%8B)
@@ -96,7 +97,7 @@ UnityのuGUIで画面遷移、画面遷移アニメーション、遷移履歴�
    * https://github.com/Haruma-K/UnityScreenNavigator.git?path=/Assets/UnityScreenNavigator
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/118421190-97842b00-b6fb-11eb-9f94-4dc94e82367a.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/118421190-97842b00-b6fb-11eb-9f94-4dc94e82367a.png">
 </p>
 
 あるいはPackages/manifest.jsonを開き、dependenciesブロックに以下を追記します。
@@ -123,14 +124,14 @@ Unity Screen Navigatorは、画面を「ページ」「モーダル」「シー�
 ページBから戻るとページAが状態を保ったまま再表示されます。
 
 <p align="center">
-  <img width=400 src="https://user-images.githubusercontent.com/47441314/136680850-2aca1977-02c2-4730-a0d8-603934f71c80.gif" alt="Demo">
+  <img width="50%" src="https://user-images.githubusercontent.com/47441314/136680850-2aca1977-02c2-4730-a0d8-603934f71c80.gif" alt="Demo">
 </p>
 
 「モーダル」は画面上に積み重なっていく画面です。  
 モーダルの表示中は最前面にあるモーダル以外のインタラクションはブロックされます。
 
 <p align="center">
-  <img width=400 src="https://user-images.githubusercontent.com/47441314/136698982-21ff5172-e38d-4d80-a976-a7ecc511c048.gif" alt="Demo">
+  <img width="50%" src="https://user-images.githubusercontent.com/47441314/136698982-21ff5172-e38d-4d80-a976-a7ecc511c048.gif" alt="Demo">
 </p>
 
 「シート」はタブのようなGUIに使われます。  
@@ -138,14 +139,14 @@ Unity Screen Navigatorは、画面を「ページ」「モーダル」「シー�
 
 
 <p align="center">
-  <img width=400 src="https://user-images.githubusercontent.com/47441314/136700074-2a4fa134-dc5d-4b72-90d8-f6b12c91fc0f.gif" alt="Demo">
+  <img width="50%" src="https://user-images.githubusercontent.com/47441314/136700074-2a4fa134-dc5d-4b72-90d8-f6b12c91fc0f.gif" alt="Demo">
 
 さらに、これらの画面は入れ子にすることが可能です。  
 また、各画面の領域は自由に指定できます（必ずしも全画面に表示する必要はありません）。
 
 </p>
 <p align="center">
-  <img width=400 src="https://user-images.githubusercontent.com/47441314/137634860-ae202ce7-5d2d-48b1-a938-358381d16780.gif" alt="Demo">
+  <img width="50%" src="https://user-images.githubusercontent.com/47441314/137634860-ae202ce7-5d2d-48b1-a938-358381d16780.gif" alt="Demo">
 </p>
 
 #### ページを作成して遷移させる
@@ -194,7 +195,7 @@ yield return handle;
 したがって余白を持ったモーダルを作成する場合には、小さめのサイズを持った子GameObjectを作り、その中にコンテンツを作成します。
 
 <p align="center">
-  <img width=600 src="https://user-images.githubusercontent.com/47441314/136698661-e4e247b6-7938-4fb5-8f6f-f2897f42eebe.png" alt="Demo">
+  <img width="70%" src="https://user-images.githubusercontent.com/47441314/136698661-e4e247b6-7938-4fb5-8f6f-f2897f42eebe.png" alt="Demo">
 </p>
 
 このGameObjectは任意の名前をつけてPrefab化して、Resourcesフォルダ配下に配置しておきます。
@@ -363,7 +364,7 @@ Page、Modal、SheetコンポーネントにはそれぞれAnimation Container�
 ここでこの画面の遷移に使用するアニメーションを設定できます。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137632127-2e224b47-3ef1-4fdd-a64a-986b38d5ea6a.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137632127-2e224b47-3ef1-4fdd-a64a-986b38d5ea6a.png">
 </p>
 
 `Asset Type`を`Scriptable Object`に設定した上で、前節で説明した`TransitionAnimationObject`を`Animation Object`にアサインすると、この画面の遷移アニメーションを変更できます。
@@ -380,14 +381,14 @@ Page、Modal、SheetコンポーネントにはそれぞれAnimation Container�
 下図のプロパティに相手画面の名前を入力すると、相手画面と名前が一致したときのみその遷移アニメーションが適用されます。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137632918-9d777817-d2dc-43c9-bd7e-c6a1713a5f26.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137632918-9d777817-d2dc-43c9-bd7e-c6a1713a5f26.png">
 </p>
 
 デフォルトでは、Prefab名が画面名として使われます。  
 明示的に命名したい場合、`Use Prefab Name As Identifer`のチェックを外した上で`Identifier`プロパティに名前を入力します。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137632986-f5727a42-4c27-48aa-930d-e7b0673b978f.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137632986-f5727a42-4c27-48aa-930d-e7b0673b978f.png">
 </p>
 
 さらに、`Partner Page Identifier Regex`には正規表現も使用できます。  
@@ -414,14 +415,14 @@ Page、Modal、SheetコンポーネントにはそれぞれAnimation Container�
 すると以下のようなScriptableObjectが生成されるので、Inspectorからアニメーションを設定します。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137326944-112e0254-cd27-4d49-a32b-9c436b9537e4.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137326944-112e0254-cd27-4d49-a32b-9c436b9537e4.png">
 </p>
 
 これのMonoBehaviour実装版である`SimpleTransitionAnimationBehaviour`も用意しています。  
 こちらは直接GameObjectにアタッチして使用します。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137326555-90cdce8d-98da-4a00-99cc-5a65c1086760.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137326555-90cdce8d-98da-4a00-99cc-5a65c1086760.png">
 </p>
 
 各プロパティの説明は以下の通りです。
@@ -443,7 +444,7 @@ Page、Modal、SheetコンポーネントにはそれぞれAnimation Container�
 以下の例では、前のモーダルの画像を拡大しつつシームレスに次のダイアログに遷移しています。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137315378-974395a8-f910-41a9-8e07-2964efded848.gif">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137315378-974395a8-f910-41a9-8e07-2964efded848.gif">
 </p>
 
 これを実装するには、まず`TransitionAnimationObject`や`TransitionAnimationBehaviour`を継承したクラスを作成します。  
@@ -457,32 +458,32 @@ Timelineを使って画面遷移アニメーションを作成することもで
 複雑な遷移アニメーションにはTimelineを使用することをおすすめします。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137634258-135b454e-04b5-49e8-a87a-bfb6ede03f49.gif">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137634258-135b454e-04b5-49e8-a87a-bfb6ede03f49.gif">
 </p>
 
 これを実装するためにはまず適当なGameObjectに`Timeline Transition Animation Behaviour`をアタッチします。  
 プロパティに`Playable Director`と`Timeline Asset`をアサインしておきます。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137633599-dd8b204e-e6ec-46bf-b93c-ee54b4ac3d59.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137633599-dd8b204e-e6ec-46bf-b93c-ee54b4ac3d59.png">
 </p>
 
 `Playable Director`の`Play On Awake`プロパティのチェックは外しておいてください。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137633492-4d837177-a381-486f-8942-df26e522da91.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137633492-4d837177-a381-486f-8942-df26e522da91.png">
 </p>
 
 最後にこの`Timeline Transition Animation Behaviour`を`Animation Container`にアサインします。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137633821-1fa1a8d6-ca41-49ca-aacf-dcf7f744c0b1.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137633821-1fa1a8d6-ca41-49ca-aacf-dcf7f744c0b1.png">
 </p>
 
 なお、Timelineを使ってuGUIのアニメーションを作成するには [UnityUIPlayables](https://github.com/Haruma-K/UnityUIPlayables) がおすすめです。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/113313016-cf9afe80-9345-11eb-9aa9-422c53b5a3f8.gif">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/113313016-cf9afe80-9345-11eb-9aa9-422c53b5a3f8.gif">
 </p>
 
 ## ライフサイクルイベント
@@ -744,7 +745,7 @@ public abstract void Release(AssetLoadHandle handle);
 このクラスを作成したら、Scriptable Objectをインスタンス化し、`UnityScreenNavigatorSettings`の`AssetLoader`プロパティにアサインします。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137721037-18c84aad-28d3-4dd8-9a4a-4450a80badd2.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137721037-18c84aad-28d3-4dd8-9a4a-4450a80badd2.png">
 </p>
 
 `UnityScreenNavigatorSettings`は`Assets > Create > Screen Navigator Settings`から作成できます。
@@ -852,7 +853,7 @@ yield return container.Pop(true);
 アプリケーション全体のモーダルの背景を変更するには、`UnityScreenNavigatorSettings`の`Modal Backdrop Prefab`にアサインします。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137837643-f5c7cc13-a379-4c0f-9c34-1e9c19869136.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137837643-f5c7cc13-a379-4c0f-9c34-1e9c19869136.png">
 </p>
 
 `UnityScreenNavigatorSettings`は`Assets > Create > Screen Navigator Settings`から作成できます。
@@ -865,7 +866,7 @@ yield return container.Pop(true);
 その上で **Modal Backdrop** の **Close Modal When Clicked** プロパティにチェックを入れます。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/182382933-14af7d19-50e4-4cbc-ac89-bd9702df26af.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/182382933-14af7d19-50e4-4cbc-ac89-bd9702df26af.png">
 </p>
 
 #### 遷移中のインタラクションを有効にする
@@ -888,7 +889,7 @@ yield return container.Pop(true);
 コンテナ外の画面も表示したい場合には、コンテナのGameObjectにアタッチされている`Rect Mask 2D`コンポーネントのチェックボックスを外してください。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137837996-42eacaae-8852-40f4-acfd-41f8bf9110a3.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137837996-42eacaae-8852-40f4-acfd-41f8bf9110a3.png">
 </p>
 
 #### 再生中の遷移アニメーションの情報を取得する
@@ -906,7 +907,7 @@ yield return container.Pop(true);
 Assets > Create > Resource Loader > Preloaded Asset Loader から作成した Scriptable Object に以下のようにキーと Prefab を入力することで使用できます。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/174422762-5942a833-3a89-43bb-ab5f-a59eecaff1f6.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/174422762-5942a833-3a89-43bb-ab5f-a59eecaff1f6.png">
 </p>
 
 また、ランタイム用の実装として `PreloadedAssetLoader` も用意しています。
