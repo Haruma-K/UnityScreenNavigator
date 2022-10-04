@@ -56,6 +56,11 @@ Library for screen transitions, transition animations, transition history stacki
     - [Disable masking for container](#disable-masking-for-container)
     - [Get information about playing animation information](#get-information-about-playing-animation-information)
     - [Use loaded Prefab instances when loading screens](#use-loaded-prefab-instances-when-loading-screens)
+- [FAQ](#faq)
+    - [How to make each Screen with Scene instead of Prefab](#how-to-make-each-screen-with-scene-instead-of-prefab)
+    - [How to separate view and logic](#how-to-separate-view-and-logic)
+    - [How to pass data to each screen](#how-to-pass-data-to-each-screen)
+    - [How to reuse popped pages or modals](#how-to-reuse-popped-pages-or-modals)
 - [License](#license)
 
 </details>
