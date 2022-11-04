@@ -228,7 +228,22 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         public AsyncProcessHandle Register(string resourceKey,
             Action<(int sheetId, Sheet instance)> onLoad = null, bool loadAsync = true)
         {
-            return CoroutineManager.Instance.Run(RegisterRoutine(resourceKey, onLoad, loadAsync));
+            return CoroutineManager.Instance.Run(RegisterRoutine(typeof(Sheet), resourceKey, onLoad, loadAsync));
+        }
+
+        /// <summary>
+        ///     Register a sheet.
+        /// </summary>
+        /// <param name="sheetType"></param>
+        /// <param name="resourceKey"></param>
+        /// <param name="onLoad"></param>
+        /// <param name="loadAsync"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public AsyncProcessHandle Register(Type sheetType, string resourceKey,
+            Action<(int sheetId, Sheet instance)> onLoad = null, bool loadAsync = true)
+        {
+            return CoroutineManager.Instance.Run(RegisterRoutine(sheetType, resourceKey, onLoad, loadAsync));
         }
 
         /// <summary>
@@ -242,11 +257,12 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         public AsyncProcessHandle Register<TSheet>(string resourceKey,
             Action<(int sheetId, TSheet instance)> onLoad = null, bool loadAsync = true) where TSheet : Sheet
         {
-            return CoroutineManager.Instance.Run(RegisterRoutine(resourceKey, onLoad, loadAsync));
+            return CoroutineManager.Instance.Run(RegisterRoutine(typeof(TSheet), resourceKey,
+                x => onLoad?.Invoke((x.sheetId, (TSheet)x.instance)), loadAsync));
         }
 
-        private IEnumerator RegisterRoutine<TSheet>(string resourceKey,
-            Action<(int sheetId, TSheet instance)> onLoad = null, bool loadAsync = true) where TSheet : Sheet
+        private IEnumerator RegisterRoutine(Type sheetType, string resourceKey,
+            Action<(int sheetId, Sheet instance)> onLoad = null, bool loadAsync = true)
         {
             if (resourceKey == null)
             {
@@ -267,8 +283,9 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             }
 
             var instance = Instantiate(assetLoadHandle.Result);
-            if (!instance.TryGetComponent<TSheet>(out var sheet))
-                sheet = instance.AddComponent<TSheet>();
+            if (!instance.TryGetComponent(sheetType, out var c))
+                c = instance.AddComponent(sheetType);
+            var sheet = (Sheet)c;
             
             var sheetId = sheet.GetInstanceID();
             _sheets.Add(sheetId, sheet);
