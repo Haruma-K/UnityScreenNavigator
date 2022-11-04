@@ -190,7 +190,23 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         public AsyncProcessHandle Push(string resourceKey, bool playAnimation, Action<Modal> onLoad = null,
             bool loadAsync = true)
         {
-            return CoroutineManager.Instance.Run(PushRoutine(resourceKey, playAnimation, onLoad, loadAsync));
+            return CoroutineManager.Instance.Run(PushRoutine(typeof(Modal), resourceKey, playAnimation, onLoad,
+                loadAsync));
+        }
+
+        /// <summary>
+        ///     Push new modal.
+        /// </summary>
+        /// <param name="modalType"></param>
+        /// <param name="resourceKey"></param>
+        /// <param name="playAnimation"></param>
+        /// <param name="onLoad"></param>
+        /// <param name="loadAsync"></param>
+        /// <returns></returns>
+        public AsyncProcessHandle Push(Type modalType, string resourceKey, bool playAnimation,
+            Action<Modal> onLoad = null, bool loadAsync = true)
+        {
+            return CoroutineManager.Instance.Run(PushRoutine(modalType, resourceKey, playAnimation, onLoad, loadAsync));
         }
         
         /// <summary>
@@ -204,7 +220,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         public AsyncProcessHandle Push<TModal>(string resourceKey, bool playAnimation, Action<TModal> onLoad = null,
             bool loadAsync = true) where TModal : Modal
         {
-            return CoroutineManager.Instance.Run(PushRoutine(resourceKey, playAnimation, onLoad, loadAsync));
+            return CoroutineManager.Instance.Run(PushRoutine(typeof(TModal), resourceKey, playAnimation,
+                x => onLoad?.Invoke((TModal)x), loadAsync));
         }
 
         /// <summary>
@@ -217,8 +234,9 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             return CoroutineManager.Instance.Run(PopRoutine(playAnimation));
         }
 
-        private IEnumerator PushRoutine<TModal>(string resourceKey, bool playAnimation, Action<TModal> onLoad = null,
-            bool loadAsync = true) where TModal : Modal
+        private IEnumerator PushRoutine(Type modalType, string resourceKey, bool playAnimation,
+            Action<Modal> onLoad = null,
+            bool loadAsync = true)
         {
             if (resourceKey == null)
             {
@@ -251,8 +269,9 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _backdrops.Add(backdrop);
 
             var instance = Instantiate(assetLoadHandle.Result);
-            if (!instance.TryGetComponent<TModal>(out var enterModal))
-                enterModal = instance.AddComponent<TModal>();
+            if (!instance.TryGetComponent(modalType, out var c))
+                c = instance.AddComponent(modalType);
+            var enterModal = (Modal)c;
 
             var modalId = enterModal.GetInstanceID();
             _assetLoadHandles.Add(modalId, assetLoadHandle);
