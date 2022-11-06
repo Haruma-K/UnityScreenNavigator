@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Modal;
+using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -41,6 +42,9 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
         [SerializeField] private AssetLoaderObject _assetLoader;
 
         [SerializeField] private bool _enableInteractionInTransition;
+
+        [EnabledIf(nameof(_enableInteractionInTransition), false)] [SerializeField]
+        private bool _controlInteractionsOfAllContainers = true;
 
         private IAssetLoader _defaultAssetLoader;
         private ModalBackdrop _defaultModalBackdrop;
@@ -125,7 +129,17 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
             }
         }
 
-        public bool EnableInteractionInTransition => _enableInteractionInTransition;
+        public bool EnableInteractionInTransition
+        {
+            get => _enableInteractionInTransition;
+            set => _enableInteractionInTransition = value;
+        }
+
+        public bool ControlInteractionsOfAllContainers
+        {
+            get => _controlInteractionsOfAllContainers;
+            set => _controlInteractionsOfAllContainers = value;
+        }
 
         public static UnityScreenNavigatorSettings Instance
         {

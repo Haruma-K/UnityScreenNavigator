@@ -49,12 +49,6 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         public SheetTransitionAnimationContainer AnimationContainer => _animationContainer;
 
-        public bool Interactable
-        {
-            get => _canvasGroup.interactable;
-            set => _canvasGroup.interactable = value;
-        }
-
         public bool IsTransitioning { get; private set; }
 
         /// <summary>
@@ -180,9 +174,6 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             _rectTransform.FillParent(_parentTransform);
             SetTransitionProgress(0.0f);
 
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-                _canvasGroup.interactable = false;
-
             _canvasGroup.alpha = 0.0f;
 
             var handle = CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.WillEnter())));
@@ -219,9 +210,6 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             foreach (var lifecycleEvent in _lifecycleEvents)
                 lifecycleEvent.DidEnter();
 
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-                _canvasGroup.interactable = true;
-
             IsTransitioning = false;
             TransitionAnimationType = null;
         }
@@ -238,8 +226,6 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
             SetTransitionProgress(0.0f);
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-                _canvasGroup.interactable = false;
 
             _canvasGroup.alpha = 1.0f;
 

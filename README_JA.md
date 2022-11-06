@@ -875,13 +875,15 @@ yield return container.Pop(true);
 </p>
 
 #### 遷移中のインタラクションを有効にする
-遷移開始から終了までは、画面のクリックなどのインタラクションは全て無効になります。
+遷移開始から終了までは、全てのコンテナにおいて画面のクリックなどのインタラクションが無効になります。  
+この設定は`UnityScreenNavigatorSettings`の`Enable Interaction In Transition`と`Control Interactions Of All Containers`で変更できます。  
+デフォルトでは、`Enable Interaction In Transition`はfalseで、`Control Interactions Of All Containers`はtrueになっています。
 
-設定を変更すると、遷移中のインタラクションを有効にすることができます。  
-有効にするには`UnityScreenNavigatorSettings`の`Enable Interaction In Transition`をtrueに設定します。
+`UnityScreenNavigatorSettings`の`Enable Interaction In Transition`をtrueに設定すると、遷移中でもインタラクションが有効になります。  
+また`Enable Interaction In Transition`をfalseにしたまま`Control Interactions Of All Containers`をfalseにすると、遷移処理を行なっているコンテナのみインタラクションを無効にします。
 
 <p align="center">
-  <img width=500 src="https://user-images.githubusercontent.com/47441314/137836806-6bbbb7dd-cc06-47aa-a1b8-3fe7d427f9fa.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/200176139-4de8c94e-60f4-4db9-8abf-7b6d50bea09e.png">
 </p>
 
 `UnityScreenNavigatorSettings`は`Assets > Create > Screen Navigator Settings`から作成できます。

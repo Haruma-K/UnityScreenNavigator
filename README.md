@@ -869,13 +869,16 @@ Then, check the **Close Modal When Clicked** option of the **Modal Backdrop** co
 </p>
 
 #### Enable interaction during transitions
-From the start of transition to the end, all interactions such as clicking on the screen are disabled.
+From the start of transition to the end, interactions of all containers such as clicking on the screen are disabled.
 
-You can change the settings to enable interaction during the transition.  
-To do this, set `Enable Interaction In Transition` in `UnityScreenNavigatorSettings` to `true`.
+You can change the settings by changing `Enable Interaction In Transition` and `Control Interactions Of All Containers` property of `UnityScreenNavigatorSettings`.
+In default, `Enable Interaction In Transition` is `false` and `Control Interactions Of All Containers` is `true`.
+
+To enable interaction during transitions, set `Enable Interaction In Transition` to `true`.
+And if you want to disable interaction only for the container that is currently transitioning, keep `Enable Interaction In Transition` to `false` and set `Control Interactions Of All Containers` to `false`.
 
 <p align="center">
-  <img width="60%" src="https://user-images.githubusercontent.com/47441314/137836806-6bbbb7dd-cc06-47aa-a1b8-3fe7d427f9fa.png">
+  <img width="60%" src="https://user-images.githubusercontent.com/47441314/200176139-4de8c94e-60f4-4db9-8abf-7b6d50bea09e.png">
 </p>
 
 You can create `UnityScreenNavigatorSettings` from `Assets > Create > Screen Navigator Settings`.

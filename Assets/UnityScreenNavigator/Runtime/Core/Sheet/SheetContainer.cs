@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityScreenNavigator.Runtime.Core.Modal;
+using UnityScreenNavigator.Runtime.Core.Page;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
@@ -13,6 +15,8 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
     [RequireComponent(typeof(RectMask2D))]
     public sealed class SheetContainer : MonoBehaviour
     {
+        public static List<SheetContainer> Instances { get; } = new List<SheetContainer>();
+        
         private static readonly Dictionary<int, SheetContainer> InstanceCacheByTransform =
             new Dictionary<int, SheetContainer>();
 
@@ -78,6 +82,8 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         private void Awake()
         {
+            Instances.Add(this);
+            
             _callbackReceivers.AddRange(GetComponents<ISheetContainerCallbackReceiver>());
 
             if (!string.IsNullOrWhiteSpace(_name))
@@ -115,6 +121,8 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             {
                 InstanceCacheByTransform.Remove(keyToRemove);
             }
+
+            Instances.Remove(this);
         }
 
         /// <summary>
@@ -323,6 +331,23 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
             IsInTransition = true;
 
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
+                {
+                    foreach (var pageContainer in PageContainer.Instances)
+                        pageContainer.Interactable = false;
+                    foreach (var modalContainer in ModalContainer.Instances)
+                        modalContainer.Interactable = false;
+                    foreach (var sheetContainer in Instances)
+                        sheetContainer.Interactable = false;
+                }
+                else
+                {
+                    Interactable = false;
+                }
+            }
+
             var enterSheet = _sheets[sheetId];
             var exitSheet = _activeSheetId.HasValue ? _sheets[_activeSheetId.Value] : null;
 
@@ -380,6 +405,23 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             {
                 callbackReceiver.AfterShow(enterSheet, exitSheet);
             }
+
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
+                {
+                    foreach (var pageContainer in PageContainer.Instances)
+                        pageContainer.Interactable = true;
+                    foreach (var modalContainer in ModalContainer.Instances)
+                        modalContainer.Interactable = true;
+                    foreach (var sheetContainer in Instances)
+                        sheetContainer.Interactable = true;
+                }
+                else
+                {
+                    Interactable = true;
+                }
+            }
         }
 
         private IEnumerator HideRoutine(bool playAnimation)
@@ -397,6 +439,23 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             }
 
             IsInTransition = true;
+
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
+                {
+                    foreach (var pageContainer in PageContainer.Instances)
+                        pageContainer.Interactable = false;
+                    foreach (var modalContainer in ModalContainer.Instances)
+                        modalContainer.Interactable = false;
+                    foreach (var sheetContainer in Instances)
+                        sheetContainer.Interactable = false;
+                }
+                else
+                {
+                    Interactable = false;
+                }
+            }
 
             var exitSheet = _sheets[_activeSheetId.Value];
 
@@ -428,6 +487,23 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             foreach (var callbackReceiver in _callbackReceivers)
             {
                 callbackReceiver.AfterHide(exitSheet);
+            }
+
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
+                {
+                    foreach (var pageContainer in PageContainer.Instances)
+                        pageContainer.Interactable = true;
+                    foreach (var modalContainer in ModalContainer.Instances)
+                        modalContainer.Interactable = true;
+                    foreach (var sheetContainer in Instances)
+                        sheetContainer.Interactable = true;
+                }
+                else
+                {
+                    Interactable = true;
+                }
             }
         }
     }

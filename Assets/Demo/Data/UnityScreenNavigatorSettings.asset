@@ -12,15 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b15ff60fcf110249b1f95c0fdfe5e8e, type: 3}
   m_Name: UnityScreenNavigatorSettings
   m_EditorClassIdentifier: 
-  _defaultSheetEnterAnimation: {fileID: 0}
-  _defaultSheetExitAnimation: {fileID: 0}
-  _defaultPagePushEnterAnimation: {fileID: 0}
-  _defaultPagePushExitAnimation: {fileID: 0}
-  _defaultPagePopEnterAnimation: {fileID: 0}
-  _defaultPagePopExitAnimation: {fileID: 0}
-  _defaultModalEnterAnimation: {fileID: 0}
-  _defaultModalExitAnimation: {fileID: 0}
-  _defaultModalBackdropEnterAnimation: {fileID: 0}
-  _defaultModalBackdropExitAnimation: {fileID: 0}
-  _defaultModalBackdropPrefab: {fileID: 0}
+  _sheetEnterAnimation: {fileID: 0}
+  _sheetExitAnimation: {fileID: 0}
+  _pagePushEnterAnimation: {fileID: 0}
+  _pagePushExitAnimation: {fileID: 0}
+  _pagePopEnterAnimation: {fileID: 0}
+  _pagePopExitAnimation: {fileID: 0}
+  _modalEnterAnimation: {fileID: 0}
+  _modalExitAnimation: {fileID: 0}
+  _modalBackdropEnterAnimation: {fileID: 0}
+  _modalBackdropExitAnimation: {fileID: 0}
+  _modalBackdropPrefab: {fileID: 0}
   _assetLoader: {fileID: 0}
+  _enableInteractionInTransition: 0
+  _controlInteractionsOfAllContainers: 0
