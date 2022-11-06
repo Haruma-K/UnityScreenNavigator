@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityScreenNavigator.Runtime.Core.Modal;
 using UnityScreenNavigator.Runtime.Core.Shared;
+using UnityScreenNavigator.Runtime.Core.Sheet;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
@@ -13,6 +15,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
     [RequireComponent(typeof(RectMask2D))]
     public sealed class PageContainer : MonoBehaviour
     {
+        public static List<PageContainer> Instances { get; } = new List<PageContainer>();
+
         private static readonly Dictionary<int, PageContainer> InstanceCacheByTransform =
             new Dictionary<int, PageContainer>();
 
@@ -66,6 +70,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         private void Awake()
         {
+            Instances.Add(this);
+            
             _callbackReceivers.AddRange(GetComponents<IPageContainerCallbackReceiver>());
             if (!string.IsNullOrWhiteSpace(_name))
             {
@@ -102,6 +108,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             {
                 InstanceCacheByTransform.Remove(keyToRemove);
             }
+
+            Instances.Remove(this);
         }
 
         /// <summary>
@@ -248,6 +256,23 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             IsInTransition = true;
 
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
+                {
+                    foreach (var pageContainer in Instances)
+                        pageContainer.Interactable = false;
+                    foreach (var modalContainer in ModalContainer.Instances)
+                        modalContainer.Interactable = false;
+                    foreach (var sheetContainer in SheetContainer.Instances)
+                        sheetContainer.Interactable = false;
+                }
+                else
+                {
+                    Interactable = false;
+                }
+            }
+
             // Setup
             var assetLoadHandle = loadAsync
                 ? AssetLoader.LoadAsync<GameObject>(resourceKey)
@@ -357,6 +382,23 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             }
 
             _isActivePageStacked = stack;
+
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
+                {
+                    foreach (var pageContainer in Instances)
+                        pageContainer.Interactable = true;
+                    foreach (var modalContainer in ModalContainer.Instances)
+                        modalContainer.Interactable = true;
+                    foreach (var sheetContainer in SheetContainer.Instances)
+                        sheetContainer.Interactable = true;
+                }
+                else
+                {
+                    Interactable = true;
+                }
+            }
         }
 
         private IEnumerator PopRoutine(bool playAnimation)
@@ -374,6 +416,23 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             }
 
             IsInTransition = true;
+
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
+                {
+                    foreach (var pageContainer in Instances)
+                        pageContainer.Interactable = false;
+                    foreach (var modalContainer in ModalContainer.Instances)
+                        modalContainer.Interactable = false;
+                    foreach (var sheetContainer in SheetContainer.Instances)
+                        sheetContainer.Interactable = false;
+                }
+                else
+                {
+                    Interactable = false;
+                }
+            }
 
             var exitPage = _pages[_pages.Count - 1];
             var exitPageId = exitPage.GetInstanceID();
@@ -449,6 +508,23 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             _assetLoadHandles.Remove(exitPageId);
 
             _isActivePageStacked = true;
+
+            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
+                {
+                    foreach (var pageContainer in Instances)
+                        pageContainer.Interactable = true;
+                    foreach (var modalContainer in ModalContainer.Instances)
+                        modalContainer.Interactable = true;
+                    foreach (var sheetContainer in SheetContainer.Instances)
+                        sheetContainer.Interactable = true;
+                }
+                else
+                {
+                    Interactable = true;
+                }
+            }
         }
 
         public AsyncProcessHandle Preload(string resourceKey, bool loadAsync = true)

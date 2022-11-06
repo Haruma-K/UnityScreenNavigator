@@ -52,12 +52,6 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         public PageTransitionAnimationContainer AnimationContainer => _animationContainer;
 
-        public bool Interactable
-        {
-            get => _canvasGroup.interactable;
-            set => _canvasGroup.interactable = value;
-        }
-
         public bool IsTransitioning { get; private set; }
 
         /// <summary>
@@ -217,9 +211,6 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
             SetTransitionProgress(0.0f);
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-                _canvasGroup.interactable = false;
-
             _canvasGroup.alpha = 0.0f;
 
             var routines = push
@@ -264,9 +255,6 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 foreach (var lifecycleEvent in _lifecycleEvents)
                     lifecycleEvent.DidPopEnter();
 
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-                _canvasGroup.interactable = true;
-
             IsTransitioning = false;
             TransitionAnimationType = null;
         }
@@ -283,9 +271,6 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             gameObject.SetActive(true);
             _rectTransform.FillParent(_parentTransform);
             SetTransitionProgress(0.0f);
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-                _canvasGroup.interactable = false;
-
             _canvasGroup.alpha = 1.0f;
 
             var routines = push

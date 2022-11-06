@@ -50,12 +50,6 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         public ModalTransitionAnimationContainer AnimationContainer => _animationContainer;
 
-        public bool Interactable
-        {
-            get => _canvasGroup.interactable;
-            set => _canvasGroup.interactable = value;
-        }
-
         public bool IsTransitioning { get; private set; }
 
         /// <summary>
@@ -203,9 +197,6 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             SetTransitionProgress(0.0f);
 
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-                _canvasGroup.interactable = false;
-
             var routines = push
                 ? _lifecycleEvents.Select(x => x.WillPushEnter())
                 : _lifecycleEvents.Select(x => x.WillPopEnter());
@@ -252,9 +243,6 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 foreach (var lifecycleEvent in _lifecycleEvents)
                     lifecycleEvent.DidPopEnter();
 
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-                _canvasGroup.interactable = true;
-
             IsTransitioning = false;
             TransitionAnimationType = null;
         }
@@ -276,9 +264,6 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
 
             SetTransitionProgress(0.0f);
-
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-                _canvasGroup.interactable = false;
 
             var routines = push
                 ? _lifecycleEvents.Select(x => x.WillPushExit())
