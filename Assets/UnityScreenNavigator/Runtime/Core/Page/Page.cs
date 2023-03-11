@@ -8,7 +8,6 @@ using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 using UnityScreenNavigator.Runtime.Foundation.PriorityCollection;
 #if USN_USE_ASYNC_METHODS
-using System;
 using System.Threading.Tasks;
 #endif
 
@@ -194,7 +193,9 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             _canvasGroup.alpha = 0.0f;
 
-            return CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.Initialize())));
+            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
+            var initializeEvents = _lifecycleEvents.Select(x => x.Initialize()).ToArray();
+            return CoroutineManager.Instance.Run(CreateCoroutine(initializeEvents));
         }
 
 
@@ -213,9 +214,10 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             SetTransitionProgress(0.0f);
             _canvasGroup.alpha = 0.0f;
 
+            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
             var routines = push
-                ? _lifecycleEvents.Select(x => x.WillPushEnter())
-                : _lifecycleEvents.Select(x => x.WillPopEnter());
+                ? _lifecycleEvents.Select(x => x.WillPushEnter()).ToArray()
+                : _lifecycleEvents.Select(x => x.WillPopEnter()).ToArray();
             var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
 
             while (!handle.IsTerminated)
@@ -248,11 +250,13 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         internal void AfterEnter(bool push, Page partnerPage)
         {
+            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
+            var lifecycleEvents = _lifecycleEvents.ToArray();
             if (push)
-                foreach (var lifecycleEvent in _lifecycleEvents)
+                foreach (var lifecycleEvent in lifecycleEvents)
                     lifecycleEvent.DidPushEnter();
             else
-                foreach (var lifecycleEvent in _lifecycleEvents)
+                foreach (var lifecycleEvent in lifecycleEvents)
                     lifecycleEvent.DidPopEnter();
 
             IsTransitioning = false;
@@ -273,9 +277,10 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             SetTransitionProgress(0.0f);
             _canvasGroup.alpha = 1.0f;
 
+            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
             var routines = push
-                ? _lifecycleEvents.Select(x => x.WillPushExit())
-                : _lifecycleEvents.Select(x => x.WillPopExit());
+                ? _lifecycleEvents.Select(x => x.WillPushExit()).ToArray()
+                : _lifecycleEvents.Select(x => x.WillPopExit()).ToArray();
             var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
 
             while (!handle.IsTerminated)
@@ -306,11 +311,13 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         internal void AfterExit(bool push, Page partnerPage)
         {
+            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
+            var lifecycleEvents = _lifecycleEvents.ToArray();
             if (push)
-                foreach (var lifecycleEvent in _lifecycleEvents)
+                foreach (var lifecycleEvent in lifecycleEvents)
                     lifecycleEvent.DidPushExit();
             else
-                foreach (var lifecycleEvent in _lifecycleEvents)
+                foreach (var lifecycleEvent in lifecycleEvents)
                     lifecycleEvent.DidPopExit();
 
             gameObject.SetActive(false);
@@ -320,7 +327,9 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         internal AsyncProcessHandle BeforeRelease()
         {
-            return CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.Cleanup())));
+            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
+            var cleanupEvents = _lifecycleEvents.Select(x => x.Cleanup()).ToArray();
+            return CoroutineManager.Instance.Run(CreateCoroutine(cleanupEvents));
         }
 
 #if USN_USE_ASYNC_METHODS

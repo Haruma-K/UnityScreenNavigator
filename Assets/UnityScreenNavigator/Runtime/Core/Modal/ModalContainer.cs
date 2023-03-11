@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Page;
@@ -372,12 +373,19 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             {
                 if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
                 {
-                    foreach (var pageContainer in PageContainer.Instances)
-                        pageContainer.Interactable = true;
-                    foreach (var modalContainer in Instances)
-                        modalContainer.Interactable = true;
-                    foreach (var sheetContainer in SheetContainer.Instances)
-                        sheetContainer.Interactable = true;
+                    // If there's a container in transition, it should restore Interactive to true when the transition is finished.
+                    // So, do nothing here if there's a transitioning container.
+                    if (PageContainer.Instances.All(x => !x.IsInTransition)
+                        && Instances.All(x => !x.IsInTransition)
+                        && SheetContainer.Instances.All(x => !x.IsInTransition))
+                    {
+                        foreach (var pageContainer in PageContainer.Instances)
+                            pageContainer.Interactable = true;
+                        foreach (var modalContainer in Instances)
+                            modalContainer.Interactable = true;
+                        foreach (var sheetContainer in SheetContainer.Instances)
+                            sheetContainer.Interactable = true;
+                    }
                 }
                 else
                 {
@@ -501,12 +509,19 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             {
                 if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
                 {
-                    foreach (var pageContainer in PageContainer.Instances)
-                        pageContainer.Interactable = true;
-                    foreach (var modalContainer in Instances)
-                        modalContainer.Interactable = true;
-                    foreach (var sheetContainer in SheetContainer.Instances)
-                        sheetContainer.Interactable = true;
+                    // If there's a container in transition, it should restore Interactive to true when the transition is finished.
+                    // So, do nothing here if there's a transitioning container.
+                    if (PageContainer.Instances.All(x => !x.IsInTransition)
+                        && Instances.All(x => !x.IsInTransition)
+                        && SheetContainer.Instances.All(x => !x.IsInTransition))
+                    {
+                        foreach (var pageContainer in PageContainer.Instances)
+                            pageContainer.Interactable = true;
+                        foreach (var modalContainer in Instances)
+                            modalContainer.Interactable = true;
+                        foreach (var sheetContainer in SheetContainer.Instances)
+                            sheetContainer.Interactable = true;
+                    }
                 }
                 else
                 {

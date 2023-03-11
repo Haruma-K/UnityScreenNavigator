@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace UnityScreenNavigator.Runtime.Core.Shared
 {
-    public class MonoBehaviourDestroyedEventDispatcher : MonoBehaviour
+    internal sealed class MonoBehaviourDestroyedEventDispatcher : MonoBehaviour
     {
-        public void OnDestroy()
+        private void OnDestroy()
         {
             OnDispatch?.Invoke();
         }
