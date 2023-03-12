@@ -16,8 +16,6 @@ namespace UnityScreenNavigator.Runtime.Core.Page
     [RequireComponent(typeof(RectMask2D))]
     public sealed class PageContainer : MonoBehaviour
     {
-        public static List<PageContainer> Instances { get; } = new List<PageContainer>();
-
         private static readonly Dictionary<int, PageContainer> InstanceCacheByTransform =
             new Dictionary<int, PageContainer>();
 
@@ -37,12 +35,13 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         private readonly Dictionary<string, AssetLoadHandle<GameObject>> _preloadedResourceHandles =
             new Dictionary<string, AssetLoadHandle<GameObject>>();
 
+        private IAssetLoader _assetLoader;
+
         private CanvasGroup _canvasGroup;
 
         private bool _isActivePageStacked;
+        public static List<PageContainer> Instances { get; } = new List<PageContainer>();
 
-        private IAssetLoader _assetLoader;
-        
         /// <summary>
         ///     By default, <see cref="IAssetLoader" /> in <see cref="UnityScreenNavigatorSettings" /> is used.
         ///     If this property is set, it is used instead.
@@ -72,12 +71,9 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         private void Awake()
         {
             Instances.Add(this);
-            
+
             _callbackReceivers.AddRange(GetComponents<IPageContainerCallbackReceiver>());
-            if (!string.IsNullOrWhiteSpace(_name))
-            {
-                InstanceCacheByName.Add(_name, this);
-            }
+            if (!string.IsNullOrWhiteSpace(_name)) InstanceCacheByName.Add(_name, this);
 
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
         }
@@ -98,17 +94,10 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             InstanceCacheByName.Remove(_name);
             var keysToRemove = new List<int>();
             foreach (var cache in InstanceCacheByTransform)
-            {
                 if (Equals(cache.Value))
-                {
                     keysToRemove.Add(cache.Key);
-                }
-            }
 
-            foreach (var keyToRemove in keysToRemove)
-            {
-                InstanceCacheByTransform.Remove(keyToRemove);
-            }
+            foreach (var keyToRemove in keysToRemove) InstanceCacheByTransform.Remove(keyToRemove);
 
             Instances.Remove(this);
         }
@@ -133,10 +122,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         public static PageContainer Of(RectTransform rectTransform, bool useCache = true)
         {
             var id = rectTransform.GetInstanceID();
-            if (useCache && InstanceCacheByTransform.TryGetValue(id, out var container))
-            {
-                return container;
-            }
+            if (useCache && InstanceCacheByTransform.TryGetValue(id, out var container)) return container;
 
             container = rectTransform.GetComponentInParent<PageContainer>();
             if (container != null)
@@ -155,10 +141,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <returns></returns>
         public static PageContainer Find(string containerName)
         {
-            if (InstanceCacheByName.TryGetValue(containerName, out var instance))
-            {
-                return instance;
-            }
+            if (InstanceCacheByName.TryGetValue(containerName, out var instance)) return instance;
 
             return null;
         }
@@ -244,16 +227,11 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         private IEnumerator PushRoutine(Type pageType, string resourceKey, bool playAnimation, bool stack = true,
             Action<Page> onLoad = null, bool loadAsync = true)
         {
-            if (resourceKey == null)
-            {
-                throw new ArgumentNullException(nameof(resourceKey));
-            }
+            if (resourceKey == null) throw new ArgumentNullException(nameof(resourceKey));
 
             if (IsInTransition)
-            {
                 throw new InvalidOperationException(
                     "Cannot transition because the screen is already in transition.");
-            }
 
             IsInTransition = true;
 
@@ -278,15 +256,9 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             var assetLoadHandle = loadAsync
                 ? AssetLoader.LoadAsync<GameObject>(resourceKey)
                 : AssetLoader.Load<GameObject>(resourceKey);
-            if (!assetLoadHandle.IsDone)
-            {
-                yield return new WaitUntil(() => assetLoadHandle.IsDone);
-            }
+            if (!assetLoadHandle.IsDone) yield return new WaitUntil(() => assetLoadHandle.IsDone);
 
-            if (assetLoadHandle.Status == AssetLoadStatus.Failed)
-            {
-                throw assetLoadHandle.OperationException;
-            }
+            if (assetLoadHandle.Status == AssetLoadStatus.Failed) throw assetLoadHandle.OperationException;
 
             var instance = Instantiate(assetLoadHandle.Result);
             if (!instance.TryGetComponent(pageType, out var c))
@@ -297,83 +269,51 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             _assetLoadHandles.Add(pageId, assetLoadHandle);
             onLoad?.Invoke(enterPage);
             var afterLoadHandle = enterPage.AfterLoad((RectTransform)transform);
-            while (!afterLoadHandle.IsTerminated)
-            {
-                yield return null;
-            }
+            while (!afterLoadHandle.IsTerminated) yield return null;
 
             var exitPage = _pages.Count == 0 ? null : _pages[_pages.Count - 1];
             var exitPageId = exitPage == null ? (int?)null : exitPage.GetInstanceID();
 
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers)
-            {
-                callbackReceiver.BeforePush(enterPage, exitPage);
-            }
+            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePush(enterPage, exitPage);
 
             var preprocessHandles = new List<AsyncProcessHandle>();
-            if (exitPage != null)
-            {
-                preprocessHandles.Add(exitPage.BeforeExit(true, enterPage));
-            }
+            if (exitPage != null) preprocessHandles.Add(exitPage.BeforeExit(true, enterPage));
 
             preprocessHandles.Add(enterPage.BeforeEnter(true, exitPage));
 
             foreach (var coroutineHandle in preprocessHandles)
-            {
                 while (!coroutineHandle.IsTerminated)
-                {
                     yield return coroutineHandle;
-                }
-            }
 
             // Play Animations
             var animationHandles = new List<AsyncProcessHandle>();
-            if (exitPage != null)
-            {
-                animationHandles.Add(exitPage.Exit(true, playAnimation, enterPage));
-            }
+            if (exitPage != null) animationHandles.Add(exitPage.Exit(true, playAnimation, enterPage));
 
             animationHandles.Add(enterPage.Enter(true, playAnimation, exitPage));
 
             foreach (var coroutineHandle in animationHandles)
-            {
                 while (!coroutineHandle.IsTerminated)
-                {
                     yield return coroutineHandle;
-                }
-            }
 
             // End Transition
-            if (!_isActivePageStacked && exitPageId.HasValue)
-            {
-                _pages.RemoveAt(_pages.Count - 1);
-            }
+            if (!_isActivePageStacked && exitPageId.HasValue) _pages.RemoveAt(_pages.Count - 1);
 
             _pages.Add(enterPage);
             IsInTransition = false;
 
             // Postprocess
-            if (exitPage != null)
-            {
-                exitPage.AfterExit(true, enterPage);
-            }
+            if (exitPage != null) exitPage.AfterExit(true, enterPage);
 
             enterPage.AfterEnter(true, exitPage);
 
-            foreach (var callbackReceiver in _callbackReceivers)
-            {
-                callbackReceiver.AfterPush(enterPage, exitPage);
-            }
+            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterPush(enterPage, exitPage);
 
             // Unload Unused Page
             if (!_isActivePageStacked && exitPageId.HasValue)
             {
                 var beforeReleaseHandle = exitPage.BeforeRelease();
-                while (!beforeReleaseHandle.IsTerminated)
-                {
-                    yield return null;
-                }
+                while (!beforeReleaseHandle.IsTerminated) yield return null;
 
                 var handle = _assetLoadHandles[exitPageId.Value];
                 AssetLoader.Release(handle);
@@ -412,16 +352,12 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         private IEnumerator PopRoutine(bool playAnimation)
         {
             if (_pages.Count == 0)
-            {
                 throw new InvalidOperationException(
                     "Cannot transition because there are no pages loaded on the stack.");
-            }
 
             if (IsInTransition)
-            {
                 throw new InvalidOperationException(
                     "Cannot transition because the screen is already in transition.");
-            }
 
             IsInTransition = true;
 
@@ -447,45 +383,28 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             var enterPage = _pages.Count == 1 ? null : _pages[_pages.Count - 2];
 
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers)
-            {
-                callbackReceiver.BeforePop(enterPage, exitPage);
-            }
+            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePop(enterPage, exitPage);
 
             var preprocessHandles = new List<AsyncProcessHandle>
             {
                 exitPage.BeforeExit(false, enterPage)
             };
-            if (enterPage != null)
-            {
-                preprocessHandles.Add(enterPage.BeforeEnter(false, exitPage));
-            }
+            if (enterPage != null) preprocessHandles.Add(enterPage.BeforeEnter(false, exitPage));
 
             foreach (var coroutineHandle in preprocessHandles)
-            {
                 while (!coroutineHandle.IsTerminated)
-                {
                     yield return coroutineHandle;
-                }
-            }
 
             // Play Animations
             var animationHandles = new List<AsyncProcessHandle>
             {
                 exitPage.Exit(false, playAnimation, enterPage)
             };
-            if (enterPage != null)
-            {
-                animationHandles.Add(enterPage.Enter(false, playAnimation, exitPage));
-            }
+            if (enterPage != null) animationHandles.Add(enterPage.Enter(false, playAnimation, exitPage));
 
             foreach (var coroutineHandle in animationHandles)
-            {
                 while (!coroutineHandle.IsTerminated)
-                {
                     yield return coroutineHandle;
-                }
-            }
 
             // End Transition
             _pages.RemoveAt(_pages.Count - 1);
@@ -493,22 +412,13 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             // Postprocess
             exitPage.AfterExit(false, enterPage);
-            if (enterPage != null)
-            {
-                enterPage.AfterEnter(false, exitPage);
-            }
+            if (enterPage != null) enterPage.AfterEnter(false, exitPage);
 
-            foreach (var callbackReceiver in _callbackReceivers)
-            {
-                callbackReceiver.AfterPop(enterPage, exitPage);
-            }
+            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterPop(enterPage, exitPage);
 
             // Unload Unused Page
             var beforeReleaseHandle = exitPage.BeforeRelease();
-            while (!beforeReleaseHandle.IsTerminated)
-            {
-                yield return null;
-            }
+            while (!beforeReleaseHandle.IsTerminated) yield return null;
 
             var loadHandle = _assetLoadHandles[exitPageId];
             Destroy(exitPage.gameObject);
@@ -550,25 +460,17 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         private IEnumerator PreloadRoutine(string resourceKey, bool loadAsync = true)
         {
             if (_preloadedResourceHandles.ContainsKey(resourceKey))
-            {
                 throw new InvalidOperationException(
                     $"The resource with key \"${resourceKey}\" has already been preloaded.");
-            }
 
             var assetLoadHandle = loadAsync
                 ? AssetLoader.LoadAsync<GameObject>(resourceKey)
                 : AssetLoader.Load<GameObject>(resourceKey);
             _preloadedResourceHandles.Add(resourceKey, assetLoadHandle);
 
-            if (!assetLoadHandle.IsDone)
-            {
-                yield return new WaitUntil(() => assetLoadHandle.IsDone);
-            }
+            if (!assetLoadHandle.IsDone) yield return new WaitUntil(() => assetLoadHandle.IsDone);
 
-            if (assetLoadHandle.Status == AssetLoadStatus.Failed)
-            {
-                throw assetLoadHandle.OperationException;
-            }
+            if (assetLoadHandle.Status == AssetLoadStatus.Failed) throw assetLoadHandle.OperationException;
         }
 
         public bool IsPreloadRequested(string resourceKey)
@@ -578,10 +480,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         public bool IsPreloaded(string resourceKey)
         {
-            if (!_preloadedResourceHandles.TryGetValue(resourceKey, out var handle))
-            {
-                return false;
-            }
+            if (!_preloadedResourceHandles.TryGetValue(resourceKey, out var handle)) return false;
 
             return handle.Status == AssetLoadStatus.Success;
         }
@@ -589,9 +488,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         public void ReleasePreloaded(string resourceKey)
         {
             if (!_preloadedResourceHandles.ContainsKey(resourceKey))
-            {
                 throw new InvalidOperationException($"The resource with key \"${resourceKey}\" is not preloaded.");
-            }
 
             var handle = _preloadedResourceHandles[resourceKey];
             _preloadedResourceHandles.Remove(resourceKey);
