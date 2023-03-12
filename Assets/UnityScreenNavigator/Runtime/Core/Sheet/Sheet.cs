@@ -8,7 +8,6 @@ using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 using UnityScreenNavigator.Runtime.Foundation.PriorityCollection;
 #if USN_USE_ASYNC_METHODS
-using System;
 using System.Threading.Tasks;
 #endif
 
@@ -158,7 +157,9 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
             gameObject.SetActive(false);
 
-            return CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.Initialize())));
+            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
+            return CoroutineManager.Instance.Run(
+                CreateCoroutine(_lifecycleEvents.Select(x => x.Initialize()).ToArray()));
         }
 
         internal AsyncProcessHandle BeforeEnter(Sheet partnerSheet)
@@ -176,7 +177,9 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
             _canvasGroup.alpha = 0.0f;
 
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.WillEnter())));
+            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
+            var handle =
+                CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.WillEnter()).ToArray()));
             while (!handle.IsTerminated)
                 yield return null;
         }
@@ -207,7 +210,9 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         internal void AfterEnter(Sheet partnerSheet)
         {
-            foreach (var lifecycleEvent in _lifecycleEvents)
+            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
+            var lifecycleEvents = _lifecycleEvents.ToArray();
+            foreach (var lifecycleEvent in lifecycleEvents)
                 lifecycleEvent.DidEnter();
 
             IsTransitioning = false;
@@ -229,7 +234,9 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
             _canvasGroup.alpha = 1.0f;
 
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.WillExit())));
+            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
+            var handle =
+                CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.WillExit()).ToArray()));
             while (!handle.IsTerminated)
                 yield return null;
         }
@@ -258,7 +265,9 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         internal void AfterExit(Sheet partnerSheet)
         {
-            foreach (var lifecycleEvent in _lifecycleEvents)
+            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
+            var lifecycleEvents = _lifecycleEvents.ToArray();
+            foreach (var lifecycleEvent in lifecycleEvents)
                 lifecycleEvent.DidExit();
 
             gameObject.SetActive(false);
@@ -269,7 +278,8 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         internal AsyncProcessHandle BeforeRelease()
         {
-            return CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.Cleanup())));
+            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
+            return CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.Cleanup()).ToArray()));
         }
 
 #if USN_USE_ASYNC_METHODS

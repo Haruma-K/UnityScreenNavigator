@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Page;
@@ -15,8 +16,6 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
     [RequireComponent(typeof(RectMask2D))]
     public sealed class ModalContainer : MonoBehaviour
     {
-        public static List<ModalContainer> Instances { get; } = new List<ModalContainer>();
-        
         private static readonly Dictionary<int, ModalContainer> InstanceCacheByTransform =
             new Dictionary<int, ModalContainer>();
 
@@ -40,11 +39,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         private readonly Dictionary<string, AssetLoadHandle<GameObject>> _preloadedResourceHandles =
             new Dictionary<string, AssetLoadHandle<GameObject>>();
 
+        private IAssetLoader _assetLoader;
+
         private ModalBackdrop _backdropPrefab;
         private CanvasGroup _canvasGroup;
+        public static List<ModalContainer> Instances { get; } = new List<ModalContainer>();
 
-        private IAssetLoader _assetLoader;
-        
         /// <summary>
         ///     By default, <see cref="IAssetLoader" /> in <see cref="UnityScreenNavigatorSettings" /> is used.
         ///     If this property is set, it is used instead.
@@ -74,12 +74,9 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         private void Awake()
         {
             Instances.Add(this);
-            
+
             _callbackReceivers.AddRange(GetComponents<IModalContainerCallbackReceiver>());
-            if (!string.IsNullOrWhiteSpace(_name))
-            {
-                InstanceCacheByName.Add(_name, this);
-            }
+            if (!string.IsNullOrWhiteSpace(_name)) InstanceCacheByName.Add(_name, this);
 
             _backdropPrefab = _overrideBackdropPrefab
                 ? _overrideBackdropPrefab
@@ -104,17 +101,10 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             InstanceCacheByName.Remove(_name);
             var keysToRemove = new List<int>();
             foreach (var cache in InstanceCacheByTransform)
-            {
                 if (Equals(cache.Value))
-                {
                     keysToRemove.Add(cache.Key);
-                }
-            }
 
-            foreach (var keyToRemove in keysToRemove)
-            {
-                InstanceCacheByTransform.Remove(keyToRemove);
-            }
+            foreach (var keyToRemove in keysToRemove) InstanceCacheByTransform.Remove(keyToRemove);
 
             Instances.Remove(this);
         }
@@ -139,10 +129,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         public static ModalContainer Of(RectTransform rectTransform, bool useCache = true)
         {
             var id = rectTransform.GetInstanceID();
-            if (useCache && InstanceCacheByTransform.TryGetValue(id, out var container))
-            {
-                return container;
-            }
+            if (useCache && InstanceCacheByTransform.TryGetValue(id, out var container)) return container;
 
             container = rectTransform.GetComponentInParent<ModalContainer>();
             if (container != null)
@@ -161,10 +148,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <returns></returns>
         public static ModalContainer Find(string containerName)
         {
-            if (InstanceCacheByName.TryGetValue(containerName, out var instance))
-            {
-                return instance;
-            }
+            if (InstanceCacheByName.TryGetValue(containerName, out var instance)) return instance;
 
             return null;
         }
@@ -216,7 +200,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         {
             return CoroutineManager.Instance.Run(PushRoutine(modalType, resourceKey, playAnimation, onLoad, loadAsync));
         }
-        
+
         /// <summary>
         ///     Push new modal.
         /// </summary>
@@ -246,16 +230,11 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             Action<Modal> onLoad = null,
             bool loadAsync = true)
         {
-            if (resourceKey == null)
-            {
-                throw new ArgumentNullException(nameof(resourceKey));
-            }
+            if (resourceKey == null) throw new ArgumentNullException(nameof(resourceKey));
 
             if (IsInTransition)
-            {
                 throw new InvalidOperationException(
                     "Cannot transition because the screen is already in transition.");
-            }
 
             IsInTransition = true;
 
@@ -279,15 +258,9 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             var assetLoadHandle = loadAsync
                 ? AssetLoader.LoadAsync<GameObject>(resourceKey)
                 : AssetLoader.Load<GameObject>(resourceKey);
-            if (!assetLoadHandle.IsDone)
-            {
-                yield return new WaitUntil(() => assetLoadHandle.IsDone);
-            }
+            if (!assetLoadHandle.IsDone) yield return new WaitUntil(() => assetLoadHandle.IsDone);
 
-            if (assetLoadHandle.Status == AssetLoadStatus.Failed)
-            {
-                throw assetLoadHandle.OperationException;
-            }
+            if (assetLoadHandle.Status == AssetLoadStatus.Failed) throw assetLoadHandle.OperationException;
 
             var backdrop = Instantiate(_backdropPrefab);
             backdrop.Setup((RectTransform)transform);
@@ -302,82 +275,63 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _assetLoadHandles.Add(modalId, assetLoadHandle);
             onLoad?.Invoke(enterModal);
             var afterLoadHandle = enterModal.AfterLoad((RectTransform)transform);
-            while (!afterLoadHandle.IsTerminated)
-            {
-                yield return null;
-            }
+            while (!afterLoadHandle.IsTerminated) yield return null;
 
             var exitModal = _modals.Count == 0 ? null : _modals[_modals.Count - 1];
 
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers)
-            {
-                callbackReceiver.BeforePush(enterModal, exitModal);
-            }
+            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePush(enterModal, exitModal);
 
 
             var preprocessHandles = new List<AsyncProcessHandle>();
-            if (exitModal != null)
-            {
-                preprocessHandles.Add(exitModal.BeforeExit(true, enterModal));
-            }
+            if (exitModal != null) preprocessHandles.Add(exitModal.BeforeExit(true, enterModal));
 
             preprocessHandles.Add(enterModal.BeforeEnter(true, exitModal));
 
             foreach (var coroutineHandle in preprocessHandles)
-            {
                 while (!coroutineHandle.IsTerminated)
-                {
                     yield return coroutineHandle;
-                }
-            }
 
             // Play Animation
             var animationHandles = new List<AsyncProcessHandle>();
             animationHandles.Add(backdrop.Enter(playAnimation));
 
-            if (exitModal != null)
-            {
-                animationHandles.Add(exitModal.Exit(true, playAnimation, enterModal));
-            }
+            if (exitModal != null) animationHandles.Add(exitModal.Exit(true, playAnimation, enterModal));
 
             animationHandles.Add(enterModal.Enter(true, playAnimation, exitModal));
 
             foreach (var coroutineHandle in animationHandles)
-            {
                 while (!coroutineHandle.IsTerminated)
-                {
                     yield return coroutineHandle;
-                }
-            }
 
             // End Transition
             _modals.Add(enterModal);
             IsInTransition = false;
 
             // Postprocess
-            if (exitModal != null)
-            {
-                exitModal.AfterExit(true, enterModal);
-            }
+            if (exitModal != null) exitModal.AfterExit(true, enterModal);
 
             enterModal.AfterEnter(true, exitModal);
 
-            foreach (var callbackReceiver in _callbackReceivers)
-            {
-                callbackReceiver.AfterPush(enterModal, exitModal);
-            }
+            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterPush(enterModal, exitModal);
 
             if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
             {
                 if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
                 {
-                    foreach (var pageContainer in PageContainer.Instances)
-                        pageContainer.Interactable = true;
-                    foreach (var modalContainer in Instances)
-                        modalContainer.Interactable = true;
-                    foreach (var sheetContainer in SheetContainer.Instances)
-                        sheetContainer.Interactable = true;
+                    // If there's a container in transition, it should restore Interactive to true when the transition is finished.
+                    // So, do nothing here if there's a transitioning container.
+                    if (PageContainer.Instances.All(x => !x.IsInTransition)
+                        && Instances.All(x => !x.IsInTransition)
+                        && SheetContainer.Instances.All(x => !x.IsInTransition))
+                    {
+                        foreach (var pageContainer in PageContainer.Instances)
+                            pageContainer.Interactable = true;
+                        foreach (var modalContainer in Instances)
+                            modalContainer.Interactable = true;
+                        foreach (var sheetContainer in SheetContainer.Instances)
+                            sheetContainer.Interactable = true;
+                    }
                 }
                 else
                 {
@@ -389,16 +343,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         private IEnumerator PopRoutine(bool playAnimation)
         {
             if (_modals.Count == 0)
-            {
                 throw new InvalidOperationException(
                     "Cannot transition because there are no modals loaded on the stack.");
-            }
 
             if (IsInTransition)
-            {
                 throw new InvalidOperationException(
                     "Cannot transition because the screen is already in transition.");
-            }
 
             IsInTransition = true;
 
@@ -426,47 +376,30 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _backdrops.RemoveAt(_backdrops.Count - 1);
 
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers)
-            {
-                callbackReceiver.BeforePop(enterModal, exitModal);
-            }
+            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePop(enterModal, exitModal);
 
             var preprocessHandles = new List<AsyncProcessHandle>
             {
                 exitModal.BeforeExit(false, enterModal)
             };
-            if (enterModal != null)
-            {
-                preprocessHandles.Add(enterModal.BeforeEnter(false, exitModal));
-            }
+            if (enterModal != null) preprocessHandles.Add(enterModal.BeforeEnter(false, exitModal));
 
             foreach (var coroutineHandle in preprocessHandles)
-            {
                 while (!coroutineHandle.IsTerminated)
-                {
                     yield return coroutineHandle;
-                }
-            }
 
             // Play Animation
             var animationHandles = new List<AsyncProcessHandle>
             {
                 exitModal.Exit(false, playAnimation, enterModal)
             };
-            if (enterModal != null)
-            {
-                animationHandles.Add(enterModal.Enter(false, playAnimation, exitModal));
-            }
+            if (enterModal != null) animationHandles.Add(enterModal.Enter(false, playAnimation, exitModal));
 
             animationHandles.Add(backdrop.Exit(playAnimation));
 
             foreach (var coroutineHandle in animationHandles)
-            {
                 while (!coroutineHandle.IsTerminated)
-                {
                     yield return coroutineHandle;
-                }
-            }
 
             // End Transition
             _modals.RemoveAt(_modals.Count - 1);
@@ -474,22 +407,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             // Postprocess
             exitModal.AfterExit(false, enterModal);
-            if (enterModal != null)
-            {
-                enterModal.AfterEnter(false, exitModal);
-            }
+            if (enterModal != null) enterModal.AfterEnter(false, exitModal);
 
-            foreach (var callbackReceiver in _callbackReceivers)
-            {
-                callbackReceiver.AfterPop(enterModal, exitModal);
-            }
+            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterPop(enterModal, exitModal);
 
             // Unload Unused Page
             var beforeReleaseHandle = exitModal.BeforeRelease();
-            while (!beforeReleaseHandle.IsTerminated)
-            {
-                yield return null;
-            }
+            while (!beforeReleaseHandle.IsTerminated) yield return null;
 
             var loadHandle = _assetLoadHandles[exitModalId];
             Destroy(exitModal.gameObject);
@@ -501,12 +425,19 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             {
                 if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
                 {
-                    foreach (var pageContainer in PageContainer.Instances)
-                        pageContainer.Interactable = true;
-                    foreach (var modalContainer in Instances)
-                        modalContainer.Interactable = true;
-                    foreach (var sheetContainer in SheetContainer.Instances)
-                        sheetContainer.Interactable = true;
+                    // If there's a container in transition, it should restore Interactive to true when the transition is finished.
+                    // So, do nothing here if there's a transitioning container.
+                    if (PageContainer.Instances.All(x => !x.IsInTransition)
+                        && Instances.All(x => !x.IsInTransition)
+                        && SheetContainer.Instances.All(x => !x.IsInTransition))
+                    {
+                        foreach (var pageContainer in PageContainer.Instances)
+                            pageContainer.Interactable = true;
+                        foreach (var modalContainer in Instances)
+                            modalContainer.Interactable = true;
+                        foreach (var sheetContainer in SheetContainer.Instances)
+                            sheetContainer.Interactable = true;
+                    }
                 }
                 else
                 {
@@ -523,25 +454,17 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         private IEnumerator PreloadRoutine(string resourceKey, bool loadAsync = true)
         {
             if (_preloadedResourceHandles.ContainsKey(resourceKey))
-            {
                 throw new InvalidOperationException(
                     $"The resource with key \"${resourceKey}\" has already been preloaded.");
-            }
 
             var assetLoadHandle = loadAsync
                 ? AssetLoader.LoadAsync<GameObject>(resourceKey)
                 : AssetLoader.Load<GameObject>(resourceKey);
             _preloadedResourceHandles.Add(resourceKey, assetLoadHandle);
 
-            if (!assetLoadHandle.IsDone)
-            {
-                yield return new WaitUntil(() => assetLoadHandle.IsDone);
-            }
+            if (!assetLoadHandle.IsDone) yield return new WaitUntil(() => assetLoadHandle.IsDone);
 
-            if (assetLoadHandle.Status == AssetLoadStatus.Failed)
-            {
-                throw assetLoadHandle.OperationException;
-            }
+            if (assetLoadHandle.Status == AssetLoadStatus.Failed) throw assetLoadHandle.OperationException;
         }
 
         public bool IsPreloadRequested(string resourceKey)
@@ -551,10 +474,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         public bool IsPreloaded(string resourceKey)
         {
-            if (!_preloadedResourceHandles.TryGetValue(resourceKey, out var handle))
-            {
-                return false;
-            }
+            if (!_preloadedResourceHandles.TryGetValue(resourceKey, out var handle)) return false;
 
             return handle.Status == AssetLoadStatus.Success;
         }
@@ -562,9 +482,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         public void ReleasePreloaded(string resourceKey)
         {
             if (!_preloadedResourceHandles.ContainsKey(resourceKey))
-            {
                 throw new InvalidOperationException($"The resource with key \"${resourceKey}\" is not preloaded.");
-            }
 
             var handle = _preloadedResourceHandles[resourceKey];
             AssetLoader.Release(handle);

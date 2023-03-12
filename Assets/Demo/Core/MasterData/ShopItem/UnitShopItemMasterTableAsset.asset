@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14c3f6c6da4046cd9288a2002d0e3119, type: 3}
+  m_Name: UnitShopItemMasterTableAsset
+  m_EditorClassIdentifier: 
+  masterTable:
+    items:
+    - id: unit_shop_item_0001
+      cost: 1000
+      unitTypeMasterId: 003
+    - id: unit_shop_item_0002
+      cost: 10000
+      unitTypeMasterId: 004
+    - id: unit_shop_item_0003
+      cost: 500
+      unitTypeMasterId: 005

@@ -12,7 +12,7 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
         Center
     }
 
-    internal static class SheetAlignmentExtensions
+    public static class SheetAlignmentExtensions
     {
         public static Vector3 ToPosition(this SheetAlignment self, RectTransform rectTransform)
         {
