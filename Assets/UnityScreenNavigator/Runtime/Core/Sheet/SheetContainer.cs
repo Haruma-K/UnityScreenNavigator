@@ -24,16 +24,14 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         [SerializeField] private string _name;
 
-        private readonly Dictionary<int, AssetLoadHandle<GameObject>> _assetLoadHandles
-            = new Dictionary<int, AssetLoadHandle<GameObject>>();
+        private readonly Dictionary<string, AssetLoadHandle<GameObject>> _assetLoadHandles
+            = new Dictionary<string, AssetLoadHandle<GameObject>>();
 
         private readonly List<ISheetContainerCallbackReceiver> _callbackReceivers =
             new List<ISheetContainerCallbackReceiver>();
 
-        private readonly Dictionary<string, int> _sheetNameToId = new Dictionary<string, int>();
-        private readonly Dictionary<int, Sheet> _sheets = new Dictionary<int, Sheet>();
-
-        private int? _activeSheetId;
+        private readonly Dictionary<string, string> _sheetNameToId = new Dictionary<string, string>();
+        private readonly Dictionary<string, Sheet> _sheets = new Dictionary<string, Sheet>();
 
         private IAssetLoader _assetLoader;
         private CanvasGroup _canvasGroup;
@@ -49,15 +47,16 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             set => _assetLoader = value;
         }
 
-        public int? ActiveSheetId => _activeSheetId;
+        public string ActiveSheetId { get; private set; }
 
         public Sheet ActiveSheet
         {
             get
             {
-                if (!_activeSheetId.HasValue) return null;
+                if (ActiveSheetId == null)
+                    return null;
 
-                return _sheets[_activeSheetId.Value];
+                return _sheets[ActiveSheetId];
             }
         }
 
@@ -69,7 +68,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <summary>
         ///     Registered sheets.
         /// </summary>
-        public IReadOnlyDictionary<int, Sheet> Sheets => _sheets;
+        public IReadOnlyDictionary<string, Sheet> Sheets => _sheets;
 
         public bool Interactable
         {
@@ -171,9 +170,9 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <param name="resourceKey"></param>
         /// <param name="playAnimation"></param>
         /// <returns></returns>
-        public AsyncProcessHandle Show(string resourceKey, bool playAnimation)
+        public AsyncProcessHandle ShowByResourceKey(string resourceKey, bool playAnimation)
         {
-            return CoroutineManager.Instance.Run(ShowRoutine(resourceKey, playAnimation));
+            return CoroutineManager.Instance.Run(ShowByResourceKeyRoutine(resourceKey, playAnimation));
         }
 
         /// <summary>
@@ -182,7 +181,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <param name="sheetId"></param>
         /// <param name="playAnimation"></param>
         /// <returns></returns>
-        public AsyncProcessHandle Show(int sheetId, bool playAnimation)
+        public AsyncProcessHandle Show(string sheetId, bool playAnimation)
         {
             return CoroutineManager.Instance.Run(ShowRoutine(sheetId, playAnimation));
         }
@@ -205,7 +204,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public AsyncProcessHandle Register(string resourceKey,
-            Action<(int sheetId, Sheet instance)> onLoad = null, bool loadAsync = true)
+            Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true)
         {
             return CoroutineManager.Instance.Run(RegisterRoutine(typeof(Sheet), resourceKey, onLoad, loadAsync));
         }
@@ -220,7 +219,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public AsyncProcessHandle Register(Type sheetType, string resourceKey,
-            Action<(int sheetId, Sheet instance)> onLoad = null, bool loadAsync = true)
+            Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true)
         {
             return CoroutineManager.Instance.Run(RegisterRoutine(sheetType, resourceKey, onLoad, loadAsync));
         }
@@ -234,14 +233,14 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public AsyncProcessHandle Register<TSheet>(string resourceKey,
-            Action<(int sheetId, TSheet instance)> onLoad = null, bool loadAsync = true) where TSheet : Sheet
+            Action<(string sheetId, TSheet sheet)> onLoad = null, bool loadAsync = true) where TSheet : Sheet
         {
             return CoroutineManager.Instance.Run(RegisterRoutine(typeof(TSheet), resourceKey,
-                x => onLoad?.Invoke((x.sheetId, (TSheet)x.instance)), loadAsync));
+                x => onLoad?.Invoke((x.sheetId, (TSheet)x.sheet)), loadAsync));
         }
 
         private IEnumerator RegisterRoutine(Type sheetType, string resourceKey,
-            Action<(int sheetId, Sheet instance)> onLoad = null, bool loadAsync = true)
+            Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true)
         {
             if (resourceKey == null) throw new ArgumentNullException(nameof(resourceKey));
 
@@ -257,7 +256,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 c = instance.AddComponent(sheetType);
             var sheet = (Sheet)c;
 
-            var sheetId = sheet.GetInstanceID();
+            var sheetId = Guid.NewGuid().ToString();
             _sheets.Add(sheetId, sheet);
             _sheetNameToId[resourceKey] = sheetId;
             _assetLoadHandles.Add(sheetId, assetLoadHandle);
@@ -268,19 +267,19 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             yield return sheetId;
         }
 
-        private IEnumerator ShowRoutine(string resourceKey, bool playAnimation)
+        private IEnumerator ShowByResourceKeyRoutine(string resourceKey, bool playAnimation)
         {
             var sheetId = _sheetNameToId[resourceKey];
             yield return ShowRoutine(sheetId, playAnimation);
         }
 
-        private IEnumerator ShowRoutine(int sheetId, bool playAnimation)
+        private IEnumerator ShowRoutine(string sheetId, bool playAnimation)
         {
             if (IsInTransition)
                 throw new InvalidOperationException(
                     "Cannot transition because the screen is already in transition.");
 
-            if (_activeSheetId.HasValue && _activeSheetId.Value.Equals(sheetId))
+            if (ActiveSheetId != null && ActiveSheetId == sheetId)
                 throw new InvalidOperationException(
                     "Cannot transition because the sheet is already active.");
 
@@ -304,7 +303,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             }
 
             var enterSheet = _sheets[sheetId];
-            var exitSheet = _activeSheetId.HasValue ? _sheets[_activeSheetId.Value] : null;
+            var exitSheet = ActiveSheetId != null ? _sheets[ActiveSheetId] : null;
 
             // Preprocess
             foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforeShow(enterSheet, exitSheet);
@@ -328,7 +327,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                     yield return null;
 
             // End Transition
-            _activeSheetId = sheetId;
+            ActiveSheetId = sheetId;
             IsInTransition = false;
 
             // Postprocess
@@ -369,7 +368,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 throw new InvalidOperationException(
                     "Cannot transition because the screen is already in transition.");
 
-            if (!_activeSheetId.HasValue)
+            if (ActiveSheetId == null)
                 throw new InvalidOperationException(
                     "Cannot transition because there is no active sheets.");
 
@@ -392,7 +391,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 }
             }
 
-            var exitSheet = _sheets[_activeSheetId.Value];
+            var exitSheet = _sheets[ActiveSheetId];
 
             // Preprocess
             foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforeHide(exitSheet);
@@ -405,7 +404,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             while (!animationHandle.IsTerminated) yield return null;
 
             // End Transition
-            _activeSheetId = null;
+            ActiveSheetId = null;
             IsInTransition = false;
 
             // Postprocess

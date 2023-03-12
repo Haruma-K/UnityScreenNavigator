@@ -14,7 +14,7 @@ namespace Demo.Subsystem.GUIComponents.TabGroup
         public List<TabSource> sources = new List<TabSource>();
         public int initialIndex;
 
-        private readonly Dictionary<int, int> _indexToSheetIdMap = new Dictionary<int, int>();
+        private readonly Dictionary<int, string> _indexToSheetIdMap = new Dictionary<int, string>();
         private readonly Subject<TabLoadedEvent> _onTabLoadedSubject = new Subject<TabLoadedEvent>();
 
         public bool IsInitializing { get; private set; }
@@ -47,7 +47,7 @@ namespace Demo.Subsystem.GUIComponents.TabGroup
                 var registerTask = sheetContainer.Register(source.sheetResourceKey, y =>
                 {
                     var sheetId = y.sheetId;
-                    var sheet = y.instance;
+                    var sheet = y.sheet;
                     _indexToSheetIdMap.Add(index, sheetId);
                     _onTabLoadedSubject.OnNext(new TabLoadedEvent(index, sheetId, sheet));
 
@@ -82,7 +82,7 @@ namespace Demo.Subsystem.GUIComponents.TabGroup
             IsInitializing = false;
         }
 
-        public int GetSheetIdFromIndex(int index)
+        public string GetSheetIdFromIndex(int index)
         {
             return _indexToSheetIdMap[index];
         }
@@ -95,7 +95,7 @@ namespace Demo.Subsystem.GUIComponents.TabGroup
 
         public readonly struct TabLoadedEvent
         {
-            public TabLoadedEvent(int index, int sheetId, Sheet sheet)
+            public TabLoadedEvent(int index, string sheetId, Sheet sheet)
             {
                 Index = index;
                 SheetId = sheetId;
@@ -103,7 +103,7 @@ namespace Demo.Subsystem.GUIComponents.TabGroup
             }
 
             public int Index { get; }
-            public int SheetId { get; }
+            public string SheetId { get; }
             public Sheet Sheet { get; }
         }
 
