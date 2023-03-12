@@ -24,11 +24,13 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         [SerializeField] private string _name;
 
-        private readonly Dictionary<int, AssetLoadHandle<GameObject>> _assetLoadHandles
-            = new Dictionary<int, AssetLoadHandle<GameObject>>();
+        private readonly Dictionary<string, AssetLoadHandle<GameObject>> _assetLoadHandles
+            = new Dictionary<string, AssetLoadHandle<GameObject>>();
 
         private readonly List<IPageContainerCallbackReceiver> _callbackReceivers =
             new List<IPageContainerCallbackReceiver>();
+
+        private readonly Dictionary<int, string> _instanceIdToPageId = new Dictionary<int, string>();
 
         private readonly List<Page> _pages = new List<Page>();
 
@@ -82,7 +84,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         {
             foreach (var page in _pages)
             {
-                var pageId = page.GetInstanceID();
+                var pageInstanceId = page.GetInstanceID();
+                var pageId = _instanceIdToPageId[pageInstanceId];
                 var assetLoadHandle = _assetLoadHandles[pageId];
 
                 Destroy(page.gameObject);
@@ -90,6 +93,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             }
 
             _assetLoadHandles.Clear();
+            _instanceIdToPageId.Clear();
 
             InstanceCacheByName.Remove(_name);
             var keysToRemove = new List<int>();
@@ -173,8 +177,25 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <param name="onLoad"></param>
         /// <param name="loadAsync"></param>
         /// <returns></returns>
+        [Obsolete("This method is obsolete. Use Push(string, bool, bool, Action<(string, Page)>, bool) instead.")]
         public AsyncProcessHandle Push(string resourceKey, bool playAnimation, bool stack = true,
             Action<Page> onLoad = null, bool loadAsync = true)
+        {
+            return CoroutineManager.Instance.Run(PushRoutine(typeof(Page), resourceKey, playAnimation, stack,
+                x => onLoad?.Invoke(x.page), loadAsync));
+        }
+
+        /// <summary>
+        ///     Push new page.
+        /// </summary>
+        /// <param name="resourceKey"></param>
+        /// <param name="playAnimation"></param>
+        /// <param name="stack"></param>
+        /// <param name="onLoad"></param>
+        /// <param name="loadAsync"></param>
+        /// <returns></returns>
+        public AsyncProcessHandle Push(string resourceKey, bool playAnimation, bool stack = true,
+            Action<(string pageId, Page page)> onLoad = null, bool loadAsync = true)
         {
             return CoroutineManager.Instance.Run(PushRoutine(typeof(Page), resourceKey, playAnimation, stack, onLoad,
                 loadAsync));
@@ -190,8 +211,26 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <param name="onLoad"></param>
         /// <param name="loadAsync"></param>
         /// <returns></returns>
+        [Obsolete("This method is obsolete. Use Push(Type, string, bool, bool, Action<(string, Page)>, bool) instead.")]
         public AsyncProcessHandle Push(Type pageType, string resourceKey, bool playAnimation, bool stack = true,
             Action<Page> onLoad = null, bool loadAsync = true)
+        {
+            return CoroutineManager.Instance.Run(PushRoutine(pageType, resourceKey, playAnimation, stack,
+                x => onLoad?.Invoke(x.page), loadAsync));
+        }
+
+        /// <summary>
+        ///     Push new page.
+        /// </summary>
+        /// <param name="pageType"></param>
+        /// <param name="resourceKey"></param>
+        /// <param name="playAnimation"></param>
+        /// <param name="stack"></param>
+        /// <param name="onLoad"></param>
+        /// <param name="loadAsync"></param>
+        /// <returns></returns>
+        public AsyncProcessHandle Push(Type pageType, string resourceKey, bool playAnimation, bool stack = true,
+            Action<(string pageId, Page page)> onLoad = null, bool loadAsync = true)
         {
             return CoroutineManager.Instance.Run(PushRoutine(pageType, resourceKey, playAnimation, stack, onLoad,
                 loadAsync));
@@ -207,12 +246,32 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <param name="loadAsync"></param>
         /// <typeparam name="TPage"></typeparam>
         /// <returns></returns>
+        [Obsolete(
+            "This method is obsolete. Use Push<TPage>(string, bool, bool, Action<(string, Page)>, bool) instead.")]
         public AsyncProcessHandle Push<TPage>(string resourceKey, bool playAnimation, bool stack = true,
             Action<TPage> onLoad = null, bool loadAsync = true) where TPage : Page
         {
             return CoroutineManager.Instance.Run(PushRoutine(typeof(TPage), resourceKey, playAnimation, stack,
-                x => onLoad?.Invoke((TPage)x), loadAsync));
+                x => onLoad?.Invoke((TPage)x.page), loadAsync));
         }
+
+        /// <summary>
+        ///     Push new page.
+        /// </summary>
+        /// <param name="resourceKey"></param>
+        /// <param name="playAnimation"></param>
+        /// <param name="stack"></param>
+        /// <param name="onLoad"></param>
+        /// <param name="loadAsync"></param>
+        /// <typeparam name="TPage"></typeparam>
+        /// <returns></returns>
+        public AsyncProcessHandle Push<TPage>(string resourceKey, bool playAnimation, bool stack = true,
+            Action<(string pageId, TPage page)> onLoad = null, bool loadAsync = true) where TPage : Page
+        {
+            return CoroutineManager.Instance.Run(PushRoutine(typeof(TPage), resourceKey, playAnimation, stack,
+                x => onLoad?.Invoke((x.pageId, (TPage)x.page)), loadAsync));
+        }
+        
 
         /// <summary>
         ///     Pop current page.
@@ -225,9 +284,10 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         }
 
         private IEnumerator PushRoutine(Type pageType, string resourceKey, bool playAnimation, bool stack = true,
-            Action<Page> onLoad = null, bool loadAsync = true)
+            Action<(string pageId, Page page)> onLoad = null, bool loadAsync = true)
         {
-            if (resourceKey == null) throw new ArgumentNullException(nameof(resourceKey));
+            if (resourceKey == null)
+                throw new ArgumentNullException(nameof(resourceKey));
 
             if (IsInTransition)
                 throw new InvalidOperationException(
@@ -265,14 +325,17 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 c = instance.AddComponent(pageType);
             var enterPage = (Page)c;
 
-            var pageId = enterPage.GetInstanceID();
+            var pageId = Guid.NewGuid().ToString();
             _assetLoadHandles.Add(pageId, assetLoadHandle);
-            onLoad?.Invoke(enterPage);
+            _instanceIdToPageId.Add(enterPage.GetInstanceID(), pageId);
+            onLoad?.Invoke((pageId, enterPage));
             var afterLoadHandle = enterPage.AfterLoad((RectTransform)transform);
-            while (!afterLoadHandle.IsTerminated) yield return null;
+            while (!afterLoadHandle.IsTerminated) 
+                yield return null;
 
             var exitPage = _pages.Count == 0 ? null : _pages[_pages.Count - 1];
-            var exitPageId = exitPage == null ? (int?)null : exitPage.GetInstanceID();
+            var exitPageInstanceId = exitPage == null ? (int?)null : exitPage.GetInstanceID();
+            var exitPageId = exitPageInstanceId.HasValue ? _instanceIdToPageId[exitPageInstanceId.Value] : null;
 
             // Preprocess
             foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePush(enterPage, exitPage);
@@ -288,7 +351,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             // Play Animations
             var animationHandles = new List<AsyncProcessHandle>();
-            if (exitPage != null) animationHandles.Add(exitPage.Exit(true, playAnimation, enterPage));
+            if (exitPage != null)
+                animationHandles.Add(exitPage.Exit(true, playAnimation, enterPage));
 
             animationHandles.Add(enterPage.Enter(true, playAnimation, exitPage));
 
@@ -297,29 +361,33 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                     yield return coroutineHandle;
 
             // End Transition
-            if (!_isActivePageStacked && exitPageId.HasValue) _pages.RemoveAt(_pages.Count - 1);
+            if (!_isActivePageStacked && exitPageId != null)
+                _pages.RemoveAt(_pages.Count - 1);
 
             _pages.Add(enterPage);
             IsInTransition = false;
 
             // Postprocess
-            if (exitPage != null) exitPage.AfterExit(true, enterPage);
+            if (exitPage != null)
+                exitPage.AfterExit(true, enterPage);
 
             enterPage.AfterEnter(true, exitPage);
 
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterPush(enterPage, exitPage);
+            foreach (var callbackReceiver in _callbackReceivers)
+                callbackReceiver.AfterPush(enterPage, exitPage);
 
             // Unload Unused Page
-            if (!_isActivePageStacked && exitPageId.HasValue)
+            if (!_isActivePageStacked && exitPageId != null)
             {
                 var beforeReleaseHandle = exitPage.BeforeRelease();
                 while (!beforeReleaseHandle.IsTerminated) yield return null;
 
-                var handle = _assetLoadHandles[exitPageId.Value];
+                var handle = _assetLoadHandles[exitPageId];
                 AssetLoader.Release(handle);
 
                 Destroy(exitPage.gameObject);
-                _assetLoadHandles.Remove(exitPageId.Value);
+                _assetLoadHandles.Remove(exitPageId);
+                _instanceIdToPageId.Remove(exitPageInstanceId.Value);
             }
 
             _isActivePageStacked = stack;
@@ -379,7 +447,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             }
 
             var exitPage = _pages[_pages.Count - 1];
-            var exitPageId = exitPage.GetInstanceID();
+            var exitPageInstanceId = exitPage.GetInstanceID();
+            var exitPageId = _instanceIdToPageId[exitPageInstanceId];
             var enterPage = _pages.Count == 1 ? null : _pages[_pages.Count - 2];
 
             // Preprocess
@@ -424,6 +493,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             Destroy(exitPage.gameObject);
             AssetLoader.Release(loadHandle);
             _assetLoadHandles.Remove(exitPageId);
+            _instanceIdToPageId.Remove(exitPageInstanceId);
 
             _isActivePageStacked = true;
 
