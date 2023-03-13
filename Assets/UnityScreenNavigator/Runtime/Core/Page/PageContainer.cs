@@ -193,12 +193,13 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <param name="stack"></param>
         /// <param name="onLoad"></param>
         /// <param name="loadAsync"></param>
+        /// <param name="pageId"></param>
         /// <returns></returns>
         public AsyncProcessHandle Push(string resourceKey, bool playAnimation, bool stack = true,
-            Action<(string pageId, Page page)> onLoad = null, bool loadAsync = true)
+            Action<(string pageId, Page page)> onLoad = null, bool loadAsync = true, string pageId = null)
         {
             return CoroutineManager.Instance.Run(PushRoutine(typeof(Page), resourceKey, playAnimation, stack, onLoad,
-                loadAsync));
+                loadAsync, pageId));
         }
 
         /// <summary>
@@ -228,12 +229,13 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <param name="stack"></param>
         /// <param name="onLoad"></param>
         /// <param name="loadAsync"></param>
+        /// <param name="pageId"></param>
         /// <returns></returns>
         public AsyncProcessHandle Push(Type pageType, string resourceKey, bool playAnimation, bool stack = true,
-            Action<(string pageId, Page page)> onLoad = null, bool loadAsync = true)
+            Action<(string pageId, Page page)> onLoad = null, bool loadAsync = true, string pageId = null)
         {
             return CoroutineManager.Instance.Run(PushRoutine(pageType, resourceKey, playAnimation, stack, onLoad,
-                loadAsync));
+                loadAsync, pageId));
         }
 
         /// <summary>
@@ -263,13 +265,15 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <param name="stack"></param>
         /// <param name="onLoad"></param>
         /// <param name="loadAsync"></param>
+        /// <param name="pageId"></param>
         /// <typeparam name="TPage"></typeparam>
         /// <returns></returns>
         public AsyncProcessHandle Push<TPage>(string resourceKey, bool playAnimation, bool stack = true,
-            Action<(string pageId, TPage page)> onLoad = null, bool loadAsync = true) where TPage : Page
+            Action<(string pageId, TPage page)> onLoad = null, bool loadAsync = true, string pageId = null)
+            where TPage : Page
         {
             return CoroutineManager.Instance.Run(PushRoutine(typeof(TPage), resourceKey, playAnimation, stack,
-                x => onLoad?.Invoke((x.pageId, (TPage)x.page)), loadAsync));
+                x => onLoad?.Invoke((x.pageId, (TPage)x.page)), loadAsync, pageId));
         }
         
 
@@ -284,7 +288,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         }
 
         private IEnumerator PushRoutine(Type pageType, string resourceKey, bool playAnimation, bool stack = true,
-            Action<(string pageId, Page page)> onLoad = null, bool loadAsync = true)
+            Action<(string pageId, Page page)> onLoad = null, bool loadAsync = true, string pageId = null)
         {
             if (resourceKey == null)
                 throw new ArgumentNullException(nameof(resourceKey));
@@ -325,7 +329,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 c = instance.AddComponent(pageType);
             var enterPage = (Page)c;
 
-            var pageId = Guid.NewGuid().ToString();
+            if (pageId == null)
+                pageId = Guid.NewGuid().ToString();
             _assetLoadHandles.Add(pageId, assetLoadHandle);
             _instanceIdToPageId.Add(enterPage.GetInstanceID(), pageId);
             onLoad?.Invoke((pageId, enterPage));

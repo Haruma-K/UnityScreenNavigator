@@ -201,12 +201,14 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <param name="resourceKey"></param>
         /// <param name="onLoad"></param>
         /// <param name="loadAsync"></param>
+        /// <param name="sheetId"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public AsyncProcessHandle Register(string resourceKey,
-            Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true)
+            Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true, string sheetId = null)
         {
-            return CoroutineManager.Instance.Run(RegisterRoutine(typeof(Sheet), resourceKey, onLoad, loadAsync));
+            return CoroutineManager.Instance.Run(
+                RegisterRoutine(typeof(Sheet), resourceKey, onLoad, loadAsync, sheetId));
         }
 
         /// <summary>
@@ -216,12 +218,13 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <param name="resourceKey"></param>
         /// <param name="onLoad"></param>
         /// <param name="loadAsync"></param>
+        /// <param name="sheetId"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public AsyncProcessHandle Register(Type sheetType, string resourceKey,
-            Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true)
+            Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true, string sheetId = null)
         {
-            return CoroutineManager.Instance.Run(RegisterRoutine(sheetType, resourceKey, onLoad, loadAsync));
+            return CoroutineManager.Instance.Run(RegisterRoutine(sheetType, resourceKey, onLoad, loadAsync, sheetId));
         }
 
         /// <summary>
@@ -230,17 +233,19 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <param name="resourceKey"></param>
         /// <param name="onLoad"></param>
         /// <param name="loadAsync"></param>
+        /// <param name="sheetId"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public AsyncProcessHandle Register<TSheet>(string resourceKey,
-            Action<(string sheetId, TSheet sheet)> onLoad = null, bool loadAsync = true) where TSheet : Sheet
+            Action<(string sheetId, TSheet sheet)> onLoad = null, bool loadAsync = true, string sheetId = null)
+            where TSheet : Sheet
         {
             return CoroutineManager.Instance.Run(RegisterRoutine(typeof(TSheet), resourceKey,
-                x => onLoad?.Invoke((x.sheetId, (TSheet)x.sheet)), loadAsync));
+                x => onLoad?.Invoke((x.sheetId, (TSheet)x.sheet)), loadAsync, sheetId));
         }
 
         private IEnumerator RegisterRoutine(Type sheetType, string resourceKey,
-            Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true)
+            Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true, string sheetId = null)
         {
             if (resourceKey == null) throw new ArgumentNullException(nameof(resourceKey));
 
@@ -256,7 +261,8 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 c = instance.AddComponent(sheetType);
             var sheet = (Sheet)c;
 
-            var sheetId = Guid.NewGuid().ToString();
+            if (sheetId == null)
+                sheetId = Guid.NewGuid().ToString();
             _sheets.Add(sheetId, sheet);
             _sheetNameToId[resourceKey] = sheetId;
             _assetLoadHandles.Add(sheetId, assetLoadHandle);
