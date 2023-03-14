@@ -222,16 +222,38 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             return CoroutineManager.Instance.Run(PushRoutine(typeof(TPage), resourceKey, playAnimation, stack,
                 x => onLoad?.Invoke((x.pageId, (TPage)x.page)), loadAsync, pageId));
         }
-        
 
         /// <summary>
-        ///     Pop current page.
+        ///     Pop pages.
         /// </summary>
         /// <param name="playAnimation"></param>
         /// <param name="popCount"></param>
         /// <returns></returns>
         public AsyncProcessHandle Pop(bool playAnimation, int popCount = 1)
         {
+            return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
+        }
+
+        /// <summary>
+        ///     Pop pages.
+        /// </summary>
+        /// <param name="playAnimation"></param>
+        /// <param name="destinationPageId"></param>
+        /// <returns></returns>
+        public AsyncProcessHandle Pop(bool playAnimation, string destinationPageId)
+        {
+            var popCount = 0;
+            foreach (var id in _instanceIdToPageId.Values.Reverse())
+            {
+                if (id == destinationPageId)
+                    break;
+
+                popCount++;
+            }
+
+            if (popCount == _instanceIdToPageId.Count)
+                throw new Exception($"The page with id '{destinationPageId}' is not found.");
+
             return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
         }
 

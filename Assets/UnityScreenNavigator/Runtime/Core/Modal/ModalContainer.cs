@@ -228,13 +228,36 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         }
 
         /// <summary>
-        ///     Pop current modal.
+        ///     Pop modals.
         /// </summary>
         /// <param name="playAnimation"></param>
         /// <param name="popCount"></param>
         /// <returns></returns>
         public AsyncProcessHandle Pop(bool playAnimation, int popCount = 1)
         {
+            return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
+        }
+
+        /// <summary>
+        ///     Pop modals.
+        /// </summary>
+        /// <param name="playAnimation"></param>
+        /// <param name="destinationModalId"></param>
+        /// <returns></returns>
+        public AsyncProcessHandle Pop(bool playAnimation, string destinationModalId)
+        {
+            var popCount = 0;
+            foreach (var id in _instanceIdToModalId.Values.Reverse())
+            {
+                if (id == destinationModalId)
+                    break;
+
+                popCount++;
+            }
+
+            if (popCount == _instanceIdToModalId.Count)
+                throw new Exception($"The modal with id '{destinationModalId}' is not found.");
+
             return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
         }
 
