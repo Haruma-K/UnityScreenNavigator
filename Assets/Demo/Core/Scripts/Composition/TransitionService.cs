@@ -59,8 +59,9 @@ namespace Demo.Core.Scripts.Composition
         public void ApplicationStarted()
         {
             MainPageContainer.Push<TopPage>(ResourceKey.Prefabs.TopPage, false,
-                onLoad: page =>
+                onLoad: x =>
                 {
+                    var page = x.page;
                     var presenter = _topPagePresenterFactory.Create(page, this);
                     OnPagePresenterCreated(presenter, page);
                 });
@@ -69,8 +70,9 @@ namespace Demo.Core.Scripts.Composition
         public void TopPageClicked()
         {
             MainPageContainer.Push<LoadingPage>(ResourceKey.Prefabs.LoadingPage, true,
-                onLoad: page =>
+                onLoad: x =>
                 {
+                    var page = x.page;
                     var presenter = _loadingPagePresenterFactory.Create(page, this);
                     OnPagePresenterCreated(presenter, page);
                 },
@@ -80,8 +82,9 @@ namespace Demo.Core.Scripts.Composition
         public void HomeLoadingPageShown()
         {
             MainPageContainer.Push<HomePage>(ResourceKey.Prefabs.HomePage, true,
-                onLoad: page =>
+                onLoad: x =>
                 {
+                    var page = x.page;
                     async Task WillPushEnter()
                     {
                         // Preload the "Shop" page prefab.
@@ -105,8 +108,9 @@ namespace Demo.Core.Scripts.Composition
         public void HomePageUnitShopButtonClicked()
         {
             MainPageContainer.Push<UnitShopPage>(ResourceKey.Prefabs.UnitShopPage, true,
-                onLoad: page =>
+                onLoad: x =>
                 {
+                    var page = x.page;
                     var presenter = _unitShopPagePresenterFactory.Create(page, this);
                     OnPagePresenterCreated(presenter, page);
                 });
@@ -115,8 +119,9 @@ namespace Demo.Core.Scripts.Composition
         public void HomePageSettingsButtonClicked()
         {
             MainModalContainer.Push<SettingsModal>(ResourceKey.Prefabs.SettingsModal, true,
-                modal =>
+                x =>
                 {
+                    var modal = x.modal;
                     var presenter = _settingsModalPresenterFactory.Create(modal, this);
                     OnModalPresenterCreated(presenter, modal);
                 });
@@ -125,8 +130,9 @@ namespace Demo.Core.Scripts.Composition
         public void UnitShopItemClicked(string unitTypeMasterId)
         {
             MainModalContainer.Push<UnitTypeInformationModal>(ResourceKey.Prefabs.UnitTypeInformationModal, true,
-                modal =>
+                x =>
                 {
+                    var modal = x.modal;
                     var presenter = _unitTypeInformationModalPresenterFactory.Create(modal, this, unitTypeMasterId);
                     OnModalPresenterCreated(presenter, modal);
                 });
@@ -135,8 +141,9 @@ namespace Demo.Core.Scripts.Composition
         public void UnitTypeInformationExpandButtonClicked(string unitTypeMasterId, int unitRank)
         {
             MainModalContainer.Push<UnitPortraitViewerModal>(ResourceKey.Prefabs.UnitPortraitViewerModal, true,
-                modal =>
+                x =>
                 {
+                    var modal = x.modal;
                     var presenter =
                         _unitPortraitViewerModalPresenterFactory.Create(modal, this, unitTypeMasterId, unitRank);
                     OnModalPresenterCreated(presenter, modal);

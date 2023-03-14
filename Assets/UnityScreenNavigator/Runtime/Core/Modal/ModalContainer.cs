@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Page;
 using UnityScreenNavigator.Runtime.Core.Shared;
@@ -182,22 +183,6 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <param name="playAnimation"></param>
         /// <param name="onLoad"></param>
         /// <param name="loadAsync"></param>
-        /// <returns></returns>
-        [Obsolete("This method is obsolete. Use Push(string, bool, Action<(string, Modal)>, bool) instead.")]
-        public AsyncProcessHandle Push(string resourceKey, bool playAnimation, Action<Modal> onLoad = null,
-            bool loadAsync = true)
-        {
-            return CoroutineManager.Instance.Run(PushRoutine(typeof(Modal), resourceKey, playAnimation,
-                x => onLoad?.Invoke(x.modal), loadAsync));
-        }
-
-        /// <summary>
-        ///     Push new modal.
-        /// </summary>
-        /// <param name="resourceKey"></param>
-        /// <param name="playAnimation"></param>
-        /// <param name="onLoad"></param>
-        /// <param name="loadAsync"></param>
         /// <param name="modalId"></param>
         /// <returns></returns>
         public AsyncProcessHandle Push(string resourceKey, bool playAnimation,
@@ -205,23 +190,6 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         {
             return CoroutineManager.Instance.Run(PushRoutine(typeof(Modal), resourceKey, playAnimation, onLoad,
                 loadAsync, modalId));
-        }
-
-        /// <summary>
-        ///     Push new modal.
-        /// </summary>
-        /// <param name="modalType"></param>
-        /// <param name="resourceKey"></param>
-        /// <param name="playAnimation"></param>
-        /// <param name="onLoad"></param>
-        /// <param name="loadAsync"></param>
-        /// <returns></returns>
-        [Obsolete("This method is obsolete. Use Push(Type, string, bool, Action<(string, Modal)>, bool) instead.")]
-        public AsyncProcessHandle Push(Type modalType, string resourceKey, bool playAnimation,
-            Action<Modal> onLoad = null, bool loadAsync = true)
-        {
-            return CoroutineManager.Instance.Run(PushRoutine(modalType, resourceKey, playAnimation,
-                x => onLoad?.Invoke(x.modal), loadAsync));
         }
 
         /// <summary>
@@ -248,22 +216,6 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <param name="playAnimation"></param>
         /// <param name="onLoad"></param>
         /// <param name="loadAsync"></param>
-        /// <returns></returns>
-        [Obsolete("This method is obsolete. Use Push<TModal>(string, bool, Action<(string, Modal)>, bool) instead.")]
-        public AsyncProcessHandle Push<TModal>(string resourceKey, bool playAnimation, Action<TModal> onLoad = null,
-            bool loadAsync = true) where TModal : Modal
-        {
-            return CoroutineManager.Instance.Run(PushRoutine(typeof(TModal), resourceKey, playAnimation,
-                x => onLoad?.Invoke((TModal)x.modal), loadAsync));
-        }
-
-        /// <summary>
-        ///     Push new modal.
-        /// </summary>
-        /// <param name="resourceKey"></param>
-        /// <param name="playAnimation"></param>
-        /// <param name="onLoad"></param>
-        /// <param name="loadAsync"></param>
         /// <param name="modalId"></param>
         /// <typeparam name="TModal"></typeparam>
         /// <returns></returns>
@@ -279,10 +231,11 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         ///     Pop current modal.
         /// </summary>
         /// <param name="playAnimation"></param>
+        /// <param name="popCount"></param>
         /// <returns></returns>
-        public AsyncProcessHandle Pop(bool playAnimation)
+        public AsyncProcessHandle Pop(bool playAnimation, int popCount = 1)
         {
-            return CoroutineManager.Instance.Run(PopRoutine(playAnimation));
+            return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
         }
 
         private IEnumerator PushRoutine(Type modalType, string resourceKey, bool playAnimation,
@@ -401,11 +354,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
         }
 
-        private IEnumerator PopRoutine(bool playAnimation)
+        private IEnumerator PopRoutine(bool playAnimation, int popCount = 1)
         {
-            if (_modals.Count == 0)
+            Assert.IsTrue(popCount >= 1);
+
+            if (_modals.Count < popCount)
                 throw new InvalidOperationException(
-                    "Cannot transition because there are no modals loaded on the stack.");
+                    "Cannot transition because the modal count is less than the pop count.");
 
             if (IsInTransition)
                 throw new InvalidOperationException(
@@ -431,11 +386,17 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
 
             var exitModal = _modals[_modals.Count - 1];
-            var exitModalInstanceId = exitModal.GetInstanceID();
-            var exitModalId = _instanceIdToModalId[exitModalInstanceId];
-            var enterModal = _modals.Count == 1 ? null : _modals[_modals.Count - 2];
-            var backdrop = _backdrops[_backdrops.Count - 1];
-            _backdrops.RemoveAt(_backdrops.Count - 1);
+
+            var unusedModals = new List<Modal>();
+            var unusedBackdrops = new List<ModalBackdrop>();
+            for (var i = _modals.Count - 1; i >= _modals.Count - popCount; i--)
+            {
+                unusedModals.Add(_modals[i]);
+                unusedBackdrops.Add(_backdrops[i]);
+            }
+
+            var enterModalIndex = _modals.Count - popCount - 1;
+            var enterModal = enterModalIndex < 0 ? null : _modals[enterModalIndex];
 
             // Preprocess
             foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePop(enterModal, exitModal);
@@ -451,20 +412,25 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     yield return coroutineHandle;
 
             // Play Animation
-            var animationHandles = new List<AsyncProcessHandle>
+            var animationHandles = new List<AsyncProcessHandle>();
+            for (var i = unusedModals.Count - 1; i >= 0; i--)
             {
-                exitModal.Exit(false, playAnimation, enterModal)
-            };
-            if (enterModal != null) animationHandles.Add(enterModal.Enter(false, playAnimation, exitModal));
+                var unusedModal = unusedModals[i];
+                var unusedBackdrop = unusedBackdrops[i];
+                var partnerModal = i == 0 ? enterModal : unusedModals[i - 1];
+                animationHandles.Add(unusedModal.Exit(false, playAnimation, partnerModal));
+                animationHandles.Add(unusedBackdrop.Exit(playAnimation));
+            }
 
-            animationHandles.Add(backdrop.Exit(playAnimation));
+            if (enterModal != null) animationHandles.Add(enterModal.Enter(false, playAnimation, exitModal));
 
             foreach (var coroutineHandle in animationHandles)
                 while (!coroutineHandle.IsTerminated)
                     yield return coroutineHandle;
 
             // End Transition
-            _modals.RemoveAt(_modals.Count - 1);
+            for (var i = 0; i < popCount; i++)
+                _modals.RemoveAt(_modals.Count - 1);
             IsInTransition = false;
 
             // Postprocess
@@ -477,12 +443,23 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             var beforeReleaseHandle = exitModal.BeforeRelease();
             while (!beforeReleaseHandle.IsTerminated) yield return null;
 
-            var loadHandle = _assetLoadHandles[exitModalId];
-            Destroy(exitModal.gameObject);
-            Destroy(backdrop.gameObject);
-            AssetLoader.Release(loadHandle);
-            _assetLoadHandles.Remove(exitModalId);
-            _instanceIdToModalId.Remove(exitModalInstanceId);
+
+            foreach (var unusedModal in unusedModals)
+            {
+                var unusedModalInstanceId = unusedModal.GetInstanceID();
+                var unusedModalId = _instanceIdToModalId[unusedModalInstanceId];
+                var loadHandle = _assetLoadHandles[unusedModalId];
+                Destroy(unusedModal.gameObject);
+                AssetLoader.Release(loadHandle);
+                _assetLoadHandles.Remove(unusedModalId);
+                _instanceIdToModalId.Remove(unusedModalInstanceId);
+            }
+
+            foreach (var unusedBackdrop in unusedBackdrops)
+            {
+                _backdrops.Remove(unusedBackdrop);
+                Destroy(unusedBackdrop.gameObject);
+            }
 
             if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
             {
