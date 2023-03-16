@@ -49,6 +49,7 @@ Library for screen transitions, transition animations, transition history stacki
     - [Load synchronously](#load-synchronously)
     - [Preloading](#preloading)
 - [Other Features](#other-features)
+    - [Pop multiple screens at once](#pop-multiple-screens-at-once)
     - [Don't stack pages in history](#dont-stack-pages-in-history)
     - [Change the backdrop of modals](#change-the-backdrop-of-modals)
     - [Close the active modal when the backdrop is clicked](#close-the-active-modal-when-the-backdrop-is-clicked)
