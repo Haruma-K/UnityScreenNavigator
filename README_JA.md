@@ -784,10 +784,10 @@ yield return handle;
 PageContainer container;
 
 // 同期ロード & ロード後のコールバック
-var handle = container.Push("FooPage", true, loadAsync: false, onLoad: page =>
+var handle = container.Push("FooPage", true, loadAsync: false, onLoad: x =>
 {
     // ページの初期化処理（Pushと同フレームに呼ばれる）
-    page.Setup();
+    x.page.Setup();
 });
 
 // 遷移アニメーションの終了を待つ
@@ -825,6 +825,49 @@ container.ReleasePreloaded(pageName);
 `Home`ページの初期化時に`Shop`ページも同時に読み込み、破棄も同時に行っています。
 
 ## その他の機能
+
+#### まとめて戻る
+`PageContainer` や `ModalContainer` では、複数の画面をまとめて戻ることができます。  
+まとめて戻るには、`PageContainer.Pop()`や`ModalContainer.Pop()`の第二引数に戻る画面数を指定します。
+
+```cs
+PageContainer pageContainer;
+pageContainer.Pop(true, 2);
+
+ModalContainer modalContainer;
+modalContainer.Pop(true, 2);
+```
+
+また、戻り先の PageID や ModalID を指定してまとめて戻ることもできます。  
+PageID や ModalID は、以下のように `Push()` の `onLoad` コールバックを使うことで取得できます。
+
+```cs
+PageContainer pageContainer;
+pageContainer.Push("fooPage", true, onLoad: x =>
+{
+    var pageId = x.pageId;
+});
+
+ModalContainer modalContainer;
+modalContainer.Push("fooModal", true, onLoad: x =>
+{
+    var modalId = x.modalId;
+});
+```
+
+また、`Push()` の `pageId` や `modalId` 引数を指定することで、任意の ID を指定することもできます。
+
+```cs
+PageContainer pageContainer;
+pageContainer.Push("fooPage", true, pageId: "MyPageID");
+
+ModalContainer modalContainer;
+modalContainer.Push("fooModal", true, modalId: "MyModalID");
+```
+
+なお、まとめて戻る際にスキップされるページやモーダルについては、遷移前後のライフサイクルイベントは呼ばれず、破棄前のイベントだけ呼ばれます。  
+また `PageContainer` においては、スキップされるページの遷移アニメーションは再生されません。  
+`ModalContainer` においてはスキップされるモーダルが閉じる際の遷移アニメーションがまとめて同時に再生されます。
 
 #### ページを履歴にスタッキングしない
 ロード画面や演出用のページのように、履歴にスタッキングせずに戻る遷移の際にはスキップしたいページがあります。
