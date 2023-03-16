@@ -119,7 +119,7 @@ namespace Demo.Core.Scripts.Composition
         public void HomePageSettingsButtonClicked()
         {
             MainModalContainer.Push<SettingsModal>(ResourceKey.Prefabs.SettingsModal, true,
-                x =>
+                onLoad: x =>
                 {
                     var modal = x.modal;
                     var presenter = _settingsModalPresenterFactory.Create(modal, this);
@@ -130,7 +130,7 @@ namespace Demo.Core.Scripts.Composition
         public void UnitShopItemClicked(string unitTypeMasterId)
         {
             MainModalContainer.Push<UnitTypeInformationModal>(ResourceKey.Prefabs.UnitTypeInformationModal, true,
-                x =>
+                onLoad: x =>
                 {
                     var modal = x.modal;
                     var presenter = _unitTypeInformationModalPresenterFactory.Create(modal, this, unitTypeMasterId);
@@ -141,7 +141,7 @@ namespace Demo.Core.Scripts.Composition
         public void UnitTypeInformationExpandButtonClicked(string unitTypeMasterId, int unitRank)
         {
             MainModalContainer.Push<UnitPortraitViewerModal>(ResourceKey.Prefabs.UnitPortraitViewerModal, true,
-                x =>
+                onLoad: x =>
                 {
                     var modal = x.modal;
                     var presenter =
