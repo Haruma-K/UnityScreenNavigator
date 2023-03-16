@@ -50,6 +50,7 @@ UnityのuGUIで画面遷移、画面遷移アニメーション、遷移履歴�
     - [同期的にロードする](#%E5%90%8C%E6%9C%9F%E7%9A%84%E3%81%AB%E3%83%AD%E3%83%BC%E3%83%89%E3%81%99%E3%82%8B)
     - [プリロードする](#%E3%83%97%E3%83%AA%E3%83%AD%E3%83%BC%E3%83%89%E3%81%99%E3%82%8B)
 - [その他の機能](#%E3%81%9D%E3%81%AE%E4%BB%96%E3%81%AE%E6%A9%9F%E8%83%BD)
+    - [まとめて戻る](#%E3%81%BE%E3%81%A8%E3%82%81%E3%81%A6%E6%88%BB%E3%82%8B)
     - [ページを履歴にスタッキングしない](#%E3%83%9A%E3%83%BC%E3%82%B8%E3%82%92%E5%B1%A5%E6%AD%B4%E3%81%AB%E3%82%B9%E3%82%BF%E3%83%83%E3%82%AD%E3%83%B3%E3%82%B0%E3%81%97%E3%81%AA%E3%81%84)
     - [モーダルの背景を変更する](#%E3%83%A2%E3%83%BC%E3%83%80%E3%83%AB%E3%81%AE%E8%83%8C%E6%99%AF%E3%82%92%E5%A4%89%E6%9B%B4%E3%81%99%E3%82%8B)
     - [モーダルの背景がクリックされたらモーダルを閉じる](#%E3%83%A2%E3%83%BC%E3%83%80%E3%83%AB%E3%81%AE%E8%83%8C%E6%99%AF%E3%81%8C%E3%82%AF%E3%83%AA%E3%83%83%E3%82%AF%E3%81%95%E3%82%8C%E3%81%9F%E3%82%89%E3%83%A2%E3%83%BC%E3%83%80%E3%83%AB%E3%82%92%E9%96%89%E3%81%98%E3%82%8B)
@@ -784,10 +785,10 @@ yield return handle;
 PageContainer container;
 
 // 同期ロード & ロード後のコールバック
-var handle = container.Push("FooPage", true, loadAsync: false, onLoad: page =>
+var handle = container.Push("FooPage", true, loadAsync: false, onLoad: x =>
 {
     // ページの初期化処理（Pushと同フレームに呼ばれる）
-    page.Setup();
+    x.page.Setup();
 });
 
 // 遷移アニメーションの終了を待つ
@@ -825,6 +826,49 @@ container.ReleasePreloaded(pageName);
 `Home`ページの初期化時に`Shop`ページも同時に読み込み、破棄も同時に行っています。
 
 ## その他の機能
+
+#### まとめて戻る
+`PageContainer` や `ModalContainer` では、複数の画面をまとめて戻ることができます。  
+まとめて戻るには、`PageContainer.Pop()`や`ModalContainer.Pop()`の第二引数に戻る画面数を指定します。
+
+```cs
+PageContainer pageContainer;
+pageContainer.Pop(true, 2);
+
+ModalContainer modalContainer;
+modalContainer.Pop(true, 2);
+```
+
+また、戻り先の PageID や ModalID を指定してまとめて戻ることもできます。  
+PageID や ModalID は、以下のように `Push()` の `onLoad` コールバックを使うことで取得できます。
+
+```cs
+PageContainer pageContainer;
+pageContainer.Push("fooPage", true, onLoad: x =>
+{
+    var pageId = x.pageId;
+});
+
+ModalContainer modalContainer;
+modalContainer.Push("fooModal", true, onLoad: x =>
+{
+    var modalId = x.modalId;
+});
+```
+
+また、`Push()` の `pageId` や `modalId` 引数を指定することで、任意の ID を指定することもできます。
+
+```cs
+PageContainer pageContainer;
+pageContainer.Push("fooPage", true, pageId: "MyPageID");
+
+ModalContainer modalContainer;
+modalContainer.Push("fooModal", true, modalId: "MyModalID");
+```
+
+なお、まとめて戻る際にスキップされるページやモーダルについては、遷移前後のライフサイクルイベントは呼ばれず、破棄前のイベントだけ呼ばれます。  
+また `PageContainer` においては、スキップされるページの遷移アニメーションは再生されません。  
+`ModalContainer` においてはスキップされるモーダルが閉じる際の遷移アニメーションがまとめて同時に再生されます。
 
 #### ページを履歴にスタッキングしない
 ロード画面や演出用のページのように、履歴にスタッキングせずに戻る遷移の際にはスキップしたいページがあります。

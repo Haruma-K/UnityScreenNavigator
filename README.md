@@ -49,6 +49,7 @@ Library for screen transitions, transition animations, transition history stacki
     - [Load synchronously](#load-synchronously)
     - [Preloading](#preloading)
 - [Other Features](#other-features)
+    - [Pop multiple screens at once](#pop-multiple-screens-at-once)
     - [Don't stack pages in history](#dont-stack-pages-in-history)
     - [Change the backdrop of modals](#change-the-backdrop-of-modals)
     - [Close the active modal when the backdrop is clicked](#close-the-active-modal-when-the-backdrop-is-clicked)
@@ -778,10 +779,10 @@ In addition, you can initialize it in same frame as the transition method call b
 PageContainer container;
 
 // Load synchronously and receive the callback after loading.
-var handle = container.Push("FooPage", true, loadAsync: false, onLoad: page =>
+var handle = container.Push("FooPage", true, loadAsync: false, onLoad: x =>
 {
     // Initialize page. (Called in the same frame as Push)
-    page.Setup();
+    x.page.Setup();
 });
 
 // Wait for the end of the transition animation.
@@ -819,6 +820,50 @@ Please refer to [HomePage in demo](https://github.com/Haruma-K/UnityScreenNaviga
 When the `Home` page is initialized, the `Shop` page is also loaded and destroyed at the same time.
 
 ## Other Features
+
+#### Pop multiple screens at once
+In `PageContainer` and `Modal Container`, you can pop multiple screens at once.
+To do this, specify the number of screens to be popped in the second argument of `PageContainer.Pop()` or `ModalContainer.Pop()`.
+
+```cs
+PageContainer pageContainer;
+pageContainer.Pop(true, 2);
+
+ModalContainer modalContainer;
+modalContainer.Pop(true, 2);
+```
+
+You can also specify the destination `PageID` or `ModalID`.
+`PageID` and `ModalID` can be obtained using the `onLoad` callback of `Push()` as shown below.
+
+
+```cs
+PageContainer pageContainer;
+pageContainer.Push("fooPage", true, onLoad: x =>
+{
+    var pageId = x.pageId;
+});
+
+ModalContainer modalContainer;
+modalContainer.Push("fooModal", true, onLoad: x =>
+{
+    var modalId = x.modalId;
+});
+```
+
+In addition, you can specify any ID by specifying the `pageId` or `modalId` argument of `Push()`.
+
+```cs
+PageContainer pageContainer;
+pageContainer.Push("fooPage", true, pageId: "MyPageID");
+
+ModalContainer modalContainer;
+modalContainer.Push("fooModal", true, modalId: "MyModalID");
+```
+
+In addition, for the pages or modals that are skipped when popping multiple screens, the lifecycle events before and after transition will not be called, only the event before destroying will be called.
+In `PageContainer`, the transition animation of the skipping pages will not be played.
+In `ModalContainer`, the transition animation when the skipped modals are closed will be played simultaneously.
 
 #### Don't stack pages in history
 There are some pages that you want to skip on transition back, such as loading screen.
