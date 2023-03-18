@@ -35,9 +35,9 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         private readonly List<IModalContainerCallbackReceiver> _callbackReceivers =
             new List<IModalContainerCallbackReceiver>();
 
-        private readonly Dictionary<int, string> _instanceIdToModalId = new Dictionary<int, string>();
+        private readonly Dictionary<string, Modal> _modals = new Dictionary<string, Modal>();
 
-        private readonly List<Modal> _modals = new List<Modal>();
+        private readonly List<string> _orderedModalIds = new List<string>();
 
         private readonly Dictionary<string, AssetLoadHandle<GameObject>> _preloadedResourceHandles =
             new Dictionary<string, AssetLoadHandle<GameObject>>();
@@ -64,9 +64,14 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         public bool IsInTransition { get; private set; }
 
         /// <summary>
-        ///     Stacked modals.
+        ///     List of ModalIds sorted in the order they are stacked.
         /// </summary>
-        public IReadOnlyList<Modal> Modals => _modals;
+        public IReadOnlyList<string> OrderedModalIds => _orderedModalIds;
+
+        /// <summary>
+        ///     Map of ModalId to Modal.
+        /// </summary>
+        public IReadOnlyDictionary<string, Modal> Modals => _modals;
 
         public bool Interactable
         {
@@ -90,10 +95,9 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         private void OnDestroy()
         {
-            foreach (var modal in _modals)
+            foreach (var modalId in _orderedModalIds)
             {
-                var modalInstanceId = modal.GetInstanceID();
-                var modalId = _instanceIdToModalId[modalInstanceId];
+                var modal = _modals[modalId];
                 var assetLoadHandle = _assetLoadHandles[modalId];
 
                 Destroy(modal.gameObject);
@@ -101,7 +105,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
 
             _assetLoadHandles.Clear();
-            _instanceIdToModalId.Clear();
+            _orderedModalIds.Clear();
 
             InstanceCacheByName.Remove(_name);
             var keysToRemove = new List<int>();
@@ -247,15 +251,16 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         public AsyncProcessHandle Pop(bool playAnimation, string destinationModalId)
         {
             var popCount = 0;
-            foreach (var id in _instanceIdToModalId.Values.Reverse())
+            for (var i = _orderedModalIds.Count - 1; i >= 0; i--)
             {
-                if (id == destinationModalId)
+                var modalId = _orderedModalIds[i];
+                if (modalId == destinationModalId)
                     break;
-
+                
                 popCount++;
             }
 
-            if (popCount == _instanceIdToModalId.Count)
+            if (popCount == _orderedModalIds.Count)
                 throw new Exception($"The modal with id '{destinationModalId}' is not found.");
 
             return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
@@ -309,13 +314,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             if (modalId == null)
                 modalId = Guid.NewGuid().ToString();
             _assetLoadHandles.Add(modalId, assetLoadHandle);
-            _instanceIdToModalId.Add(enterModal.GetInstanceID(), modalId);
             onLoad?.Invoke((modalId, enterModal));
             var afterLoadHandle = enterModal.AfterLoad((RectTransform)transform);
             while (!afterLoadHandle.IsTerminated)
                 yield return null;
 
-            var exitModal = _modals.Count == 0 ? null : _modals[_modals.Count - 1];
+            var exitModalId = _orderedModalIds.Count == 0 ? null : _orderedModalIds[_orderedModalIds.Count - 1];
+            var exitModal = exitModalId == null ? null : _modals[exitModalId];
 
             // Preprocess
             foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePush(enterModal, exitModal);
@@ -342,7 +347,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     yield return coroutineHandle;
 
             // End Transition
-            _modals.Add(enterModal);
+            _modals.Add(modalId, enterModal);
+            _orderedModalIds.Add(modalId);
             IsInTransition = false;
 
             // Postprocess
@@ -381,7 +387,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         {
             Assert.IsTrue(popCount >= 1);
 
-            if (_modals.Count < popCount)
+            if (_orderedModalIds.Count < popCount)
                 throw new InvalidOperationException(
                     "Cannot transition because the modal count is less than the pop count.");
 
@@ -408,18 +414,20 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 }
             }
 
-            var exitModal = _modals[_modals.Count - 1];
+            var exitModalId = _orderedModalIds[_orderedModalIds.Count - 1];
+            var exitModal = _modals[exitModalId];
 
-            var unusedModals = new List<Modal>();
+            var unusedModalIds = new List<string>();
             var unusedBackdrops = new List<ModalBackdrop>();
-            for (var i = _modals.Count - 1; i >= _modals.Count - popCount; i--)
+            for (var i = _orderedModalIds.Count - 1; i >= _orderedModalIds.Count - popCount; i--)
             {
-                unusedModals.Add(_modals[i]);
+                unusedModalIds.Add(_orderedModalIds[i]);
                 unusedBackdrops.Add(_backdrops[i]);
             }
 
-            var enterModalIndex = _modals.Count - popCount - 1;
-            var enterModal = enterModalIndex < 0 ? null : _modals[enterModalIndex];
+            var enterModalIndex = _orderedModalIds.Count - popCount - 1;
+            var enterModalId = enterModalIndex < 0 ? null : _orderedModalIds[enterModalIndex];
+            var enterModal = enterModalId == null ? null : _modals[enterModalId];
 
             // Preprocess
             foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePop(enterModal, exitModal);
@@ -436,11 +444,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             // Play Animation
             var animationHandles = new List<AsyncProcessHandle>();
-            for (var i = unusedModals.Count - 1; i >= 0; i--)
+            for (var i = unusedModalIds.Count - 1; i >= 0; i--)
             {
-                var unusedModal = unusedModals[i];
+                var unusedModalId = unusedModalIds[i];
+                var unusedModal = _modals[unusedModalId];
                 var unusedBackdrop = unusedBackdrops[i];
-                var partnerModal = i == 0 ? enterModal : unusedModals[i - 1];
+                var partnerModalId = i == 0 ? enterModalId : unusedModalIds[i - 1];
+                var partnerModal = partnerModalId == null ? null : _modals[partnerModalId];
                 animationHandles.Add(unusedModal.Exit(false, playAnimation, partnerModal));
                 animationHandles.Add(unusedBackdrop.Exit(playAnimation));
             }
@@ -453,7 +463,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             // End Transition
             for (var i = 0; i < popCount; i++)
-                _modals.RemoveAt(_modals.Count - 1);
+                _orderedModalIds.RemoveAt(_orderedModalIds.Count - 1);
             IsInTransition = false;
 
             // Postprocess
@@ -467,15 +477,14 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             while (!beforeReleaseHandle.IsTerminated) yield return null;
 
 
-            foreach (var unusedModal in unusedModals)
+            foreach (var unusedModalId in unusedModalIds)
             {
-                var unusedModalInstanceId = unusedModal.GetInstanceID();
-                var unusedModalId = _instanceIdToModalId[unusedModalInstanceId];
+                var unusedModal = _modals[unusedModalId];
                 var loadHandle = _assetLoadHandles[unusedModalId];
                 Destroy(unusedModal.gameObject);
                 AssetLoader.Release(loadHandle);
                 _assetLoadHandles.Remove(unusedModalId);
-                _instanceIdToModalId.Remove(unusedModalInstanceId);
+                _modals.Remove(unusedModalId);
             }
 
             foreach (var unusedBackdrop in unusedBackdrops)
