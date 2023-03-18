@@ -434,8 +434,13 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             var exitPage = _pages[exitPageId];
 
             var unusedPageIds = new List<string>();
+            var unusedPages = new List<Page>();
             for (var i = _orderedPageIds.Count - 1; i >= _orderedPageIds.Count - popCount; i--)
-                unusedPageIds.Add(_orderedPageIds[i]);
+            {
+                var unusedPageId = _orderedPageIds[i];
+                unusedPageIds.Add(unusedPageId);
+                unusedPages.Add(_pages[unusedPageId]);
+            }
 
             var enterPageIndex = _orderedPageIds.Count - popCount - 1;
             var enterPageId = enterPageIndex < 0 ? null : _orderedPageIds[enterPageIndex];
@@ -466,8 +471,12 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                     yield return coroutineHandle;
 
             // End Transition
-            for (var i = 0; i < popCount; i++)
+            for (var i = 0; i < unusedPageIds.Count; i++)
+            {
+                var unusedPageId = unusedPageIds[i];
+                _pages.Remove(unusedPageId);
                 _orderedPageIds.RemoveAt(_orderedPageIds.Count - 1);
+            }
             IsInTransition = false;
 
             // Postprocess
@@ -480,14 +489,14 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             var beforeReleaseHandle = exitPage.BeforeRelease();
             while (!beforeReleaseHandle.IsTerminated) yield return null;
 
-            foreach (var unusedPageId in unusedPageIds)
+            for (var i = 0; i < unusedPageIds.Count; i++)
             {
-                var unusedPage = _pages[unusedPageId];
+                var unusedPageId = unusedPageIds[i];
+                var unusedPage = unusedPages[i];
                 var loadHandle = _assetLoadHandles[unusedPageId];
                 Destroy(unusedPage.gameObject);
                 AssetLoader.Release(loadHandle);
                 _assetLoadHandles.Remove(unusedPageId);
-                _pages.Remove(unusedPageId);
             }
 
             _isActivePageStacked = true;

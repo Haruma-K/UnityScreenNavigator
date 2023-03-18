@@ -418,10 +418,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             var exitModal = _modals[exitModalId];
 
             var unusedModalIds = new List<string>();
+            var unusedModals = new List<Modal>();
             var unusedBackdrops = new List<ModalBackdrop>();
             for (var i = _orderedModalIds.Count - 1; i >= _orderedModalIds.Count - popCount; i--)
             {
-                unusedModalIds.Add(_orderedModalIds[i]);
+                var unusedModalId = _orderedModalIds[i];
+                unusedModalIds.Add(unusedModalId);
+                unusedModals.Add(_modals[unusedModalId]);
                 unusedBackdrops.Add(_backdrops[i]);
             }
 
@@ -462,8 +465,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     yield return coroutineHandle;
 
             // End Transition
-            for (var i = 0; i < popCount; i++)
+            for (var i = 0; i < unusedModalIds.Count; i++)
+            {
+                var unusedModalId = unusedModalIds[i];
+                _modals.Remove(unusedModalId);
                 _orderedModalIds.RemoveAt(_orderedModalIds.Count - 1);
+            }
             IsInTransition = false;
 
             // Postprocess
@@ -476,15 +483,14 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             var beforeReleaseHandle = exitModal.BeforeRelease();
             while (!beforeReleaseHandle.IsTerminated) yield return null;
 
-
-            foreach (var unusedModalId in unusedModalIds)
+            for (var i = 0; i < unusedModalIds.Count; i++)
             {
-                var unusedModal = _modals[unusedModalId];
+                var unusedModalId = unusedModalIds[i];
+                var unusedModal = unusedModals[i];
                 var loadHandle = _assetLoadHandles[unusedModalId];
                 Destroy(unusedModal.gameObject);
                 AssetLoader.Release(loadHandle);
                 _assetLoadHandles.Remove(unusedModalId);
-                _modals.Remove(unusedModalId);
             }
 
             foreach (var unusedBackdrop in unusedBackdrops)
