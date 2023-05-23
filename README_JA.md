@@ -82,7 +82,7 @@ UnityのuGUIで画面遷移、画面遷移アニメーション、遷移履歴�
 
 1. リポジトリをクローンする
 2. 以下のシーンを開いて再生する
-    * https://github.com/Haruma-K/UnityScreenNavigator/blob/master/Assets/Demo/Scenes/Demo.unity
+    * https://github.com/Haruma-K/UnityScreenNavigator/blob/master/Assets/Demo/Core/DemoEntryPoint.unity
 
 
 なお、本デモで使用している画像の一部は以下のフリーコンテンツを利用させていただいております。  
