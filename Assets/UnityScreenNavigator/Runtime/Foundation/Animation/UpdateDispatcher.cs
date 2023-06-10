@@ -30,7 +30,7 @@ namespace UnityScreenNavigator.Runtime.Foundation.Animation
         {
             foreach (var target in _targets)
             {
-                var deltaTime = target.Value?.Invoke(Time.deltaTime) ?? Time.deltaTime;
+                var deltaTime = target.Value?.Invoke(Time.unscaledDeltaTime) ?? Time.unscaledDeltaTime;
                 target.Key.Update(deltaTime);
             }
         }
