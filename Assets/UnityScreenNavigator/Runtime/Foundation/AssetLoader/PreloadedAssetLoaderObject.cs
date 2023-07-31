@@ -10,15 +10,13 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader
     {
         [SerializeField] private List<KeyAssetPair> _preloadedObjects = new List<KeyAssetPair>();
 
-        private readonly PreloadedAssetLoader _loader = new PreloadedAssetLoader();
+        private PreloadedAssetLoader _loader = new PreloadedAssetLoader();
 
         public List<KeyAssetPair> PreloadedObjects => _preloadedObjects;
 
         private void OnEnable()
         {
-            if (!Application.isPlaying)
-                return;
-
+            _loader = new PreloadedAssetLoader();
             foreach (var preloadedObject in _preloadedObjects)
             {
                 if (string.IsNullOrEmpty(preloadedObject.Key))
@@ -33,10 +31,8 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader
 
         private void OnDisable()
         {
-            if (!Application.isPlaying)
-                return;
-
-            _loader.PreloadedObjects.Clear();
+            _loader?.PreloadedObjects.Clear();
+            _loader = null;
         }
 
         public override AssetLoadHandle<T> Load<T>(string key)
