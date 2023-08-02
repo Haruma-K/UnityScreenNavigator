@@ -16,9 +16,6 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader
 
         private void OnEnable()
         {
-            if (!Application.isPlaying)
-                return;
-
             foreach (var preloadedObject in _preloadedObjects)
             {
                 if (string.IsNullOrEmpty(preloadedObject.Key))
@@ -33,10 +30,7 @@ namespace UnityScreenNavigator.Runtime.Foundation.AssetLoader
 
         private void OnDisable()
         {
-            if (!Application.isPlaying)
-                return;
-
-            _loader.PreloadedObjects.Clear();
+            _loader?.PreloadedObjects.Clear();
         }
 
         public override AssetLoadHandle<T> Load<T>(string key)
