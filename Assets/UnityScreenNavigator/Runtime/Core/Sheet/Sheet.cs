@@ -199,9 +199,12 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 if (anim == null)
                     anim = UnityScreenNavigatorSettings.Instance.GetDefaultSheetTransitionAnimation(true);
 
-                anim.SetPartner(partnerSheet?.transform as RectTransform);
-                anim.Setup(_rectTransform);
-                yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                if (anim.Duration > 0.0f)
+                {
+                    anim.SetPartner(partnerSheet?.transform as RectTransform);
+                    anim.Setup(_rectTransform);
+                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                }
             }
 
             _rectTransform.FillParent(_parentTransform);
@@ -254,9 +257,12 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 if (anim == null)
                     anim = UnityScreenNavigatorSettings.Instance.GetDefaultSheetTransitionAnimation(false);
 
-                anim.SetPartner(partnerSheet?.transform as RectTransform);
-                anim.Setup(_rectTransform);
-                yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                if (anim.Duration > 0.0f)
+                {
+                    anim.SetPartner(partnerSheet?.transform as RectTransform);
+                    anim.Setup(_rectTransform);
+                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                }
             }
 
             _canvasGroup.alpha = 0.0f;

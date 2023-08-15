@@ -223,9 +223,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     if (anim == null)
                         anim = UnityScreenNavigatorSettings.Instance.GetDefaultModalTransitionAnimation(true);
 
-                    anim.SetPartner(partnerModal?.transform as RectTransform);
-                    anim.Setup(_rectTransform);
-                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                    if (anim.Duration > 0.0f)
+                    {
+                        anim.SetPartner(partnerModal?.transform as RectTransform);
+                        anim.Setup(_rectTransform);
+                        yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                    }
                 }
 
                 _rectTransform.FillParent(_parentTransform);
@@ -292,9 +295,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     if (anim == null)
                         anim = UnityScreenNavigatorSettings.Instance.GetDefaultModalTransitionAnimation(false);
 
-                    anim.SetPartner(partnerModal?.transform as RectTransform);
-                    anim.Setup(_rectTransform);
-                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                    if (anim.Duration > 0.0f)
+                    {
+                        anim.SetPartner(partnerModal?.transform as RectTransform);
+                        anim.Setup(_rectTransform);
+                        yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                    }
                 }
 
                 _canvasGroup.alpha = 0.0f;
