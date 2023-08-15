@@ -239,9 +239,12 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 if (anim == null)
                     anim = UnityScreenNavigatorSettings.Instance.GetDefaultPageTransitionAnimation(push, true);
 
-                anim.SetPartner(partnerPage?.transform as RectTransform);
-                anim.Setup(_rectTransform);
-                yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                if (anim.Duration > 0.0f)
+                {
+                    anim.SetPartner(partnerPage?.transform as RectTransform);
+                    anim.Setup(_rectTransform);
+                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                }
             }
 
             _rectTransform.FillParent(_parentTransform);
@@ -300,9 +303,12 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 if (anim == null)
                     anim = UnityScreenNavigatorSettings.Instance.GetDefaultPageTransitionAnimation(push, false);
 
-                anim.SetPartner(partnerPage?.transform as RectTransform);
-                anim.Setup(_rectTransform);
-                yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                if (anim.Duration > 0.0f)
+                {
+                    anim.SetPartner(partnerPage?.transform as RectTransform);
+                    anim.Setup(_rectTransform);
+                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                }
             }
 
             _canvasGroup.alpha = 0.0f;
