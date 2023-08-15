@@ -73,8 +73,11 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     anim = UnityScreenNavigatorSettings.Instance.ModalBackdropEnterAnimation;
                 }
 
-                anim.Setup(_rectTransform);
-                yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
+                if (anim.Duration > 0)
+                {
+                    anim.Setup(_rectTransform);
+                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
+                }
             }
 
             _rectTransform.FillParent(_parentTransform);
@@ -99,8 +102,11 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     anim = UnityScreenNavigatorSettings.Instance.ModalBackdropExitAnimation;
                 }
 
-                anim.Setup(_rectTransform);
-                yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
+                if (anim.Duration > 0)
+                {
+                    anim.Setup(_rectTransform);
+                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
+                }
             }
 
             _canvasGroup.alpha = 0;
