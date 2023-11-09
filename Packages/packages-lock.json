@@ -7,16 +7,6 @@
       "dependencies": {},
       "hash": "5cc97c7f0085624b6ef57853d70b404440060cef"
     },
-    "com.harumak.unityuiplayables": {
-      "version": "https://github.com/Rapilias/UnityUIPlayables.git?path=Assets/UnityUIPlayables#develop",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.unity.ugui": "2.0.0",
-        "com.unity.timeline": "1.8.6"
-      },
-      "hash": "9900a2b1e3a1a91b1ab941d51a1c6c9546389eb1"
-    },
     "com.neuecc.unirx": {
       "version": "https://github.com/neuecc/UniRx.git?path=Assets/Plugins/UniRx/Scripts",
       "depth": 0,
