@@ -2,9 +2,11 @@
   "name": "com.harumak.unityscreennavigator",
   "displayName": "UnityScreenNavigator",
   "version": "1.6.5",
-  "unity": "2019.4",
+  "unity": "2023.2",
   "license": "MIT",
   "dependencies": {
+    "com.unity.ugui": "2.0.0",
+    "com.unity.timeline": "1.8.6"
   },
   "author": {
     "name": "Haruki Yano",
