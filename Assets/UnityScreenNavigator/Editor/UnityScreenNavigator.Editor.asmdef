@@ -1,7 +1,8 @@
 {
     "name": "UnityScreenNavigator.Editor",
+    "rootNamespace": "",
     "references": [
-        "GUID:2359c074672083046b6ff6b309700f8e"
+        "UnityScreenNavigator"
     ],
     "includePlatforms": [
         "Editor"
