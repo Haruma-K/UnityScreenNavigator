@@ -323,6 +323,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             IsTransitioning = false;
             TransitionAnimationType = null;
         }
+        
+        internal void BeforeReleaseAndForget()
+        {
+            foreach (var lifecycleEvent in _lifecycleEvents)
+                lifecycleEvent.Cleanup();
+        }
 
         internal AsyncProcessHandle BeforeRelease()
         {

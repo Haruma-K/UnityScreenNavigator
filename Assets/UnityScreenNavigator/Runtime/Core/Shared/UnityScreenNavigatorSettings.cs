@@ -45,6 +45,8 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
 
         [EnabledIf(nameof(_enableInteractionInTransition), false)] [SerializeField]
         private bool _controlInteractionsOfAllContainers = true;
+        
+        [SerializeField] private bool _callCleanupWhenDestroy = true;
 
         private IAssetLoader _defaultAssetLoader;
         private ModalBackdrop _defaultModalBackdrop;
@@ -190,6 +192,12 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
         public ITransitionAnimation GetDefaultSheetTransitionAnimation(bool enter)
         {
             return enter ? SheetEnterAnimation : SheetExitAnimation;
+        }
+        
+        public bool CallCleanupWhenDestroy
+        {
+            get => _callCleanupWhenDestroy;
+            set => _callCleanupWhenDestroy = value;
         }
 
 #if UNITY_EDITOR

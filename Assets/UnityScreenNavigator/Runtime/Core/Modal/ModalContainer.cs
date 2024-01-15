@@ -30,7 +30,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         private readonly Dictionary<string, AssetLoadHandle<GameObject>> _assetLoadHandles
             = new Dictionary<string, AssetLoadHandle<GameObject>>();
 
-        private readonly List<ModalBackdrop> _backdrops = new List<ModalBackdrop>();
+        public List<ModalBackdrop> Backdrops { get; } = new List<ModalBackdrop>();
 
         private readonly List<IModalContainerCallbackReceiver> _callbackReceivers =
             new List<IModalContainerCallbackReceiver>();
@@ -100,6 +100,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 var modal = _modals[modalId];
                 var assetLoadHandle = _assetLoadHandles[modalId];
 
+                if (UnityScreenNavigatorSettings.Instance.CallCleanupWhenDestroy)
+                    modal.BeforeReleaseAndForget();
                 Destroy(modal.gameObject);
                 AssetLoader.Release(assetLoadHandle);
             }
@@ -304,7 +306,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             var backdrop = Instantiate(_backdropPrefab);
             backdrop.Setup((RectTransform)transform);
-            _backdrops.Add(backdrop);
+            Backdrops.Add(backdrop);
 
             var instance = Instantiate(assetLoadHandle.Result);
             if (!instance.TryGetComponent(modalType, out var c))
@@ -425,7 +427,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 var unusedModalId = _orderedModalIds[i];
                 unusedModalIds.Add(unusedModalId);
                 unusedModals.Add(_modals[unusedModalId]);
-                unusedBackdrops.Add(_backdrops[i]);
+                unusedBackdrops.Add(Backdrops[i]);
             }
 
             var enterModalIndex = _orderedModalIds.Count - popCount - 1;
@@ -495,7 +497,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             foreach (var unusedBackdrop in unusedBackdrops)
             {
-                _backdrops.Remove(unusedBackdrop);
+                Backdrops.Remove(unusedBackdrop);
                 Destroy(unusedBackdrop.gameObject);
             }
 

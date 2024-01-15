@@ -91,7 +91,7 @@ For more information, including copyright, please refer to the following website
 ## Setup
 
 #### Requirement
-* Unity 2019.4 or higher
+* Unity 2021.3 or higher
 * uGUI (UIElements not supported)
 
 #### Install
