@@ -448,7 +448,11 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         public void UnregisterAll()
         {
             foreach (var sheet in _sheets.Values)
+            {
+                if (UnityScreenNavigatorSettings.Instance.CallCleanupWhenDestroy)
+                    sheet.BeforeReleaseAndForget();
                 Destroy(sheet.gameObject);
+            }
 
             foreach (var assetLoadHandle in _assetLoadHandles.Values)
                 AssetLoader.Release(assetLoadHandle);

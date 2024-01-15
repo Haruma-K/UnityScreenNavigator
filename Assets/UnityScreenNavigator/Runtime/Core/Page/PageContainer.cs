@@ -93,6 +93,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 var page = _pages[pageId];
                 var assetLoadHandle = _assetLoadHandles[pageId];
 
+                if (UnityScreenNavigatorSettings.Instance.CallCleanupWhenDestroy)
+                    page.BeforeReleaseAndForget();
                 Destroy(page.gameObject);
                 AssetLoader.Release(assetLoadHandle);
             }

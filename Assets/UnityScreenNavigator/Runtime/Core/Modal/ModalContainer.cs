@@ -100,6 +100,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 var modal = _modals[modalId];
                 var assetLoadHandle = _assetLoadHandles[modalId];
 
+                if (UnityScreenNavigatorSettings.Instance.CallCleanupWhenDestroy)
+                    modal.BeforeReleaseAndForget();
                 Destroy(modal.gameObject);
                 AssetLoader.Release(assetLoadHandle);
             }
