@@ -5,7 +5,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "73d86259ce31ce7f4dfe1d028ea1c3edf96c23e4"
+      "hash": "66de0d3a58b256b6e0194f285cc530fd0c08407b"
     },
     "com.harumak.unityuiplayables": {
       "version": "https://github.com/Haruma-K/UnityUIPlayables.git?path=/Assets/UnityUIPlayables",
@@ -15,14 +15,14 @@
         "com.unity.textmeshpro": "2.0.1",
         "com.unity.timeline": "1.2.14"
       },
-      "hash": "799efe48dc0a6990e8a1d7a2372415a11fa8dfbc"
+      "hash": "e61ba2931c7d57926098254e61df7d51488782e6"
     },
     "com.neuecc.unirx": {
       "version": "https://github.com/neuecc/UniRx.git?path=Assets/Plugins/UniRx/Scripts",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "284d5c50d3f1ddd9fa7df3d382ea904732a9c2ff"
+      "hash": "7cce378b3f8c8943b4cac8e847bdbb8e2e1802d1"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -31,11 +31,11 @@
       "dependencies": {}
     },
     "com.unity.addressables": {
-      "version": "1.17.17",
+      "version": "1.19.19",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.scriptablebuildpipeline": "1.17.0",
+        "com.unity.scriptablebuildpipeline": "1.19.6",
         "com.unity.modules.assetbundle": "1.0.0",
         "com.unity.modules.imageconversion": "1.0.0",
         "com.unity.modules.jsonserialize": "1.0.0",
@@ -45,7 +45,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.collab-proxy": {
-      "version": "1.6.0",
+      "version": "2.0.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -59,16 +59,16 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.rider": {
-      "version": "1.2.1",
+      "version": "3.0.21",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.test-framework": "1.1.1"
+        "com.unity.ext.nunit": "1.0.6"
       },
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.9",
+      "version": "2.0.18",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -77,21 +77,21 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.vscode": {
-      "version": "1.2.3",
+      "version": "1.2.5",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.scriptablebuildpipeline": {
-      "version": "1.17.0",
+      "version": "1.20.1",
       "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
-      "version": "1.1.27",
+      "version": "1.1.31",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -102,7 +102,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.textmeshpro": {
-      "version": "2.1.6",
+      "version": "3.0.6",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -111,7 +111,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
-      "version": "1.2.18",
+      "version": "1.6.5",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -264,6 +264,18 @@
       "depth": 0,
       "source": "builtin",
       "dependencies": {
+        "com.unity.modules.ui": "1.0.0",
+        "com.unity.modules.imgui": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.modules.uielementsnative": "1.0.0"
+      }
+    },
+    "com.unity.modules.uielementsnative": {
+      "version": "1.0.0",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.ui": "1.0.0",
         "com.unity.modules.imgui": "1.0.0",
         "com.unity.modules.jsonserialize": "1.0.0"
       }
