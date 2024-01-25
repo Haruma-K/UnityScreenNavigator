@@ -1,7 +1,7 @@
 {
   "name": "com.harumak.unityscreennavigator",
   "displayName": "UnityScreenNavigator",
-  "version": "1.6.6",
+  "version": "1.6.7",
   "unity": "2021.3",
   "license": "MIT",
   "dependencies": {
