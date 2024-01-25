@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
-using UnityScreenNavigator.Runtime.Foundation.PriorityCollection;
 #if USN_USE_ASYNC_METHODS
 using System.Threading.Tasks;
 #endif
@@ -23,8 +21,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         [SerializeField] private int _renderingOrder;
 
-        [SerializeField]
-        private PageTransitionAnimationContainer _animationContainer = new PageTransitionAnimationContainer();
+        [SerializeField] private PageTransitionAnimationContainer _animationContainer = new();
 
         private CanvasGroup _canvasGroup;
         private RectTransform _parentTransform;
@@ -41,7 +38,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             }
         }
 
-        private readonly PriorityList<IPageLifecycleEvent> _lifecycleEvents = new PriorityList<IPageLifecycleEvent>();
+        private readonly CompositeLifecycleEvent<IPageLifecycleEvent> _lifecycleEvents = new();
 
         public string Identifier
         {
@@ -159,19 +156,19 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         public void AddLifecycleEvent(IPageLifecycleEvent lifecycleEvent, int priority = 0)
         {
-            _lifecycleEvents.Add(lifecycleEvent, priority);
+            _lifecycleEvents.AddItem(lifecycleEvent, priority);
         }
 
         public void RemoveLifecycleEvent(IPageLifecycleEvent lifecycleEvent)
         {
-            _lifecycleEvents.Remove(lifecycleEvent);
+            _lifecycleEvents.RemoveItem(lifecycleEvent);
         }
 
         internal AsyncProcessHandle AfterLoad(RectTransform parentTransform)
         {
             _rectTransform = (RectTransform)transform;
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
-            _lifecycleEvents.Add(this, 0);
+            _lifecycleEvents.AddItem(this, 0);
             _identifier = _usePrefabNameAsIdentifier ? gameObject.name.Replace("(Clone)", string.Empty) : _identifier;
             _parentTransform = parentTransform;
             _rectTransform.FillParent(_parentTransform);
@@ -193,9 +190,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             _canvasGroup.alpha = 0.0f;
 
-            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
-            var initializeEvents = _lifecycleEvents.Select(x => x.Initialize()).ToArray();
-            return CoroutineManager.Instance.Run(CreateCoroutine(initializeEvents));
+            var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Initialize());
+            return CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
         }
 
 
@@ -214,11 +210,10 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             SetTransitionProgress(0.0f);
             _canvasGroup.alpha = 0.0f;
 
-            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
-            var routines = push
-                ? _lifecycleEvents.Select(x => x.WillPushEnter()).ToArray()
-                : _lifecycleEvents.Select(x => x.WillPopEnter()).ToArray();
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
+            var lifecycleEventTask = push
+                ? _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPushEnter())
+                : _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPopEnter());
+            var handle = CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
 
             while (!handle.IsTerminated)
                 yield return null;
@@ -253,14 +248,10 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         internal void AfterEnter(bool push, Page partnerPage)
         {
-            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
-            var lifecycleEvents = _lifecycleEvents.ToArray();
             if (push)
-                foreach (var lifecycleEvent in lifecycleEvents)
-                    lifecycleEvent.DidPushEnter();
+                _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.DidPushEnter());
             else
-                foreach (var lifecycleEvent in lifecycleEvents)
-                    lifecycleEvent.DidPopEnter();
+                _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.DidPopEnter());
 
             IsTransitioning = false;
             TransitionAnimationType = null;
@@ -280,10 +271,9 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             SetTransitionProgress(0.0f);
             _canvasGroup.alpha = 1.0f;
 
-            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
             var routines = push
-                ? _lifecycleEvents.Select(x => x.WillPushExit()).ToArray()
-                : _lifecycleEvents.Select(x => x.WillPopExit()).ToArray();
+                ? _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPushExit())
+                : _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPopExit());
             var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
 
             while (!handle.IsTerminated)
@@ -317,31 +307,25 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         internal void AfterExit(bool push, Page partnerPage)
         {
-            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
-            var lifecycleEvents = _lifecycleEvents.ToArray();
             if (push)
-                foreach (var lifecycleEvent in lifecycleEvents)
-                    lifecycleEvent.DidPushExit();
+                _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.DidPushExit());
             else
-                foreach (var lifecycleEvent in lifecycleEvents)
-                    lifecycleEvent.DidPopExit();
+                _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.DidPopExit());
 
             gameObject.SetActive(false);
             IsTransitioning = false;
             TransitionAnimationType = null;
         }
-        
+
         internal void BeforeReleaseAndForget()
         {
-            foreach (var lifecycleEvent in _lifecycleEvents)
-                lifecycleEvent.Cleanup();
+            var _ = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Cleanup());
         }
 
         internal AsyncProcessHandle BeforeRelease()
         {
-            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
-            var cleanupEvents = _lifecycleEvents.Select(x => x.Cleanup()).ToArray();
-            return CoroutineManager.Instance.Run(CreateCoroutine(cleanupEvents));
+            var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Cleanup());
+            return CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
         }
 
 #if USN_USE_ASYNC_METHODS
@@ -370,12 +354,9 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 await task;
                 callback?.Invoke();
             }
-            
+
             var isCompleted = false;
-            WaitTaskAndCallback(target, () =>
-            {
-                isCompleted = true;
-            });
+            WaitTaskAndCallback(target, () => { isCompleted = true; });
             return new WaitUntil(() => isCompleted);
 #else
             return target;

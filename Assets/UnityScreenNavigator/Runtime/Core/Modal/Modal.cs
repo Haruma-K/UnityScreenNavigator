@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
-using UnityScreenNavigator.Runtime.Foundation.PriorityCollection;
 #if USN_USE_ASYNC_METHODS
 using System.Threading.Tasks;
 #endif
@@ -39,7 +37,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
         }
 
-        private readonly PriorityList<IModalLifecycleEvent> _lifecycleEvents = new PriorityList<IModalLifecycleEvent>();
+        private readonly CompositeLifecycleEvent<IModalLifecycleEvent> _lifecycleEvents = new();
 
         public string Identifier
         {
@@ -157,25 +155,26 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         public void AddLifecycleEvent(IModalLifecycleEvent lifecycleEvent, int priority = 0)
         {
-            _lifecycleEvents.Add(lifecycleEvent, priority);
+            _lifecycleEvents.AddItem(lifecycleEvent, priority);
         }
 
         public void RemoveLifecycleEvent(IModalLifecycleEvent lifecycleEvent)
         {
-            _lifecycleEvents.Remove(lifecycleEvent);
+            _lifecycleEvents.RemoveItem(lifecycleEvent);
         }
 
         internal AsyncProcessHandle AfterLoad(RectTransform parentTransform)
         {
             _rectTransform = (RectTransform)transform;
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
-            _lifecycleEvents.Add(this, 0);
+            _lifecycleEvents.AddItem(this, 0);
             _identifier = _usePrefabNameAsIdentifier ? gameObject.name.Replace("(Clone)", string.Empty) : _identifier;
             _parentTransform = parentTransform;
             _rectTransform.FillParent(_parentTransform);
             _canvasGroup.alpha = 0.0f;
 
-            return CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.Initialize())));
+            var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Initialize());
+            return CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
         }
 
         internal AsyncProcessHandle BeforeEnter(bool push, Modal partnerModal)
@@ -196,12 +195,10 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             SetTransitionProgress(0.0f);
 
-            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
-            var routines = push
-                ? _lifecycleEvents.Select(x => x.WillPushEnter()).ToArray()
-                : _lifecycleEvents.Select(x => x.WillPopEnter()).ToArray();
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
-
+            var lifecycleEventTask = push
+                ? _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPushEnter())
+                : _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPopEnter());
+            var handle = CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
             while (!handle.IsTerminated)
                 yield return null;
         }
@@ -239,14 +236,10 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         internal void AfterEnter(bool push, Modal partnerModal)
         {
-            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
-            var lifecycleEvents = _lifecycleEvents.ToArray();
             if (push)
-                foreach (var lifecycleEvent in lifecycleEvents)
-                    lifecycleEvent.DidPushEnter();
+                _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.DidPushEnter());
             else
-                foreach (var lifecycleEvent in lifecycleEvents)
-                    lifecycleEvent.DidPopEnter();
+                _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.DidPopEnter());
 
             IsTransitioning = false;
             TransitionAnimationType = null;
@@ -269,13 +262,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
 
             SetTransitionProgress(0.0f);
-
-            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
+            
             var routines = push
-                ? _lifecycleEvents.Select(x => x.WillPushExit()).ToArray()
-                : _lifecycleEvents.Select(x => x.WillPopExit()).ToArray();
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
+                ? _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPushExit())
+                : _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPopExit());
 
+            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
             while (!handle.IsTerminated)
                 yield return null;
         }
@@ -311,14 +303,10 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         internal void AfterExit(bool push, Modal partnerModal)
         {
-            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
-            var lifecycleEvents = _lifecycleEvents.ToArray();
             if (push)
-                foreach (var lifecycleEvent in lifecycleEvents)
-                    lifecycleEvent.DidPushExit();
+                _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.DidPushExit());
             else
-                foreach (var lifecycleEvent in lifecycleEvents)
-                    lifecycleEvent.DidPopExit();
+                _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.DidPopExit());
 
             IsTransitioning = false;
             TransitionAnimationType = null;
@@ -326,14 +314,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         
         internal void BeforeReleaseAndForget()
         {
-            foreach (var lifecycleEvent in _lifecycleEvents)
-                lifecycleEvent.Cleanup();
+            var _ = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Cleanup());
         }
 
         internal AsyncProcessHandle BeforeRelease()
         {
-            // Evaluate here because users may add/remove lifecycle events within the lifecycle events.
-            return CoroutineManager.Instance.Run(CreateCoroutine(_lifecycleEvents.Select(x => x.Cleanup()).ToArray()));
+            var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Cleanup());
+            return CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
         }
 
 #if USN_USE_ASYNC_METHODS
