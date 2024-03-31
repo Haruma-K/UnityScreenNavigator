@@ -565,7 +565,7 @@ public interface IPageContainerCallbackReceiver
 }
 ```
 
-なお`IPageContainerCallbackReceiver`を`MonoBehaviour`に実装してページのGameObjectにアタッチしておけば、  
+なお`IPageContainerCallbackReceiver`を`MonoBehaviour`に実装してコンテナのGameObjectにアタッチしておけば、  
 `PageContainer.AddCallbackReceiver()`を呼ばなくても初期化時に`PageContainer`に登録されます。
 
 #### モーダルのライフサイクルイベント
@@ -637,7 +637,7 @@ public interface IModalContainerCallbackReceiver
 }
 ```
 
-なお`IModalContainerCallbackReceiver`を`MonoBehaviour`に実装してモーダルのGameObjectにアタッチしておけば、  
+なお`IModalContainerCallbackReceiver`を`MonoBehaviour`に実装してコンテナのGameObjectにアタッチしておけば、  
 `ModalContainer.AddCallbackReceiver()`を呼ばなくても初期化時に`ModalContainer`に登録されます。
 
 #### シートのライフサイクルイベント
@@ -701,7 +701,7 @@ public interface ISheetContainerCallbackReceiver
 }
 ```
 
-なお`ISheetContainerCallbackReceiver`を`MonoBehaviour`に実装してシートのGameObjectにアタッチしておけば、  
+なお`ISheetContainerCallbackReceiver`を`MonoBehaviour`に実装してコンテナのGameObjectにアタッチしておけば、  
 `SheetContainer.AddCallbackReceiver()`を呼ばなくても初期化時に`SheetContainer`に登録されます。
 
 #### コルーチンの代わりに非同期メソッドを使う

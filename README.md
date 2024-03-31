@@ -559,7 +559,7 @@ public interface IPageContainerCallbackReceiver
 }
 ```
 
-Note that if you implement `IPageContainerCallbackReceiver` to `MonoBehaviour` and attach it to GameObject of the page,  
+Note that if you implement `IPageContainerCallbackReceiver` to `MonoBehaviour` and attach it to GameObject of the container,  
 it will be registered to `PageContainer` without calling `PageContainer.AddCallbackReceiver()`.
 
 #### Lifecycle events of the modal
@@ -631,7 +631,7 @@ public interface IModalContainerCallbackReceiver
 }
 ```
 
-Note that if you implement `IModalContainerCallbackReceiver` to `MonoBehaviour` and attach it to GameObject of the page,  
+Note that if you implement `IModalContainerCallbackReceiver` to `MonoBehaviour` and attach it to GameObject of the container,  
 it will be registered to `ModalContainer` without calling `ModalContainer.AddCallbackReceiver()`.
 
 #### Lifecycle events of the sheet
@@ -695,7 +695,7 @@ public interface ISheetContainerCallbackReceiver
 }
 ```
 
-Note that if you implement `ISheetContainerCallbackReceiver` to `MonoBehaviour` and attach it to GameObject of the page,  
+Note that if you implement `ISheetContainerCallbackReceiver` to `MonoBehaviour` and attach it to GameObject of the container,  
 it will be registered to `SheetContainer` without calling `SheetContainer.AddCallbackReceiver()`.
 
 #### Use async methods instead of coroutines
