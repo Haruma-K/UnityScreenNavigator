@@ -9,6 +9,7 @@ namespace Demo.Core.Scripts.Foundation.Common
             private const string HomeFolder = "Home";
             private const string LoadingFolder = "Loading";
             private const string SettingsFolder = "Settings";
+            private const string ConfirmationFolder = "Confirmation";
             private const string UnitShopFolder = "UnitShop";
             private const string UnitTypeInformationFolder = "UnitTypeInformation";
             private const string UnitPortraitViewerFolder = "UnitPortraitViewer";
@@ -18,6 +19,7 @@ namespace Demo.Core.Scripts.Foundation.Common
             public const string LoadingPage = LoadingFolder + "/" + Prefix + "loading_page.prefab";
             public const string SettingsModal = SettingsFolder + "/" + Prefix + "settings_modal.prefab";
             public const string UnitShopPage = UnitShopFolder + "/" + Prefix + "unit_shop_page.prefab";
+            public const string ConfirmationModal = ConfirmationFolder + "/" + Prefix + "confirmation_modal.prefab";
 
             public const string UnitTypeInformationModal =
                 UnitTypeInformationFolder + "/" + Prefix + "unit_type_information_modal.prefab";

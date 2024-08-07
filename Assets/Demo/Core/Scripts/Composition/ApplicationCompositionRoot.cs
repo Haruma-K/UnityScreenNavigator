@@ -7,6 +7,7 @@ using Demo.Core.Scripts.MasterRepository.Unit;
 using Demo.Core.Scripts.MasterRepository.UnitShop;
 using Demo.Core.Scripts.Presentation.Home;
 using Demo.Core.Scripts.Presentation.Loading;
+using Demo.Core.Scripts.Presentation.LockConfirmation;
 using Demo.Core.Scripts.Presentation.Setting;
 using Demo.Core.Scripts.Presentation.Top;
 using Demo.Core.Scripts.Presentation.UnitPortraitViewer;
@@ -54,6 +55,7 @@ namespace Demo.Core.Scripts.Composition
                 new UnitShopPagePresenterFactory(unitShopService, unitShopMasterRepository, connectingView);
             var unitTypeInformationModalPresenterFactory =
                 new UnitTypeInformationModalPresenterFactory(unitMasterRepository);
+            var lockConfirmationModalPresenterFactory = new LockConfirmationModalPresenterFactory();
 
             // Transition Service
             var transitionService = new TransitionService(
@@ -63,7 +65,8 @@ namespace Demo.Core.Scripts.Composition
                 unitShopPagePresenterFactory,
                 settingsModalPresenterFactory,
                 unitTypeInformationModalPresenterFactory,
-                unitPortraitViewerModalPresenterFactory
+                unitPortraitViewerModalPresenterFactory,
+                lockConfirmationModalPresenterFactory
             );
 
             // Show Initial Page

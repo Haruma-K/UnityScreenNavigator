@@ -4,12 +4,14 @@ using Cysharp.Threading.Tasks;
 using Demo.Core.Scripts.Foundation.Common;
 using Demo.Core.Scripts.Presentation.Home;
 using Demo.Core.Scripts.Presentation.Loading;
+using Demo.Core.Scripts.Presentation.LockConfirmation;
 using Demo.Core.Scripts.Presentation.Setting;
 using Demo.Core.Scripts.Presentation.Shared;
 using Demo.Core.Scripts.Presentation.Top;
 using Demo.Core.Scripts.Presentation.UnitPortraitViewer;
 using Demo.Core.Scripts.Presentation.UnitShop;
 using Demo.Core.Scripts.Presentation.UnitTypeInformation;
+using Demo.Core.Scripts.View.Confirmation;
 using Demo.Core.Scripts.View.Home;
 using Demo.Core.Scripts.View.Loading;
 using Demo.Core.Scripts.View.Setting;
@@ -33,6 +35,7 @@ namespace Demo.Core.Scripts.Composition
         private readonly UnitPortraitViewerModalPresenterFactory _unitPortraitViewerModalPresenterFactory;
         private readonly UnitShopPagePresenterFactory _unitShopPagePresenterFactory;
         private readonly UnitTypeInformationModalPresenterFactory _unitTypeInformationModalPresenterFactory;
+        private readonly LockConfirmationModalPresenterFactory _lockConfirmationModalPresenterFactory;
 
         public TransitionService(
             TopPagePresenterFactory topPagePresenterFactory,
@@ -41,7 +44,8 @@ namespace Demo.Core.Scripts.Composition
             UnitShopPagePresenterFactory unitShopPagePresenterFactory,
             SettingsModalPresenterFactory settingsModalPresenterFactory,
             UnitTypeInformationModalPresenterFactory unitTypeInformationModalPresenterFactory,
-            UnitPortraitViewerModalPresenterFactory unitPortraitViewerModalPresenterFactory
+            UnitPortraitViewerModalPresenterFactory unitPortraitViewerModalPresenterFactory,
+            LockConfirmationModalPresenterFactory lockConfirmationModalPresenterFactory
         )
         {
             _topPagePresenterFactory = topPagePresenterFactory;
@@ -51,6 +55,7 @@ namespace Demo.Core.Scripts.Composition
             _settingsModalPresenterFactory = settingsModalPresenterFactory;
             _unitTypeInformationModalPresenterFactory = unitTypeInformationModalPresenterFactory;
             _unitPortraitViewerModalPresenterFactory = unitPortraitViewerModalPresenterFactory;
+            _lockConfirmationModalPresenterFactory = lockConfirmationModalPresenterFactory;
         }
 
         private static PageContainer MainPageContainer => PageContainer.Find("MainPageContainer");
@@ -161,6 +166,18 @@ namespace Demo.Core.Scripts.Composition
                 MainPageContainer.Pop(true);
             else
                 throw new InvalidOperationException("Cannot pop page or modal because there is no page or modal.");
+        }
+
+        public void SettingsModalLockedButtonClicked()
+        {
+            MainModalContainer.Push<ConfirmationModal>(ResourceKey.Prefabs.ConfirmationModal,
+                true,
+                onLoad: x =>
+                {
+                    var modal = x.modal;
+                    var presenter = _lockConfirmationModalPresenterFactory.Create(modal, this);
+                    OnModalPresenterCreated(presenter, modal);
+                });
         }
 
         private IPagePresenter OnPagePresenterCreated(IPagePresenter presenter, Page page, bool shouldInitialize = true)
