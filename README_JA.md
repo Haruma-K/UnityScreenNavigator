@@ -953,7 +953,7 @@ yield return container.Pop(true);
 | TransitionAnimationProgress | 遷移アニメーションの進捗。 |
 | TransitionAnimationProgressChanged | 遷移アニメーションの進捗が変わった時のイベント。 |
 
-#### 画面ロード時に読み込み済みの Prefab インスタンスを使用する
+#### 画面ロード時に読み込み済みの Prefab インスタンスを使用[README.md](README.md)する
 `PreloadedAssetLoaderObject` を使用すると、画面読み込み時に Resources や Addressables を経由せず、読み込み済みの Prefab インスタンスを直接できます。  
 Assets > Create > Resource Loader > Preloaded Asset Loader から作成した Scriptable Object に以下のようにキーと Prefab を入力することで使用できます。
 
@@ -962,6 +962,16 @@ Assets > Create > Resource Loader > Preloaded Asset Loader から作成した Sc
 </p>
 
 また、ランタイム用の実装として `PreloadedAssetLoader` も用意しています。
+
+#### モーダルの背景の挙動を変えたい
+`ModalContainer`の Inspector から Backdrop Strategy を変更することで、モーダルの背景の挙動を以下の通り変更できます。
+
+| 設定値                           | 説明                                                        |
+|-------------------------------|-----------------------------------------------------------|
+| Generate Per Modal            | モーダルごとに背景を生成する                                            |
+| Only First Backdrop           | 最初のモーダルにだけ背景を生成し、2個目以降は背景をつけない                            |
+| Change Order Before Animation | 2個目のモーダルを生成したときに最初に生成した背景の描画順を変更して再利用する（アニメーションの前に描画順を変更） |
+| Change Order After Animation  | 2個目のモーダルを生成したときに最初に生成した背景の描画順を変更して再利用する（アニメーションの後に描画順を変更） |
 
 ## FAQ
 

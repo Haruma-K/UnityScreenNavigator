@@ -959,6 +959,16 @@ You can use it by entering the key and prefab in the Scriptable Object created f
 
 I also provide `PreloadedAssetLoader` implementation for runtime.
 
+#### Changing the Behavior of the Modal Backdrop
+You can change the behavior of the modal backdrop as follows by changing the Backdrop Strategy from the `ModalContainer` Inspector.
+
+| Setting Value                 | Description                                                         |
+|-------------------------------|---------------------------------------------------------------------|
+| Generate Per Modal            | Generate a backdrop for each modal                                |
+| Only First Backdrop           | Generate a backdrop only for the first modal, and do not add a backdrop for the second and subsequent ones |
+| Change Order Before Animation | Change the rendering order of the first generated backdrop and reuse it when generating the second modal (change the rendering order before the animation) |
+| Change Order After Animation  | Change the rendering order of the first generated backdrop and reuse it when generating the second modal (change the rendering order after the animation) |
+
 ## FAQ
 
 #### How to make each Screen with Scene instead of Prefab
