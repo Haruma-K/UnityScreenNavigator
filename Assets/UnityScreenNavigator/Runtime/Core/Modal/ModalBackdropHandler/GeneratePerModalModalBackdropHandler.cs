@@ -4,7 +4,7 @@ using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 namespace UnityScreenNavigator.Runtime.Core.Modal
 {
     /// <summary>
-    ///     en: Implementation of <see cref="IModalBackdropHandler" /> that generates a backdrop for each modal
+    ///     Implementation of <see cref="IModalBackdropHandler" /> that generates a backdrop for each modal
     /// </summary>
     internal sealed class GeneratePerModalModalBackdropHandler : IModalBackdropHandler
     {
@@ -15,32 +15,30 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _prefab = prefab;
         }
 
-        public AsyncProcessHandle BeforeModalEnter(Modal modal, bool playAnimation)
+        public AsyncProcessHandle BeforeModalEnter(Modal modal, int modalIndex, bool playAnimation)
         {
             var parent = (RectTransform)modal.transform.parent;
-            var siblingIndex = modal.transform.GetSiblingIndex();
             var backdrop = Object.Instantiate(_prefab);
-            backdrop.Setup(parent);
-            backdrop.transform.SetSiblingIndex(siblingIndex);
+            backdrop.Setup(parent, modalIndex);
+            var backdropSiblingIndex = modalIndex * 2;
+            backdrop.transform.SetSiblingIndex(backdropSiblingIndex);
             return backdrop.Enter(playAnimation);
         }
 
-        public void AfterModalEnter(Modal modal, bool playAnimation)
+        public void AfterModalEnter(Modal modal, int modalIndex, bool playAnimation)
         {
         }
 
-        public AsyncProcessHandle BeforeModalExit(Modal modal, bool playAnimation)
+        public AsyncProcessHandle BeforeModalExit(Modal modal, int modalIndex, bool playAnimation)
         {
-            var modalSiblingIndex = modal.transform.GetSiblingIndex();
-            var backdropSiblingIndex = modalSiblingIndex - 1;
+            var backdropSiblingIndex = modalIndex * 2;
             var backdrop = modal.transform.parent.GetChild(backdropSiblingIndex).GetComponent<ModalBackdrop>();
             return backdrop.Exit(playAnimation);
         }
 
-        public void AfterModalExit(Modal modal, bool playAnimation)
+        public void AfterModalExit(Modal modal, int modalIndex, bool playAnimation)
         {
-            var modalSiblingIndex = modal.transform.GetSiblingIndex();
-            var backdropSiblingIndex = modalSiblingIndex - 1;
+            var backdropSiblingIndex = modalIndex * 2;
             var backdrop = modal.transform.parent.GetChild(backdropSiblingIndex).GetComponent<ModalBackdrop>();
             Object.Destroy(backdrop.gameObject);
         }

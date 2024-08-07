@@ -16,43 +16,38 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _prefab = prefab;
         }
 
-        public AsyncProcessHandle BeforeModalEnter(Modal modal, bool playAnimation)
+        public AsyncProcessHandle BeforeModalEnter(Modal modal, int modalIndex, bool playAnimation)
         {
             var parent = (RectTransform)modal.transform.parent;
-            var modalSiblingIndex = modal.transform.GetSiblingIndex();
 
             // Do not generate a backdrop for the first modal
-            if (modalSiblingIndex != 0)
+            if (modalIndex != 0)
                 return AsyncProcessHandle.Completed();
 
             var backdrop = Object.Instantiate(_prefab);
-            backdrop.Setup(parent);
+            backdrop.Setup(parent, modalIndex);
             backdrop.transform.SetSiblingIndex(0);
             return backdrop.Enter(playAnimation);
         }
 
-        public void AfterModalEnter(Modal modal, bool playAnimation)
+        public void AfterModalEnter(Modal modal, int modalIndex, bool playAnimation)
         {
         }
 
-        public AsyncProcessHandle BeforeModalExit(Modal modal, bool playAnimation)
+        public AsyncProcessHandle BeforeModalExit(Modal modal, int modalIndex, bool playAnimation)
         {
-            var modalSiblingIndex = modal.transform.GetSiblingIndex();
-
             // Do not remove the backdrop for the first modal
-            if (modalSiblingIndex != 1)
+            if (modalIndex != 0)
                 return AsyncProcessHandle.Completed();
 
             var backdrop = modal.transform.parent.GetChild(0).GetComponent<ModalBackdrop>();
             return backdrop.Exit(playAnimation);
         }
 
-        public void AfterModalExit(Modal modal, bool playAnimation)
+        public void AfterModalExit(Modal modal, int modalIndex, bool playAnimation)
         {
-            var modalSiblingIndex = modal.transform.GetSiblingIndex();
-
             // Do not remove the backdrop for the first modal
-            if (modalSiblingIndex != 1)
+            if (modalIndex != 0)
                 return;
 
             var backdrop = modal.transform.parent.GetChild(0).GetComponent<ModalBackdrop>();

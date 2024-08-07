@@ -25,7 +25,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         [SerializeField] private string _name;
 
-        [SerializeField] private ModalBackdropStrategy _backdropStrategy;
+        [SerializeField] private ModalBackdropStrategy _backdropStrategy = ModalBackdropStrategy.GeneratePerModal;
         
         [SerializeField] private ModalBackdrop _overrideBackdropPrefab;
 
@@ -336,8 +336,9 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     yield return coroutineHandle;
 
             // Play Animation
+            var enterModalIndex = _modals.Count;
             var animationHandles = new List<AsyncProcessHandle>();
-            animationHandles.Add(_backdropHandler.BeforeModalEnter(enterModal, playAnimation));
+            animationHandles.Add(_backdropHandler.BeforeModalEnter(enterModal, enterModalIndex, playAnimation));
 
             if (exitModal != null) animationHandles.Add(exitModal.Exit(true, playAnimation, enterModal));
 
@@ -347,7 +348,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 while (!coroutineHandle.IsTerminated)
                     yield return coroutineHandle;
 
-            _backdropHandler.AfterModalEnter(enterModal, true);
+            _backdropHandler.AfterModalEnter(enterModal, enterModalIndex, true);
 
             // End Transition
             _modals.Add(modalId, enterModal);
@@ -422,11 +423,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             var unusedModalIds = new List<string>();
             var unusedModals = new List<Modal>();
+            var unusedModalIndices = new List<int>();
             for (var i = _orderedModalIds.Count - 1; i >= _orderedModalIds.Count - popCount; i--)
             {
                 var unusedModalId = _orderedModalIds[i];
                 unusedModalIds.Add(unusedModalId);
                 unusedModals.Add(_modals[unusedModalId]);
+                unusedModalIndices.Add(i);
             }
 
             var enterModalIndex = _orderedModalIds.Count - popCount - 1;
@@ -452,9 +455,10 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             {
                 var unusedModalId = unusedModalIds[i];
                 var unusedModal = _modals[unusedModalId];
+                var unusedModalIndex = unusedModalIndices[i];
                 var partnerModalId = i == 0 ? enterModalId : unusedModalIds[i - 1];
                 var partnerModal = partnerModalId == null ? null : _modals[partnerModalId];
-                animationHandles.Add(_backdropHandler.BeforeModalExit(unusedModal, playAnimation));
+                animationHandles.Add(_backdropHandler.BeforeModalExit(unusedModal, unusedModalIndex, playAnimation));
                 animationHandles.Add(unusedModal.Exit(false, playAnimation, partnerModal));
             }
 
@@ -476,7 +480,6 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             // Postprocess
             exitModal.AfterExit(false, enterModal);
             if (enterModal != null) enterModal.AfterEnter(false, exitModal);
-            _backdropHandler.AfterModalExit(exitModal, playAnimation);
 
             foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterPop(enterModal, exitModal);
 
@@ -488,10 +491,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             {
                 var unusedModalId = unusedModalIds[i];
                 var unusedModal = unusedModals[i];
+                var unusedModalIndex = unusedModalIndices[i];
                 var loadHandle = _assetLoadHandles[unusedModalId];
                 Destroy(unusedModal.gameObject);
                 AssetLoader.Release(loadHandle);
                 _assetLoadHandles.Remove(unusedModalId);
+                _backdropHandler.AfterModalExit(exitModal, unusedModalIndex, playAnimation);
             }
 
             if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)

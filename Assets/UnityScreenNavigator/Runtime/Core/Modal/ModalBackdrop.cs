@@ -7,7 +7,7 @@ using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 
 namespace UnityScreenNavigator.Runtime.Core.Modal
 {
-    public sealed class ModalBackdrop : MonoBehaviour
+    public class ModalBackdrop : MonoBehaviour
     {
         [SerializeField] private ModalBackdropTransitionAnimationContainer _animationContainer;
         [SerializeField] private bool _closeModalWhenClicked;
@@ -46,12 +46,17 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
         }
 
-        public void Setup(RectTransform parentTransform)
+        public void Setup(RectTransform parentTransform, int modalIndex)
         {
             _parentTransform = parentTransform;
             _rectTransform.FillParent(_parentTransform);
             _canvasGroup.interactable = _closeModalWhenClicked;
+            OnSetup(parentTransform, modalIndex);
             gameObject.SetActive(false);
+        }
+
+        protected virtual void OnSetup(RectTransform parentTransform, int modalIndex)
+        {
         }
 
         internal AsyncProcessHandle Enter(bool playAnimation)

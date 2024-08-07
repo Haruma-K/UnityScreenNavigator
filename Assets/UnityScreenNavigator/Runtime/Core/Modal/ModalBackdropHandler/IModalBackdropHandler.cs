@@ -4,12 +4,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 {
     internal interface IModalBackdropHandler
     {
-        AsyncProcessHandle BeforeModalEnter(Modal modal, bool playAnimation);
+        AsyncProcessHandle BeforeModalEnter(Modal modal, int modalIndex, bool playAnimation);
 
-        void AfterModalEnter(Modal modal, bool playAnimation);
+        void AfterModalEnter(Modal modal, int modalIndex, bool playAnimation);
 
-        AsyncProcessHandle BeforeModalExit(Modal modal, bool playAnimation);
+        AsyncProcessHandle BeforeModalExit(Modal modal, int modalIndex, bool playAnimation);
 
-        void AfterModalExit(Modal modal, bool playAnimation);
+        void AfterModalExit(Modal modal, int modalIndex, bool playAnimation);
     }
 }

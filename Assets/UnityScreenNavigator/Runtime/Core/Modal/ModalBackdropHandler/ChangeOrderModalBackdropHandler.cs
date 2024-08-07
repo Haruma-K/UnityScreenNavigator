@@ -27,59 +27,53 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _changeTiming = changeTiming;
         }
 
-        public AsyncProcessHandle BeforeModalEnter(Modal modal, bool playAnimation)
+        public AsyncProcessHandle BeforeModalEnter(Modal modal, int modalIndex, bool playAnimation)
         {
             var parent = (RectTransform)modal.transform.parent;
-            var modalSiblingIndex = modal.transform.GetSiblingIndex();
 
             // If it is the first modal, generate a new backdrop
-            if (modalSiblingIndex == 0)
+            if (modalIndex == 0)
             {
                 var backdrop = Object.Instantiate(_prefab);
-                backdrop.Setup(parent);
+                backdrop.Setup(parent, modalIndex);
                 backdrop.transform.SetSiblingIndex(0);
                 _instance = backdrop;
                 return backdrop.Enter(playAnimation);
             }
 
             // For the second and subsequent modals, change the drawing order of the backdrop
-            var backdropSiblingIndex = modalSiblingIndex - 1;
+            var backdropSiblingIndex = modalIndex;
             if (_changeTiming == ChangeTiming.BeforeAnimation)
                 _instance.transform.SetSiblingIndex(backdropSiblingIndex);
 
             return AsyncProcessHandle.Completed();
         }
 
-        public void AfterModalEnter(Modal modal, bool playAnimation)
+        public void AfterModalEnter(Modal modal, int modalIndex, bool playAnimation)
         {
-            var modalSiblingIndex = modal.transform.GetSiblingIndex();
-            var backdropSiblingIndex = modalSiblingIndex - 1;
+            var backdropSiblingIndex = modalIndex;
             // For the second and subsequent modals, change the drawing order of the backdrop
             if (_changeTiming == ChangeTiming.AfterAnimation)
                 _instance.transform.SetSiblingIndex(backdropSiblingIndex);
         }
 
-        public AsyncProcessHandle BeforeModalExit(Modal modal, bool playAnimation)
+        public AsyncProcessHandle BeforeModalExit(Modal modal, int modalIndex, bool playAnimation)
         {
-            var modalSiblingIndex = modal.transform.GetSiblingIndex();
-
             // If it is the first modal, play the backdrop animation
-            if (modalSiblingIndex == 1)
+            if (modalIndex == 0)
                 return _instance.Exit(playAnimation);
 
             // For the second and subsequent modals, change the drawing order of the backdrop
             if (_changeTiming == ChangeTiming.BeforeAnimation)
-                _instance.transform.SetSiblingIndex(modalSiblingIndex - 2);
+                _instance.transform.SetSiblingIndex(modalIndex - 1);
 
             return AsyncProcessHandle.Completed();
         }
 
-        public void AfterModalExit(Modal modal, bool playAnimation)
+        public void AfterModalExit(Modal modal, int modalIndex, bool playAnimation)
         {
-            var modalSiblingIndex = modal.transform.GetSiblingIndex();
-
             // If it is the first modal, remove the backdrop
-            if (modalSiblingIndex == 1)
+            if (modalIndex == 0)
             {
                 Object.Destroy(_instance.gameObject);
                 return;
@@ -87,7 +81,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             // For the second and subsequent modals, change the drawing order of the backdrop
             if (_changeTiming == ChangeTiming.AfterAnimation)
-                _instance.transform.SetSiblingIndex(modalSiblingIndex - 2);
+                _instance.transform.SetSiblingIndex(modalIndex - 1);
         }
     }
 }
