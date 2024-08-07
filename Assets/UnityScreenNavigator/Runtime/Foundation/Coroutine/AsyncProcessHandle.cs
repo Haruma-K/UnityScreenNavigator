@@ -51,5 +51,21 @@ namespace UnityScreenNavigator.Runtime.Foundation.Coroutine
         }
 
         public event Action OnTerminate;
+
+        public static AsyncProcessHandle Completed()
+        {
+            var handle = new AsyncProcessHandle(-1);
+            var handleSetter = (IAsyncProcessHandleSetter)handle;
+            handleSetter.Complete(null);
+            return handle;
+        }
+
+        public static AsyncProcessHandle Completed<T>(T result)
+        {
+            var handle = new AsyncProcessHandle(-1);
+            var handleSetter = (IAsyncProcessHandleSetter)handle;
+            handleSetter.Complete(result);
+            return handle;
+        }
     }
 }

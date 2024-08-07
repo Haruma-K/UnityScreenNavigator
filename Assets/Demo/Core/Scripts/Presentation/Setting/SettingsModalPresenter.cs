@@ -54,6 +54,9 @@ namespace Demo.Core.Scripts.Presentation.Setting
             viewState.CloseButtonClicked
                 .Subscribe(_ => TransitionService.PopCommandExecuted())
                 .AddTo(this);
+            viewState.LockedButtonClicked
+                .Subscribe(_ => TransitionService.SettingsModalLockedButtonClicked())
+                .AddTo(this);
         }
 
         private void SetVoiceSettingsViewState(SettingsViewState viewState, float volume, bool isMuted)

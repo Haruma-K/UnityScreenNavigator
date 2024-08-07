@@ -57,6 +57,7 @@ Library for screen transitions, transition animations, transition history stacki
     - [Disable masking for container](#disable-masking-for-container)
     - [Get information about playing animation information](#get-information-about-playing-animation-information)
     - [Use loaded Prefab instances when loading screens](#use-loaded-prefab-instances-when-loading-screens)
+    - [Changing the Behavior of the Modal Backdrop](#changing-the-behavior-of-the-modal-backdrop)
 - [FAQ](#faq)
     - [How to make each Screen with Scene instead of Prefab](#how-to-make-each-screen-with-scene-instead-of-prefab)
     - [How to separate view and logic](#how-to-separate-view-and-logic)
@@ -958,6 +959,16 @@ You can use it by entering the key and prefab in the Scriptable Object created f
 </p>
 
 I also provide `PreloadedAssetLoader` implementation for runtime.
+
+#### Changing the Behavior of the Modal Backdrop
+You can change the behavior of the modal backdrop as follows by changing the Backdrop Strategy from the `ModalContainer` Inspector.
+
+| Setting Value                 | Description                                                         |
+|-------------------------------|---------------------------------------------------------------------|
+| Generate Per Modal            | Generate a backdrop for each modal                                |
+| Only First Backdrop           | Generate a backdrop only for the first modal, and do not add a backdrop for the second and subsequent ones |
+| Change Order Before Animation | Change the rendering order of the first generated backdrop and reuse it when generating the second modal (change the rendering order before the animation) |
+| Change Order After Animation  | Change the rendering order of the first generated backdrop and reuse it when generating the second modal (change the rendering order after the animation) |
 
 ## FAQ
 

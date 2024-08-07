@@ -17,5 +17,7 @@ namespace Demo.Core.Scripts.Presentation.Shared
         void UnitTypeInformationExpandButtonClicked(string unitTypeMasterId, int unitRank);
 
         void PopCommandExecuted();
+
+        void SettingsModalLockedButtonClicked();
     }
 }

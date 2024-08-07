@@ -57,7 +57,8 @@ UnityのuGUIで画面遷移、画面遷移アニメーション、遷移履歴�
     - [遷移中のインタラクションを有効にする](#%E9%81%B7%E7%A7%BB%E4%B8%AD%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%A9%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E3%82%92%E6%9C%89%E5%8A%B9%E3%81%AB%E3%81%99%E3%82%8B)
     - [Containerのマスクを外す](#container%E3%81%AE%E3%83%9E%E3%82%B9%E3%82%AF%E3%82%92%E5%A4%96%E3%81%99)
     - [再生中の遷移アニメーションの情報を取得する](#%E5%86%8D%E7%94%9F%E4%B8%AD%E3%81%AE%E9%81%B7%E7%A7%BB%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E6%83%85%E5%A0%B1%E3%82%92%E5%8F%96%E5%BE%97%E3%81%99%E3%82%8B)
-    - [画面ロード時に読み込み済みの Prefab インスタンスを使用する](#%E7%94%BB%E9%9D%A2%E3%83%AD%E3%83%BC%E3%83%89%E6%99%82%E3%81%AB%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E6%B8%88%E3%81%BF%E3%81%AE-prefab-%E3%82%A4%E3%83%B3%E3%82%B9%E3%82%BF%E3%83%B3%E3%82%B9%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%99%E3%82%8B)
+    - [画面ロード時に読み込み済みの Prefab インスタンスを使用README.mdする](#%E7%94%BB%E9%9D%A2%E3%83%AD%E3%83%BC%E3%83%89%E6%99%82%E3%81%AB%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E6%B8%88%E3%81%BF%E3%81%AE-prefab-%E3%82%A4%E3%83%B3%E3%82%B9%E3%82%BF%E3%83%B3%E3%82%B9%E3%82%92%E4%BD%BF%E7%94%A8readmemd%E3%81%99%E3%82%8B)
+    - [モーダルの背景の挙動を変えたい](#%E3%83%A2%E3%83%BC%E3%83%80%E3%83%AB%E3%81%AE%E8%83%8C%E6%99%AF%E3%81%AE%E6%8C%99%E5%8B%95%E3%82%92%E5%A4%89%E3%81%88%E3%81%9F%E3%81%84)
 - [FAQ](#faq)
     - [各画面をPrefabではなくシーンで作りたい](#%E5%90%84%E7%94%BB%E9%9D%A2%E3%82%92prefab%E3%81%A7%E3%81%AF%E3%81%AA%E3%81%8F%E3%82%B7%E3%83%BC%E3%83%B3%E3%81%A7%E4%BD%9C%E3%82%8A%E3%81%9F%E3%81%84)
     - [ビューとロジックを分離する方法を知りたい](#%E3%83%93%E3%83%A5%E3%83%BC%E3%81%A8%E3%83%AD%E3%82%B8%E3%83%83%E3%82%AF%E3%82%92%E5%88%86%E9%9B%A2%E3%81%99%E3%82%8B%E6%96%B9%E6%B3%95%E3%82%92%E7%9F%A5%E3%82%8A%E3%81%9F%E3%81%84)
@@ -953,7 +954,7 @@ yield return container.Pop(true);
 | TransitionAnimationProgress | 遷移アニメーションの進捗。 |
 | TransitionAnimationProgressChanged | 遷移アニメーションの進捗が変わった時のイベント。 |
 
-#### 画面ロード時に読み込み済みの Prefab インスタンスを使用する
+#### 画面ロード時に読み込み済みの Prefab インスタンスを使用[README.md](README.md)する
 `PreloadedAssetLoaderObject` を使用すると、画面読み込み時に Resources や Addressables を経由せず、読み込み済みの Prefab インスタンスを直接できます。  
 Assets > Create > Resource Loader > Preloaded Asset Loader から作成した Scriptable Object に以下のようにキーと Prefab を入力することで使用できます。
 
@@ -962,6 +963,16 @@ Assets > Create > Resource Loader > Preloaded Asset Loader から作成した Sc
 </p>
 
 また、ランタイム用の実装として `PreloadedAssetLoader` も用意しています。
+
+#### モーダルの背景の挙動を変えたい
+`ModalContainer`の Inspector から Backdrop Strategy を変更することで、モーダルの背景の挙動を以下の通り変更できます。
+
+| 設定値                           | 説明                                                        |
+|-------------------------------|-----------------------------------------------------------|
+| Generate Per Modal            | モーダルごとに背景を生成する                                            |
+| Only First Backdrop           | 最初のモーダルにだけ背景を生成し、2個目以降は背景をつけない                            |
+| Change Order Before Animation | 2個目のモーダルを生成したときに最初に生成した背景の描画順を変更して再利用する（アニメーションの前に描画順を変更） |
+| Change Order After Animation  | 2個目のモーダルを生成したときに最初に生成した背景の描画順を変更して再利用する（アニメーションの後に描画順を変更） |
 
 ## FAQ
 
