@@ -954,7 +954,7 @@ yield return container.Pop(true);
 | TransitionAnimationProgress | 遷移アニメーションの進捗。 |
 | TransitionAnimationProgressChanged | 遷移アニメーションの進捗が変わった時のイベント。 |
 
-#### 画面ロード時に読み込み済みの Prefab インスタンスを使用[README.md](README.md)する
+#### 画面ロード時に読み込み済みの Prefab インスタンスを使用する
 `PreloadedAssetLoaderObject` を使用すると、画面読み込み時に Resources や Addressables を経由せず、読み込み済みの Prefab インスタンスを直接できます。  
 Assets > Create > Resource Loader > Preloaded Asset Loader から作成した Scriptable Object に以下のようにキーと Prefab を入力することで使用できます。
 
