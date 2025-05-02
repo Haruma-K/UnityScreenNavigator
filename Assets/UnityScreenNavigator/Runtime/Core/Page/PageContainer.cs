@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
-using UnityScreenNavigator.Runtime.Core.Modal;
 using UnityScreenNavigator.Runtime.Core.Shared;
-using UnityScreenNavigator.Runtime.Core.Sheet;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
@@ -45,6 +42,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         private bool _isActivePageStacked;
         public static List<PageContainer> Instances { get; } = new List<PageContainer>();
 
+        private PageTransitionHandler _transitionHandler;
+
         /// <summary>
         ///     By default, <see cref="IAssetLoader" /> in <see cref="UnityScreenNavigatorSettings" /> is used.
         ///     If this property is set, it is used instead.
@@ -58,7 +57,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <summary>
         ///     True if in transition.
         /// </summary>
-        public bool IsInTransition { get; private set; }
+        public bool IsInTransition => _transitionHandler.IsInTransition;
 
         /// <summary>
         ///     List of PageIds sorted in the order they are stacked. 
@@ -84,6 +83,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             if (!string.IsNullOrWhiteSpace(_name)) InstanceCacheByName.Add(_name, this);
 
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
+            _transitionHandler = new PageTransitionHandler(this);
         }
 
         private void OnDestroy()
@@ -275,24 +275,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 throw new InvalidOperationException(
                     "Cannot transition because the screen is already in transition.");
 
-            IsInTransition = true;
-
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
-                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
-                {
-                    foreach (var pageContainer in Instances)
-                        pageContainer.Interactable = false;
-                    foreach (var modalContainer in ModalContainer.Instances)
-                        modalContainer.Interactable = false;
-                    foreach (var sheetContainer in SheetContainer.Instances)
-                        sheetContainer.Interactable = false;
-                }
-                else
-                {
-                    Interactable = false;
-                }
-            }
+            _transitionHandler.Begin();
 
             // Setup
             var assetLoadHandle = loadAsync
@@ -350,7 +333,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             _pages.Add(pageId, enterPage);
             _orderedPageIds.Add(pageId);
-            IsInTransition = false;
+
+            _transitionHandler.End();
 
             // Postprocess
             if (exitPage != null)
@@ -375,30 +359,6 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             }
 
             _isActivePageStacked = stack;
-
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
-                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
-                {
-                    // If there's a container in transition, it should restore Interactive to true when the transition is finished.
-                    // So, do nothing here if there's a transitioning container.
-                    if (Instances.All(x => !x.IsInTransition)
-                        && ModalContainer.Instances.All(x => !x.IsInTransition)
-                        && SheetContainer.Instances.All(x => !x.IsInTransition))
-                    {
-                        foreach (var pageContainer in Instances)
-                            pageContainer.Interactable = true;
-                        foreach (var modalContainer in ModalContainer.Instances)
-                            modalContainer.Interactable = true;
-                        foreach (var sheetContainer in SheetContainer.Instances)
-                            sheetContainer.Interactable = true;
-                    }
-                }
-                else
-                {
-                    Interactable = true;
-                }
-            }
         }
 
         private IEnumerator PopRoutine(bool playAnimation, int popCount = 1)
@@ -413,24 +373,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 throw new InvalidOperationException(
                     "Cannot transition because the screen is already in transition.");
 
-            IsInTransition = true;
-
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
-                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
-                {
-                    foreach (var pageContainer in Instances)
-                        pageContainer.Interactable = false;
-                    foreach (var modalContainer in ModalContainer.Instances)
-                        modalContainer.Interactable = false;
-                    foreach (var sheetContainer in SheetContainer.Instances)
-                        sheetContainer.Interactable = false;
-                }
-                else
-                {
-                    Interactable = false;
-                }
-            }
+            _transitionHandler.Begin();
 
             var exitPageId = _orderedPageIds[_orderedPageIds.Count - 1];
             var exitPage = _pages[exitPageId];
@@ -479,7 +422,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 _pages.Remove(unusedPageId);
                 _orderedPageIds.RemoveAt(_orderedPageIds.Count - 1);
             }
-            IsInTransition = false;
+
+            _transitionHandler.End();
 
             // Postprocess
             exitPage.AfterExit(false, enterPage);
@@ -502,30 +446,6 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             }
 
             _isActivePageStacked = true;
-
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
-                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
-                {
-                    // If there's a container in transition, it should restore Interactive to true when the transition is finished.
-                    // So, do nothing here if there's a transitioning container.
-                    if (Instances.All(x => !x.IsInTransition)
-                        && ModalContainer.Instances.All(x => !x.IsInTransition)
-                        && SheetContainer.Instances.All(x => !x.IsInTransition))
-                    {
-                        foreach (var pageContainer in Instances)
-                            pageContainer.Interactable = true;
-                        foreach (var modalContainer in ModalContainer.Instances)
-                            modalContainer.Interactable = true;
-                        foreach (var sheetContainer in SheetContainer.Instances)
-                            sheetContainer.Interactable = true;
-                    }
-                }
-                else
-                {
-                    Interactable = true;
-                }
-            }
         }
 
         public AsyncProcessHandle Preload(string resourceKey, bool loadAsync = true)
