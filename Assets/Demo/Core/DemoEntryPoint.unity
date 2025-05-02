@@ -368,7 +368,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _name: MainModalContainer
-  _backdropStrategy: 1
+  _backdropStrategy: 0
   _overrideBackdropPrefab: {fileID: 4672728316167856403, guid: 30228440436e2a248b41c61d678f615e,
     type: 3}
 --- !u!114 &779631005
