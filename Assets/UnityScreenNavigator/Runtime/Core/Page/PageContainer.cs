@@ -274,7 +274,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             if (IsInTransition)
                 throw new InvalidOperationException(
                     "Cannot transition because the screen is already in transition.");
-
+            
             _transitionHandler.Begin();
 
             // Setup
@@ -288,26 +288,23 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             var instance = Instantiate(assetLoadHandle.Result);
             if (!instance.TryGetComponent(pageType, out var c))
                 c = instance.AddComponent(pageType);
-            var enterPage = (Page)c;
 
-            if (pageId == null)
-                pageId = Guid.NewGuid().ToString();
-            _assetLoadHandles.Add(pageId, assetLoadHandle);
-            onLoad?.Invoke((pageId, enterPage));
-            var afterLoadHandle = enterPage.AfterLoad((RectTransform)transform);
+            var context = PagePushContext.Create(pageId, (Page)c, _orderedPageIds, _pages, stack);
+
+            _assetLoadHandles.Add(context.EnterPageId, assetLoadHandle);
+            onLoad?.Invoke((context.EnterPageId, context.EnterPage));
+            var afterLoadHandle = context.EnterPage.AfterLoad((RectTransform)transform);
             while (!afterLoadHandle.IsTerminated)
                 yield return null;
 
-            var exitPageId = _orderedPageIds.Count == 0 ? null : _orderedPageIds[_pages.Count - 1];
-            var exitPage = exitPageId == null ? null : _pages[exitPageId];
-
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePush(enterPage, exitPage);
+            foreach (var callbackReceiver in _callbackReceivers)
+                callbackReceiver.BeforePush(context.EnterPage, context.ExitPage);
 
             var preprocessHandles = new List<AsyncProcessHandle>();
-            if (exitPage != null) preprocessHandles.Add(exitPage.BeforeExit(true, enterPage));
+            if (context.ExitPage != null) preprocessHandles.Add(context.ExitPage.BeforeExit(true, context.EnterPage));
 
-            preprocessHandles.Add(enterPage.BeforeEnter(true, exitPage));
+            preprocessHandles.Add(context.EnterPage.BeforeEnter(true, context.ExitPage));
 
             foreach (var coroutineHandle in preprocessHandles)
                 while (!coroutineHandle.IsTerminated)
@@ -315,47 +312,47 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             // Play Animations
             var animationHandles = new List<AsyncProcessHandle>();
-            if (exitPage != null)
-                animationHandles.Add(exitPage.Exit(true, playAnimation, enterPage));
+            if (context.ExitPage != null)
+                animationHandles.Add(context.ExitPage.Exit(true, playAnimation, context.EnterPage));
 
-            animationHandles.Add(enterPage.Enter(true, playAnimation, exitPage));
+            animationHandles.Add(context.EnterPage.Enter(true, playAnimation, context.ExitPage));
 
             foreach (var coroutineHandle in animationHandles)
                 while (!coroutineHandle.IsTerminated)
                     yield return coroutineHandle;
 
             // End Transition
-            if (!_isActivePageStacked && exitPage != null)
+            if (!_isActivePageStacked && context.ExitPage != null)
             {
-                _pages.Remove(exitPageId);
-                _orderedPageIds.Remove(exitPageId);
+                _pages.Remove(context.ExitPageId);
+                _orderedPageIds.Remove(context.ExitPageId);
             }
 
-            _pages.Add(pageId, enterPage);
-            _orderedPageIds.Add(pageId);
+            _pages.Add(context.EnterPageId, context.EnterPage);
+            _orderedPageIds.Add(context.EnterPageId);
 
             _transitionHandler.End();
 
             // Postprocess
-            if (exitPage != null)
-                exitPage.AfterExit(true, enterPage);
+            if (context.ExitPage != null)
+                context.ExitPage.AfterExit(true, context.EnterPage);
 
-            enterPage.AfterEnter(true, exitPage);
+            context.EnterPage.AfterEnter(true, context.ExitPage);
 
             foreach (var callbackReceiver in _callbackReceivers)
-                callbackReceiver.AfterPush(enterPage, exitPage);
+                callbackReceiver.AfterPush(context.EnterPage, context.ExitPage);
 
             // Unload Unused Page
-            if (!_isActivePageStacked && exitPage != null)
+            if (!_isActivePageStacked && context.ExitPage != null)
             {
-                var beforeReleaseHandle = exitPage.BeforeRelease();
+                var beforeReleaseHandle = context.ExitPage.BeforeRelease();
                 while (!beforeReleaseHandle.IsTerminated) yield return null;
 
-                var handle = _assetLoadHandles[exitPageId];
+                var handle = _assetLoadHandles[context.ExitPageId];
                 AssetLoader.Release(handle);
 
-                Destroy(exitPage.gameObject);
-                _assetLoadHandles.Remove(exitPageId);
+                Destroy(context.ExitPage.gameObject);
+                _assetLoadHandles.Remove(context.ExitPageId);
             }
 
             _isActivePageStacked = stack;
@@ -375,21 +372,9 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             _transitionHandler.Begin();
 
-            var exitPageId = _orderedPageIds[_orderedPageIds.Count - 1];
-            var exitPage = _pages[exitPageId];
-
-            var unusedPageIds = new List<string>();
-            var unusedPages = new List<Page>();
-            for (var i = _orderedPageIds.Count - 1; i >= _orderedPageIds.Count - popCount; i--)
-            {
-                var unusedPageId = _orderedPageIds[i];
-                unusedPageIds.Add(unusedPageId);
-                unusedPages.Add(_pages[unusedPageId]);
-            }
-
-            var enterPageIndex = _orderedPageIds.Count - popCount - 1;
-            var enterPageId = enterPageIndex < 0 ? null : _orderedPageIds[enterPageIndex];
-            var enterPage = enterPageId == null ? null : _pages[enterPageId];
+            var context = PagePopContext.Create(_orderedPageIds, _pages, popCount);
+            var exitPage = context.ExitPage;
+            var enterPage = context.EnterPage;
 
             // Preprocess
             foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePop(enterPage, exitPage);
@@ -416,9 +401,9 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                     yield return coroutineHandle;
 
             // End Transition
-            for (var i = 0; i < unusedPageIds.Count; i++)
+            for (var i = 0; i < context.ExitPageIds.Count; i++)
             {
-                var unusedPageId = unusedPageIds[i];
+                var unusedPageId = context.ExitPageIds[i];
                 _pages.Remove(unusedPageId);
                 _orderedPageIds.RemoveAt(_orderedPageIds.Count - 1);
             }
@@ -435,10 +420,10 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             var beforeReleaseHandle = exitPage.BeforeRelease();
             while (!beforeReleaseHandle.IsTerminated) yield return null;
 
-            for (var i = 0; i < unusedPageIds.Count; i++)
+            for (var i = 0; i < context.ExitPageIds.Count; i++)
             {
-                var unusedPageId = unusedPageIds[i];
-                var unusedPage = unusedPages[i];
+                var unusedPageId = context.ExitPageIds[i];
+                var unusedPage = context.ExitPages[i];
                 var loadHandle = _assetLoadHandles[unusedPageId];
                 Destroy(unusedPage.gameObject);
                 AssetLoader.Release(loadHandle);

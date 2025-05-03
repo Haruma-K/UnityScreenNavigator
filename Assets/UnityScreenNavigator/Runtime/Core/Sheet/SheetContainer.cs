@@ -249,28 +249,35 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         {
             if (resourceKey == null) throw new ArgumentNullException(nameof(resourceKey));
 
+            var context = new SheetRegisterContext(sheetType, resourceKey, sheetId);
+
+            // アセットのロード
             var assetLoadHandle = loadAsync
                 ? AssetLoader.LoadAsync<GameObject>(resourceKey)
                 : AssetLoader.Load<GameObject>(resourceKey);
+            context.SetAssetLoadHandle(assetLoadHandle);
             while (!assetLoadHandle.IsDone) yield return null;
 
             if (assetLoadHandle.Status == AssetLoadStatus.Failed) throw assetLoadHandle.OperationException;
 
+            // シートのインスタンス化と初期化
             var instance = Instantiate(assetLoadHandle.Result);
             if (!instance.TryGetComponent(sheetType, out var c))
                 c = instance.AddComponent(sheetType);
             var sheet = (Sheet)c;
+            context.SetSheet(sheet);
 
-            if (sheetId == null)
-                sheetId = Guid.NewGuid().ToString();
-            _sheets.Add(sheetId, sheet);
-            _sheetNameToId[resourceKey] = sheetId;
-            _assetLoadHandles.Add(sheetId, assetLoadHandle);
-            onLoad?.Invoke((sheetId, sheet));
+            // シートの登録
+            _sheets.Add(context.SheetId, sheet);
+            _sheetNameToId[resourceKey] = context.SheetId;
+            _assetLoadHandles.Add(context.SheetId, assetLoadHandle);
+            onLoad?.Invoke((context.SheetId, sheet));
+
+            // シートの後処理
             var afterLoadHandle = sheet.AfterLoad((RectTransform)transform);
             while (!afterLoadHandle.IsTerminated) yield return null;
 
-            yield return sheetId;
+            yield return context.SheetId;
         }
 
         private IEnumerator ShowByResourceKeyRoutine(string resourceKey, bool playAnimation)
@@ -289,27 +296,29 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 throw new InvalidOperationException(
                     "Cannot transition because the sheet is already active.");
 
+            var context = SheetShowContext.Create(sheetId, ActiveSheetId, _sheets);
+
             _transitionHandler.Begin();
 
-            var enterSheet = _sheets[sheetId];
-            var exitSheet = ActiveSheetId != null ? _sheets[ActiveSheetId] : null;
 
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforeShow(enterSheet, exitSheet);
+            foreach (var callbackReceiver in _callbackReceivers)
+                callbackReceiver.BeforeShow(context.EnterSheet, context.ExitSheet);
 
             var preprocessHandles = new List<AsyncProcessHandle>();
-            if (exitSheet != null) preprocessHandles.Add(exitSheet.BeforeExit(enterSheet));
+            if (context.ExitSheet != null) preprocessHandles.Add(context.ExitSheet.BeforeExit(context.EnterSheet));
 
-            preprocessHandles.Add(enterSheet.BeforeEnter(exitSheet));
+            preprocessHandles.Add(context.EnterSheet.BeforeEnter(context.ExitSheet));
             foreach (var coroutineHandle in preprocessHandles)
                 while (!coroutineHandle.IsTerminated)
                     yield return null;
 
             // Play Animation
             var animationHandles = new List<AsyncProcessHandle>();
-            if (exitSheet != null) animationHandles.Add(exitSheet.Exit(playAnimation, enterSheet));
+            if (context.ExitSheet != null)
+                animationHandles.Add(context.ExitSheet.Exit(playAnimation, context.EnterSheet));
 
-            animationHandles.Add(enterSheet.Enter(playAnimation, exitSheet));
+            animationHandles.Add(context.EnterSheet.Enter(playAnimation, context.ExitSheet));
 
             foreach (var handle in animationHandles)
                 while (!handle.IsTerminated)
@@ -320,11 +329,12 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             _transitionHandler.End();
 
             // Postprocess
-            if (exitSheet != null) exitSheet.AfterExit(enterSheet);
+            if (context.ExitSheet != null) context.ExitSheet.AfterExit(context.EnterSheet);
 
-            enterSheet.AfterEnter(exitSheet);
+            context.EnterSheet.AfterEnter(context.ExitSheet);
 
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterShow(enterSheet, exitSheet);
+            foreach (var callbackReceiver in _callbackReceivers)
+                callbackReceiver.AfterShow(context.EnterSheet, context.ExitSheet);
         }
 
         private IEnumerator HideRoutine(bool playAnimation)
@@ -339,25 +349,29 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
             _transitionHandler.Begin();
 
-            var exitSheet = _sheets[ActiveSheetId];
+            var context = SheetHideContext.Create(_sheets[ActiveSheetId], playAnimation);
 
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforeHide(exitSheet);
+            foreach (var callbackReceiver in _callbackReceivers) 
+                callbackReceiver.BeforeHide(context.ExitSheet);
 
-            var preprocessHandle = exitSheet.BeforeExit(null);
-            while (!preprocessHandle.IsTerminated) yield return preprocessHandle;
+            var preprocessHandle = context.ExitSheet.BeforeExit(null);
+            while (!preprocessHandle.IsTerminated) 
+                yield return preprocessHandle;
 
             // Play Animation
-            var animationHandle = exitSheet.Exit(playAnimation, null);
-            while (!animationHandle.IsTerminated) yield return null;
+            var animationHandle = context.ExitSheet.Exit(context.PlayAnimation, null);
+            while (!animationHandle.IsTerminated) 
+                yield return null;
 
             // End Transition
             ActiveSheetId = null;
             _transitionHandler.End();
 
             // Postprocess
-            exitSheet.AfterExit(null);
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterHide(exitSheet);
+            context.ExitSheet.AfterExit(null);
+            foreach (var callbackReceiver in _callbackReceivers) 
+                callbackReceiver.AfterHide(context.ExitSheet);
         }
 
         /// <summary>

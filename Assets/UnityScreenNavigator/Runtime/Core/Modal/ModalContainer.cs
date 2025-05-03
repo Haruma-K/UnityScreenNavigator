@@ -292,57 +292,57 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             var instance = Instantiate(assetLoadHandle.Result);
             if (!instance.TryGetComponent(modalType, out var c))
                 c = instance.AddComponent(modalType);
-            var enterModal = (Modal)c;
 
-            if (modalId == null)
-                modalId = Guid.NewGuid().ToString();
-            _assetLoadHandles.Add(modalId, assetLoadHandle);
-            onLoad?.Invoke((modalId, enterModal));
-            var afterLoadHandle = enterModal.AfterLoad((RectTransform)transform);
+            var context = ModalPushContext.Create(modalId, (Modal)c, _orderedModalIds, _modals);
+
+            _assetLoadHandles.Add(context.ModalId, assetLoadHandle);
+            onLoad?.Invoke((context.ModalId, context.EnterModal));
+            var afterLoadHandle = context.EnterModal.AfterLoad((RectTransform)transform);
             while (!afterLoadHandle.IsTerminated)
                 yield return null;
 
-            var exitModalId = _orderedModalIds.Count == 0 ? null : _orderedModalIds[_orderedModalIds.Count - 1];
-            var exitModal = exitModalId == null ? null : _modals[exitModalId];
-
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePush(enterModal, exitModal);
+            foreach (var callbackReceiver in _callbackReceivers)
+                callbackReceiver.BeforePush(context.EnterModal, context.ExitModal);
 
             var preprocessHandles = new List<AsyncProcessHandle>();
-            if (exitModal != null) preprocessHandles.Add(exitModal.BeforeExit(true, enterModal));
+            if (context.ExitModal != null)
+                preprocessHandles.Add(context.ExitModal.BeforeExit(true, context.EnterModal));
 
-            preprocessHandles.Add(enterModal.BeforeEnter(true, exitModal));
+            preprocessHandles.Add(context.EnterModal.BeforeEnter(true, context.ExitModal));
 
             foreach (var coroutineHandle in preprocessHandles)
                 while (!coroutineHandle.IsTerminated)
                     yield return coroutineHandle;
 
             // Play Animation
-            var enterModalIndex = _modals.Count;
             var animationHandles = new List<AsyncProcessHandle>();
-            animationHandles.Add(_backdropHandler.BeforeModalEnter(enterModal, enterModalIndex, playAnimation));
+            animationHandles.Add(
+                _backdropHandler.BeforeModalEnter(context.EnterModal, context.EnterModalIndex, playAnimation));
 
-            if (exitModal != null) animationHandles.Add(exitModal.Exit(true, playAnimation, enterModal));
+            if (context.ExitModal != null)
+                animationHandles.Add(context.ExitModal.Exit(true, playAnimation, context.EnterModal));
 
-            animationHandles.Add(enterModal.Enter(true, playAnimation, exitModal));
+            animationHandles.Add(context.EnterModal.Enter(true, playAnimation, context.ExitModal));
 
             foreach (var coroutineHandle in animationHandles)
                 while (!coroutineHandle.IsTerminated)
                     yield return coroutineHandle;
 
-            _backdropHandler.AfterModalEnter(enterModal, enterModalIndex, true);
+            _backdropHandler.AfterModalEnter(context.EnterModal, context.EnterModalIndex, true);
 
             // End Transition
-            _modals.Add(modalId, enterModal);
-            _orderedModalIds.Add(modalId);
+            _modals.Add(context.ModalId, context.EnterModal);
+            _orderedModalIds.Add(context.ModalId);
             _transitionHandler.End();
 
             // Postprocess
-            if (exitModal != null) exitModal.AfterExit(true, enterModal);
+            if (context.ExitModal != null) context.ExitModal.AfterExit(true, context.EnterModal);
 
-            enterModal.AfterEnter(true, exitModal);
+            context.EnterModal.AfterEnter(true, context.ExitModal);
 
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterPush(enterModal, exitModal);
+            foreach (var callbackReceiver in _callbackReceivers)
+                callbackReceiver.AfterPush(context.EnterModal, context.ExitModal);
         }
 
         private IEnumerator PopRoutine(bool playAnimation, int popCount = 1)
@@ -357,34 +357,20 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 throw new InvalidOperationException(
                     "Cannot transition because the screen is already in transition.");
 
+            var context = ModalPopContext.Create(_orderedModalIds, _modals, popCount);
+            
             _transitionHandler.Begin();
 
-            var exitModalId = _orderedModalIds[_orderedModalIds.Count - 1];
-            var exitModal = _modals[exitModalId];
-
-            var unusedModalIds = new List<string>();
-            var unusedModals = new List<Modal>();
-            var unusedModalIndices = new List<int>();
-            for (var i = _orderedModalIds.Count - 1; i >= _orderedModalIds.Count - popCount; i--)
-            {
-                var unusedModalId = _orderedModalIds[i];
-                unusedModalIds.Add(unusedModalId);
-                unusedModals.Add(_modals[unusedModalId]);
-                unusedModalIndices.Add(i);
-            }
-
-            var enterModalIndex = _orderedModalIds.Count - popCount - 1;
-            var enterModalId = enterModalIndex < 0 ? null : _orderedModalIds[enterModalIndex];
-            var enterModal = enterModalId == null ? null : _modals[enterModalId];
-
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePop(enterModal, exitModal);
+            foreach (var callbackReceiver in _callbackReceivers)
+                callbackReceiver.BeforePop(context.EnterModal, context.FirstExitModal);
 
             var preprocessHandles = new List<AsyncProcessHandle>
             {
-                exitModal.BeforeExit(false, enterModal)
+                context.FirstExitModal.BeforeExit(false, context.EnterModal)
             };
-            if (enterModal != null) preprocessHandles.Add(enterModal.BeforeEnter(false, exitModal));
+            if (context.EnterModal != null)
+                preprocessHandles.Add(context.EnterModal.BeforeEnter(false, context.FirstExitModal));
 
             foreach (var coroutineHandle in preprocessHandles)
                 while (!coroutineHandle.IsTerminated)
@@ -392,52 +378,54 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             // Play Animation
             var animationHandles = new List<AsyncProcessHandle>();
-            for (var i = unusedModalIds.Count - 1; i >= 0; i--)
+            for (var i = context.ExitModalIds.Count - 1; i >= 0; i--)
             {
-                var unusedModalId = unusedModalIds[i];
-                var unusedModal = _modals[unusedModalId];
-                var unusedModalIndex = unusedModalIndices[i];
-                var partnerModalId = i == 0 ? enterModalId : unusedModalIds[i - 1];
+                var exitModalId = context.ExitModalIds[i];
+                var exitModal = _modals[exitModalId];
+                var exitModalIndex = context.ExitModalIndices[i];
+                var partnerModalId = i == 0 ? context.EnterModalId : context.ExitModalIds[i - 1];
                 var partnerModal = partnerModalId == null ? null : _modals[partnerModalId];
-                animationHandles.Add(_backdropHandler.BeforeModalExit(unusedModal, unusedModalIndex, playAnimation));
-                animationHandles.Add(unusedModal.Exit(false, playAnimation, partnerModal));
+                animationHandles.Add(_backdropHandler.BeforeModalExit(exitModal, exitModalIndex, playAnimation));
+                animationHandles.Add(exitModal.Exit(false, playAnimation, partnerModal));
             }
 
-            if (enterModal != null) animationHandles.Add(enterModal.Enter(false, playAnimation, exitModal));
+            if (context.EnterModal != null)
+                animationHandles.Add(context.EnterModal.Enter(false, playAnimation, context.FirstExitModal));
 
             foreach (var coroutineHandle in animationHandles)
                 while (!coroutineHandle.IsTerminated)
                     yield return coroutineHandle;
 
             // End Transition
-            for (var i = 0; i < unusedModalIds.Count; i++)
+            for (var i = 0; i < context.ExitModalIds.Count; i++)
             {
-                var unusedModalId = unusedModalIds[i];
+                var unusedModalId = context.ExitModalIds[i];
                 _modals.Remove(unusedModalId);
                 _orderedModalIds.RemoveAt(_orderedModalIds.Count - 1);
             }
             _transitionHandler.End();
 
             // Postprocess
-            exitModal.AfterExit(false, enterModal);
-            if (enterModal != null) enterModal.AfterEnter(false, exitModal);
+            context.FirstExitModal.AfterExit(false, context.EnterModal);
+            if (context.EnterModal != null) context.EnterModal.AfterEnter(false, context.FirstExitModal);
 
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterPop(enterModal, exitModal);
+            foreach (var callbackReceiver in _callbackReceivers)
+                callbackReceiver.AfterPop(context.EnterModal, context.FirstExitModal);
 
             // Unload Unused Page
-            var beforeReleaseHandle = exitModal.BeforeRelease();
+            var beforeReleaseHandle = context.FirstExitModal.BeforeRelease();
             while (!beforeReleaseHandle.IsTerminated) yield return null;
 
-            for (var i = 0; i < unusedModalIds.Count; i++)
+            for (var i = 0; i < context.ExitModalIds.Count; i++)
             {
-                var unusedModalId = unusedModalIds[i];
-                var unusedModal = unusedModals[i];
-                var unusedModalIndex = unusedModalIndices[i];
+                var unusedModalId = context.ExitModalIds[i];
+                var unusedModal = context.ExitModals[i];
+                var unusedModalIndex = context.ExitModalIndices[i];
                 var loadHandle = _assetLoadHandles[unusedModalId];
                 Destroy(unusedModal.gameObject);
                 AssetLoader.Release(loadHandle);
                 _assetLoadHandles.Remove(unusedModalId);
-                _backdropHandler.AfterModalExit(exitModal, unusedModalIndex, playAnimation);
+                _backdropHandler.AfterModalExit(context.FirstExitModal, unusedModalIndex, playAnimation);
             }
         }
 
