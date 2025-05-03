@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityScreenNavigator.Runtime.Core.Modal;
-using UnityScreenNavigator.Runtime.Core.Page;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
@@ -14,7 +11,7 @@ using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 namespace UnityScreenNavigator.Runtime.Core.Sheet
 {
     [RequireComponent(typeof(RectMask2D))]
-    public sealed class SheetContainer : MonoBehaviour
+    public sealed class SheetContainer : MonoBehaviour, IScreenContainer
     {
         private static readonly Dictionary<int, SheetContainer> InstanceCacheByTransform =
             new Dictionary<int, SheetContainer>();
@@ -37,7 +34,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         private CanvasGroup _canvasGroup;
         public static List<SheetContainer> Instances { get; } = new List<SheetContainer>();
 
-        private SheetTransitionHandler _transitionHandler;
+        private ScreenContainerTransitionHandler _transitionHandler;
 
         /// <summary>
         ///     By default, <see cref="IAssetLoader" /> in <see cref="UnityScreenNavigatorSettings" /> is used.
@@ -86,7 +83,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
             if (!string.IsNullOrWhiteSpace(_name)) InstanceCacheByName.Add(_name, this);
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
-            _transitionHandler = new SheetTransitionHandler(this);
+            _transitionHandler = new ScreenContainerTransitionHandler(this);
         }
 
         private void OnDestroy()

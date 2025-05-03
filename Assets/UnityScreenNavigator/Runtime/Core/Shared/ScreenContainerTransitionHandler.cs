@@ -1,23 +1,20 @@
 using System;
 using System.Linq;
-using UnityEngine.Assertions;
 using UnityScreenNavigator.Runtime.Core.Modal;
-using UnityScreenNavigator.Runtime.Core.Shared;
+using UnityScreenNavigator.Runtime.Core.Page;
 using UnityScreenNavigator.Runtime.Core.Sheet;
 
-namespace UnityScreenNavigator.Runtime.Core.Page
+namespace UnityScreenNavigator.Runtime.Core.Shared
 {
-    public sealed class PageTransitionHandler
+    public sealed class ScreenContainerTransitionHandler
     {
-        private readonly PageContainer _container;
+        private readonly IScreenContainer _container;
+        public bool IsInTransition { get; private set; }
 
-        public PageTransitionHandler(PageContainer container)
+        public ScreenContainerTransitionHandler(IScreenContainer container)
         {
-            Assert.IsNotNull(container);
             _container = container;
         }
-
-        public bool IsInTransition { get; private set; }
 
         public void Begin()
         {
@@ -31,7 +28,6 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
             {
-                // 他のコンテナがトランジション中の場合は、すでにそのコンテナの開始処理でSetAllContainersInteractableが実行されているので、ここでは何もしない
                 if (!AllContainersFinishedTransition())
                     return;
 
@@ -39,7 +35,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             }
             else
             {
-                SetSelfContainersInteractable(false);
+                _container.Interactable = false;
             }
         }
 
@@ -55,7 +51,6 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
             {
-                // 他のコンテナがトランジション中の場合は、そのコンテナの終了処理でSetAllContainersInteractableが実行されるので、ここでは何もしない
                 if (!AllContainersFinishedTransition())
                     return;
 
@@ -63,7 +58,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             }
             else
             {
-                SetSelfContainersInteractable(true);
+                _container.Interactable = true;
             }
         }
 
@@ -82,11 +77,6 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 container.Interactable = value;
             foreach (var container in SheetContainer.Instances)
                 container.Interactable = value;
-        }
-
-        private void SetSelfContainersInteractable(bool value)
-        {
-            _container.Interactable = value;
         }
     }
 }

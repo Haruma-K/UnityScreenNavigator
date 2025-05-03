@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
-using UnityScreenNavigator.Runtime.Core.Page;
 using UnityScreenNavigator.Runtime.Core.Shared;
-using UnityScreenNavigator.Runtime.Core.Sheet;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
 using UnityScreenNavigator.Runtime.Foundation.Coroutine;
@@ -15,7 +12,7 @@ using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 namespace UnityScreenNavigator.Runtime.Core.Modal
 {
     [RequireComponent(typeof(RectMask2D))]
-    public sealed class ModalContainer : MonoBehaviour
+    public sealed class ModalContainer : MonoBehaviour, IScreenContainer
     {
         private static readonly Dictionary<int, ModalContainer> InstanceCacheByTransform =
             new Dictionary<int, ModalContainer>();
@@ -49,7 +46,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         public static List<ModalContainer> Instances { get; } = new List<ModalContainer>();
 
         private IModalBackdropHandler _backdropHandler;
-        private ModalTransitionHandler _transitionHandler;
+        private ScreenContainerTransitionHandler _transitionHandler;
 
         /// <summary>
         ///     By default, <see cref="IAssetLoader" /> in <see cref="UnityScreenNavigatorSettings" /> is used.
@@ -95,7 +92,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
             _backdropHandler = ModalBackdropHandlerFactory.Create(_backdropStrategy, _backdropPrefab);
-            _transitionHandler = new ModalTransitionHandler(this);
+            _transitionHandler = new ScreenContainerTransitionHandler(this);
         }
 
         private void OnDestroy()

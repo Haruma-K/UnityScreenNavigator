@@ -12,7 +12,7 @@ using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 namespace UnityScreenNavigator.Runtime.Core.Page
 {
     [RequireComponent(typeof(RectMask2D))]
-    public sealed class PageContainer : MonoBehaviour
+    public sealed class PageContainer : MonoBehaviour, IScreenContainer
     {
         private static readonly Dictionary<int, PageContainer> InstanceCacheByTransform =
             new Dictionary<int, PageContainer>();
@@ -42,7 +42,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         private bool _isActivePageStacked;
         public static List<PageContainer> Instances { get; } = new List<PageContainer>();
 
-        private PageTransitionHandler _transitionHandler;
+        private ScreenContainerTransitionHandler _transitionHandler;
 
         /// <summary>
         ///     By default, <see cref="IAssetLoader" /> in <see cref="UnityScreenNavigatorSettings" /> is used.
@@ -83,7 +83,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             if (!string.IsNullOrWhiteSpace(_name)) InstanceCacheByName.Add(_name, this);
 
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
-            _transitionHandler = new PageTransitionHandler(this);
+            _transitionHandler = new ScreenContainerTransitionHandler(this);
         }
 
         private void OnDestroy()
