@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace UnityScreenNavigator.Runtime.Core.Page
@@ -11,15 +10,25 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         public string ExitPageId { get; }
         public Page ExitPage { get; }
 
-        public bool IsStacked { get; }
+        public bool Stack { get; }
+        public bool IsExitPageStacked { get; }
+        public bool ShouldRemoveExitPage => ExitPage != null && !IsExitPageStacked;
 
-        private PagePushContext(string enterPageId, Page enterPage, string exitPageId, Page exitPage, bool isStacked)
+        private PagePushContext(
+            string enterPageId,
+            Page enterPage,
+            string exitPageId,
+            Page exitPage,
+            bool stack,
+            bool isExitPageStacked
+        )
         {
             EnterPageId = enterPageId;
             EnterPage = enterPage;
             ExitPageId = exitPageId;
             ExitPage = exitPage;
-            IsStacked = isStacked;
+            Stack = stack;
+            IsExitPageStacked = isExitPageStacked;
         }
 
         public static PagePushContext Create(
@@ -27,7 +36,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             Page enterPage,
             List<string> orderedPageIds,
             Dictionary<string, Page> pages,
-            bool isStacked
+            bool stack,
+            bool isExitPageStacked
         )
         {
             var hasExit = orderedPageIds.Count > 0;
@@ -35,9 +45,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             var exitPage = hasExit ? pages[exitPageId] : null;
 
-            var resolvedPageId = pageId ?? Guid.NewGuid().ToString();
-
-            return new PagePushContext(resolvedPageId, enterPage, exitPageId, exitPage, isStacked);
+            return new PagePushContext(pageId, enterPage, exitPageId, exitPage, stack, isExitPageStacked);
         }
     }
 }

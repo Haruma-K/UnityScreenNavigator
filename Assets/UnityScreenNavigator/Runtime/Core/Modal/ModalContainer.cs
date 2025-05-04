@@ -14,39 +14,35 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
     [RequireComponent(typeof(RectMask2D))]
     public sealed class ModalContainer : MonoBehaviour, IScreenContainer
     {
-        private static readonly Dictionary<int, ModalContainer> InstanceCacheByTransform =
-            new Dictionary<int, ModalContainer>();
+        private static readonly Dictionary<int, ModalContainer> InstanceCacheByTransform = new();
 
-        private static readonly Dictionary<string, ModalContainer> InstanceCacheByName =
-            new Dictionary<string, ModalContainer>();
+        private static readonly Dictionary<string, ModalContainer> InstanceCacheByName = new();
 
         [SerializeField] private string _name;
 
         [SerializeField] private ModalBackdropStrategy _backdropStrategy = ModalBackdropStrategy.GeneratePerModal;
-        
+
         [SerializeField] private ModalBackdrop _overrideBackdropPrefab;
 
-        private readonly Dictionary<string, AssetLoadHandle<GameObject>> _assetLoadHandles
-            = new Dictionary<string, AssetLoadHandle<GameObject>>();
+        private readonly Dictionary<string, AssetLoadHandle<GameObject>> _assetLoadHandles = new();
 
-        private readonly List<IModalContainerCallbackReceiver> _callbackReceivers =
-            new List<IModalContainerCallbackReceiver>();
+        private readonly List<IModalContainerCallbackReceiver> _callbackReceivers = new();
 
-        private readonly Dictionary<string, Modal> _modals = new Dictionary<string, Modal>();
+        private readonly Dictionary<string, Modal> _modals = new();
 
-        private readonly List<string> _orderedModalIds = new List<string>();
+        private readonly List<string> _orderedModalIds = new();
 
-        private readonly Dictionary<string, AssetLoadHandle<GameObject>> _preloadedResourceHandles =
-            new Dictionary<string, AssetLoadHandle<GameObject>>();
+        private readonly Dictionary<string, AssetLoadHandle<GameObject>> _preloadedResourceHandles = new();
 
         private IAssetLoader _assetLoader;
 
+        private IModalBackdropHandler _backdropHandler;
+
         private ModalBackdrop _backdropPrefab;
         private CanvasGroup _canvasGroup;
-        public static List<ModalContainer> Instances { get; } = new List<ModalContainer>();
-
-        private IModalBackdropHandler _backdropHandler;
+        private ModalLifecycleHandler _lifecycleHandler;
         private ScreenContainerTransitionHandler _transitionHandler;
+        public static List<ModalContainer> Instances { get; } = new();
 
         /// <summary>
         ///     By default, <see cref="IAssetLoader" /> in <see cref="UnityScreenNavigatorSettings" /> is used.
@@ -59,11 +55,6 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         }
 
         /// <summary>
-        ///     True if in transition.
-        /// </summary>
-        public bool IsInTransition => _transitionHandler.IsInTransition;
-
-        /// <summary>
         ///     List of ModalIds sorted in the order they are stacked.
         /// </summary>
         public IReadOnlyList<string> OrderedModalIds => _orderedModalIds;
@@ -72,12 +63,6 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         ///     Map of ModalId to Modal.
         /// </summary>
         public IReadOnlyDictionary<string, Modal> Modals => _modals;
-
-        public bool Interactable
-        {
-            get => _canvasGroup.interactable;
-            set => _canvasGroup.interactable = value;
-        }
 
         private void Awake()
         {
@@ -93,6 +78,10 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
             _backdropHandler = ModalBackdropHandlerFactory.Create(_backdropStrategy, _backdropPrefab);
             _transitionHandler = new ScreenContainerTransitionHandler(this);
+            _lifecycleHandler = new ModalLifecycleHandler(
+                (RectTransform)transform,
+                _callbackReceivers,
+                _backdropHandler);
         }
 
         private void OnDestroy()
@@ -120,6 +109,17 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             foreach (var keyToRemove in keysToRemove) InstanceCacheByTransform.Remove(keyToRemove);
 
             Instances.Remove(this);
+        }
+
+        /// <summary>
+        ///     True if in transition.
+        /// </summary>
+        public bool IsInTransition => _transitionHandler.IsInTransition;
+
+        public bool Interactable
+        {
+            get => _canvasGroup.interactable;
+            set => _canvasGroup.interactable = value;
         }
 
         /// <summary>
@@ -193,11 +193,20 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <param name="loadAsync"></param>
         /// <param name="onLoad"></param>
         /// <returns></returns>
-        public AsyncProcessHandle Push(string resourceKey, bool playAnimation, string modalId = null,
-            bool loadAsync = true, Action<(string modalId, Modal modal)> onLoad = null)
+        public AsyncProcessHandle Push(
+            string resourceKey,
+            bool playAnimation,
+            string modalId = null,
+            bool loadAsync = true,
+            Action<(string modalId, Modal modal)> onLoad = null
+        )
         {
-            return CoroutineManager.Instance.Run(PushRoutine(typeof(Modal), resourceKey, playAnimation, onLoad,
-                loadAsync, modalId));
+            return CoroutineManager.Instance.Run(PushRoutine(typeof(Modal),
+                resourceKey,
+                playAnimation,
+                onLoad,
+                loadAsync,
+                modalId));
         }
 
         /// <summary>
@@ -210,10 +219,20 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <param name="loadAsync"></param>
         /// <param name="onLoad"></param>
         /// <returns></returns>
-        public AsyncProcessHandle Push(Type modalType, string resourceKey, bool playAnimation, string modalId = null,
-            bool loadAsync = true, Action<(string modalId, Modal modal)> onLoad = null)
+        public AsyncProcessHandle Push(
+            Type modalType,
+            string resourceKey,
+            bool playAnimation,
+            string modalId = null,
+            bool loadAsync = true,
+            Action<(string modalId, Modal modal)> onLoad = null
+        )
         {
-            return CoroutineManager.Instance.Run(PushRoutine(modalType, resourceKey, playAnimation, onLoad, loadAsync,
+            return CoroutineManager.Instance.Run(PushRoutine(modalType,
+                resourceKey,
+                playAnimation,
+                onLoad,
+                loadAsync,
                 modalId));
         }
 
@@ -227,12 +246,21 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <param name="onLoad"></param>
         /// <typeparam name="TModal"></typeparam>
         /// <returns></returns>
-        public AsyncProcessHandle Push<TModal>(string resourceKey, bool playAnimation, string modalId = null,
-            bool loadAsync = true, Action<(string modalId, TModal modal)> onLoad = null)
+        public AsyncProcessHandle Push<TModal>(
+            string resourceKey,
+            bool playAnimation,
+            string modalId = null,
+            bool loadAsync = true,
+            Action<(string modalId, TModal modal)> onLoad = null
+        )
             where TModal : Modal
         {
-            return CoroutineManager.Instance.Run(PushRoutine(typeof(TModal), resourceKey, playAnimation,
-                x => onLoad?.Invoke((x.modalId, (TModal)x.modal)), loadAsync, modalId));
+            return CoroutineManager.Instance.Run(PushRoutine(typeof(TModal),
+                resourceKey,
+                playAnimation,
+                x => onLoad?.Invoke((x.modalId, (TModal)x.modal)),
+                loadAsync,
+                modalId));
         }
 
         /// <summary>
@@ -260,7 +288,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 var modalId = _orderedModalIds[i];
                 if (modalId == destinationModalId)
                     break;
-                
+
                 popCount++;
             }
 
@@ -270,139 +298,100 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
         }
 
-        private IEnumerator PushRoutine(Type modalType, string resourceKey, bool playAnimation,
-            Action<(string modalId, Modal modal)> onLoad = null, bool loadAsync = true, string modalId = null)
+        private IEnumerator PushRoutine(
+            Type modalType,
+            string resourceKey,
+            bool playAnimation,
+            Action<(string modalId, Modal modal)> onLoad = null,
+            bool loadAsync = true,
+            string modalId = null
+        )
         {
-            if (resourceKey == null)
-                throw new ArgumentNullException(nameof(resourceKey));
-
-            if (IsInTransition)
-                throw new InvalidOperationException(
-                    "Cannot transition because the screen is already in transition.");
+            Assert.IsNotNull(resourceKey);
+            Assert.IsFalse(IsInTransition,
+                "Cannot transition because the screen is already in transition.");
 
             _transitionHandler.Begin();
 
-            var assetLoadHandle = loadAsync
-                ? AssetLoader.LoadAsync<GameObject>(resourceKey)
-                : AssetLoader.Load<GameObject>(resourceKey);
-            if (!assetLoadHandle.IsDone) yield return new WaitUntil(() => assetLoadHandle.IsDone);
+            // If the user explicitly specifies modalId, use it, otherwise generate it
+            modalId ??= Guid.NewGuid().ToString();
 
-            if (assetLoadHandle.Status == AssetLoadStatus.Failed) throw assetLoadHandle.OperationException;
+            Modal modal = null;
+            yield return LoadModal(modalType,
+                resourceKey,
+                loadAsync,
+                (m, lh) =>
+                {
+                    modal = m;
+                    _assetLoadHandles.Add(modalId, lh);
+                    onLoad?.Invoke((modalId, m));
+                });
 
-            var instance = Instantiate(assetLoadHandle.Result);
-            if (!instance.TryGetComponent(modalType, out var c))
-                c = instance.AddComponent(modalType);
+            var context = ModalPushContext.Create(modalId, modal, _orderedModalIds, _modals);
 
-            var context = ModalPushContext.Create(modalId, (Modal)c, _orderedModalIds, _modals);
-            var lifecycleHandler = new ModalLifecycleHandler(_callbackReceivers);
+            yield return _lifecycleHandler.AfterLoad(context);
 
-            _assetLoadHandles.Add(context.ModalId, assetLoadHandle);
-            onLoad?.Invoke((context.ModalId, context.EnterModal));
-            var afterLoadHandle = context.EnterModal.AfterLoad((RectTransform)transform);
-            while (!afterLoadHandle.IsTerminated)
-                yield return null;
+            yield return _lifecycleHandler.BeforePush(context);
 
-            // Preprocess
-            var preprocessHandles = lifecycleHandler.BeforePush(context);
-            foreach (var coroutineHandle in preprocessHandles)
-                while (!coroutineHandle.IsTerminated)
-                    yield return coroutineHandle;
+            yield return _lifecycleHandler.Push(context, playAnimation);
 
-            // Play Animation
-            var animationHandles = new List<AsyncProcessHandle>();
-            animationHandles.Add(
-                _backdropHandler.BeforeModalEnter(context.EnterModal, context.EnterModalIndex, playAnimation));
+            _lifecycleHandler.AfterPush(context);
 
-            if (context.ExitModal != null)
-                animationHandles.Add(context.ExitModal.Exit(true, playAnimation, context.EnterModal));
-
-            animationHandles.Add(context.EnterModal.Enter(true, playAnimation, context.ExitModal));
-
-            foreach (var coroutineHandle in animationHandles)
-                while (!coroutineHandle.IsTerminated)
-                    yield return coroutineHandle;
-
-            _backdropHandler.AfterModalEnter(context.EnterModal, context.EnterModalIndex, true);
-
-            // End Transition
             _modals.Add(context.ModalId, context.EnterModal);
             _orderedModalIds.Add(context.ModalId);
-            _transitionHandler.End();
 
-            // Postprocess
-            lifecycleHandler.AfterPush(context);
+            _transitionHandler.End();
         }
 
         private IEnumerator PopRoutine(bool playAnimation, int popCount = 1)
         {
             Assert.IsTrue(popCount >= 1);
+            Assert.IsTrue(_orderedModalIds.Count >= popCount,
+                "Cannot transition because the modal count is less than the pop count.");
+            Assert.IsFalse(IsInTransition,
+                "Cannot transition because the screen is already in transition.");
 
-            if (_orderedModalIds.Count < popCount)
-                throw new InvalidOperationException(
-                    "Cannot transition because the modal count is less than the pop count.");
-
-            if (IsInTransition)
-                throw new InvalidOperationException(
-                    "Cannot transition because the screen is already in transition.");
-
-            var context = ModalPopContext.Create(_orderedModalIds, _modals, popCount);
-            var lifecycleHandler = new ModalLifecycleHandler(_callbackReceivers);
-            
             _transitionHandler.Begin();
 
-            // Preprocess
-            var preprocessHandles = lifecycleHandler.BeforePop(context);
-            
-            foreach (var coroutineHandle in preprocessHandles)
-                while (!coroutineHandle.IsTerminated)
-                    yield return coroutineHandle;
+            var context = ModalPopContext.Create(_orderedModalIds, _modals, popCount);
 
-            // Play Animation
-            var animationHandles = new List<AsyncProcessHandle>();
-            for (var i = context.ExitModalIds.Count - 1; i >= 0; i--)
-            {
-                var exitModalId = context.ExitModalIds[i];
-                var exitModal = _modals[exitModalId];
-                var exitModalIndex = context.ExitModalIndices[i];
-                var partnerModalId = i == 0 ? context.EnterModalId : context.ExitModalIds[i - 1];
-                var partnerModal = partnerModalId == null ? null : _modals[partnerModalId];
-                animationHandles.Add(_backdropHandler.BeforeModalExit(exitModal, exitModalIndex, playAnimation));
-                animationHandles.Add(exitModal.Exit(false, playAnimation, partnerModal));
-            }
+            yield return _lifecycleHandler.BeforePop(context);
 
-            if (context.EnterModal != null)
-                animationHandles.Add(context.EnterModal.Enter(false, playAnimation, context.FirstExitModal));
+            yield return _lifecycleHandler.Pop(context, playAnimation);
 
-            foreach (var coroutineHandle in animationHandles)
-                while (!coroutineHandle.IsTerminated)
-                    yield return coroutineHandle;
+            _lifecycleHandler.AfterPop(context);
 
-            // End Transition
             for (var i = 0; i < context.ExitModalIds.Count; i++)
             {
-                var unusedModalId = context.ExitModalIds[i];
-                _modals.Remove(unusedModalId);
-                _orderedModalIds.RemoveAt(_orderedModalIds.Count - 1);
+                var exitModal = context.ExitModals[i];
+                var exitModalId = context.ExitModalIds[i];
+
+                exitModal.gameObject.SetActive(false);
+                _modals.Remove(exitModalId);
+                _orderedModalIds.Remove(exitModalId);
             }
+
             _transitionHandler.End();
 
-            // Postprocess
-            lifecycleHandler.AfterPop(context);
-            
-            // Unload Unused Page
-            var beforeReleaseHandle = context.FirstExitModal.BeforeRelease();
-            while (!beforeReleaseHandle.IsTerminated) yield return null;
+            // Resource cleanup isn't tied to the transition itself, so it should be handled asynchronously in the background.
+            StartCoroutine(AfterPopRoutine(context));
+        }
+
+        private IEnumerator AfterPopRoutine(
+            ModalPopContext context
+        )
+        {
+            yield return _lifecycleHandler.AfterPopRoutine(context);
 
             for (var i = 0; i < context.ExitModalIds.Count; i++)
             {
-                var unusedModalId = context.ExitModalIds[i];
-                var unusedModal = context.ExitModals[i];
-                var unusedModalIndex = context.ExitModalIndices[i];
-                var loadHandle = _assetLoadHandles[unusedModalId];
-                Destroy(unusedModal.gameObject);
+                var exitModalId = context.ExitModalIds[i];
+                var exitModal = context.ExitModals[i];
+                var loadHandle = _assetLoadHandles[exitModalId];
+
+                Destroy(exitModal.gameObject);
                 AssetLoader.Release(loadHandle);
-                _assetLoadHandles.Remove(unusedModalId);
-                _backdropHandler.AfterModalExit(context.FirstExitModal, unusedModalIndex, playAnimation);
+                _assetLoadHandles.Remove(exitModalId);
             }
         }
 
@@ -446,6 +435,31 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             var handle = _preloadedResourceHandles[resourceKey];
             AssetLoader.Release(handle);
+        }
+
+        private IEnumerator LoadModal(
+            Type modalType,
+            string resourceKey,
+            bool loadAsync,
+            Action<Modal, AssetLoadHandle<GameObject>> onLoaded
+        )
+        {
+            var assetLoadHandle = loadAsync
+                ? AssetLoader.LoadAsync<GameObject>(resourceKey)
+                : AssetLoader.Load<GameObject>(resourceKey);
+
+            if (!assetLoadHandle.IsDone)
+                yield return new WaitUntil(() => assetLoadHandle.IsDone);
+
+            if (assetLoadHandle.Status == AssetLoadStatus.Failed)
+                throw assetLoadHandle.OperationException;
+
+            var instance = Instantiate(assetLoadHandle.Result);
+            if (!instance.TryGetComponent(modalType, out var c))
+                c = instance.AddComponent(modalType);
+
+            var modal = (Modal)c;
+            onLoaded?.Invoke(modal, assetLoadHandle);
         }
     }
 }

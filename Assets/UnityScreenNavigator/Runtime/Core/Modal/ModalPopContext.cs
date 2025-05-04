@@ -13,6 +13,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         public Modal FirstExitModal => ExitModals[0];
 
+        public int FirstExitModalIndex => ExitModalIndices[0];
+
         private ModalPopContext(
             List<string> exitModalIds,
             List<Modal> exitModals,

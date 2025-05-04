@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
@@ -35,6 +36,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         public static List<SheetContainer> Instances { get; } = new List<SheetContainer>();
 
         private ScreenContainerTransitionHandler _transitionHandler;
+        private SheetLifecycleHandler _lifecycleHandler;
 
         /// <summary>
         ///     By default, <see cref="IAssetLoader" /> in <see cref="UnityScreenNavigatorSettings" /> is used.
@@ -84,6 +86,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             if (!string.IsNullOrWhiteSpace(_name)) InstanceCacheByName.Add(_name, this);
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
             _transitionHandler = new ScreenContainerTransitionHandler(this);
+            _lifecycleHandler = new SheetLifecycleHandler((RectTransform)transform, _callbackReceivers);
         }
 
         private void OnDestroy()
@@ -247,35 +250,26 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         private IEnumerator RegisterRoutine(Type sheetType, string resourceKey,
             Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true, string sheetId = null)
         {
-            if (resourceKey == null) throw new ArgumentNullException(nameof(resourceKey));
+            Assert.IsNotNull(resourceKey);
 
-            var context = new SheetRegisterContext(sheetType, resourceKey, sheetId);
+            sheetId ??= Guid.NewGuid().ToString();
 
-            // アセットのロード
-            var assetLoadHandle = loadAsync
-                ? AssetLoader.LoadAsync<GameObject>(resourceKey)
-                : AssetLoader.Load<GameObject>(resourceKey);
-            context.SetAssetLoadHandle(assetLoadHandle);
-            while (!assetLoadHandle.IsDone) yield return null;
+            Sheet sheet = null;
+            yield return LoadSheet(sheetType,
+                resourceKey,
+                loadAsync,
+                (s, lh) =>
+                {
+                    sheet = s;
+                    _sheets.Add(sheetId, sheet);
+                    _sheetNameToId[resourceKey] = sheetId;
+                    _assetLoadHandles.Add(sheetId, lh);
+                    onLoad?.Invoke((sheetId, s));
+                });
 
-            if (assetLoadHandle.Status == AssetLoadStatus.Failed) throw assetLoadHandle.OperationException;
+            var context = new SheetRegisterContext(sheetId, sheet);
 
-            // シートのインスタンス化と初期化
-            var instance = Instantiate(assetLoadHandle.Result);
-            if (!instance.TryGetComponent(sheetType, out var c))
-                c = instance.AddComponent(sheetType);
-            var sheet = (Sheet)c;
-            context.SetSheet(sheet);
-
-            // シートの登録
-            _sheets.Add(context.SheetId, sheet);
-            _sheetNameToId[resourceKey] = context.SheetId;
-            _assetLoadHandles.Add(context.SheetId, assetLoadHandle);
-            onLoad?.Invoke((context.SheetId, sheet));
-
-            // シートの後処理
-            var afterLoadHandle = sheet.AfterLoad((RectTransform)transform);
-            while (!afterLoadHandle.IsTerminated) yield return null;
+            yield return _lifecycleHandler.AfterLoad(context);
 
             yield return context.SheetId;
         }
@@ -288,76 +282,46 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         private IEnumerator ShowRoutine(string sheetId, bool playAnimation)
         {
-            if (IsInTransition)
-                throw new InvalidOperationException(
-                    "Cannot transition because the screen is already in transition.");
-
-            if (ActiveSheetId != null && ActiveSheetId == sheetId)
-                throw new InvalidOperationException(
-                    "Cannot transition because the sheet is already active.");
+            Assert.IsFalse(IsInTransition,
+                "Cannot transition because the screen is already in transition.");
+            Assert.IsFalse(ActiveSheetId != null && ActiveSheetId == sheetId,
+                "Cannot transition because the sheet is already active.");
 
             var context = SheetShowContext.Create(sheetId, ActiveSheetId, _sheets);
-            var lifecycleHandler = new SheetLifecycleHandler(_callbackReceivers);
 
             _transitionHandler.Begin();
 
-            // Preprocess
-            var preprocessHandles = lifecycleHandler.BeforeShow(context);
-            foreach (var coroutineHandle in preprocessHandles)
-                while (!coroutineHandle.IsTerminated)
-                    yield return null;
+            yield return _lifecycleHandler.BeforeShow(context);
 
-            // Play Animation
-            var animationHandles = new List<AsyncProcessHandle>();
-            if (context.ExitSheet != null)
-                animationHandles.Add(context.ExitSheet.Exit(playAnimation, context.EnterSheet));
+            yield return _lifecycleHandler.Show(context, playAnimation);
 
-            animationHandles.Add(context.EnterSheet.Enter(playAnimation, context.ExitSheet));
+            _lifecycleHandler.AfterShow(context);
 
-            foreach (var handle in animationHandles)
-                while (!handle.IsTerminated)
-                    yield return null;
-
-            // End Transition
             ActiveSheetId = sheetId;
+            
             _transitionHandler.End();
-
-            // Postprocess
-            lifecycleHandler.AfterShow(context);
         }
 
         private IEnumerator HideRoutine(bool playAnimation)
         {
-            if (IsInTransition)
-                throw new InvalidOperationException(
-                    "Cannot transition because the screen is already in transition.");
-
-            if (ActiveSheetId == null)
-                throw new InvalidOperationException(
-                    "Cannot transition because there is no active sheets.");
+            Assert.IsFalse(IsInTransition,
+                "Cannot transition because the screen is already in transition.");
+            Assert.IsNotNull(ActiveSheetId,
+                "Cannot transition because there is no active sheets.");
 
             _transitionHandler.Begin();
 
-            var context = SheetHideContext.Create(_sheets[ActiveSheetId], playAnimation);
-            var lifecycleHandler = new SheetLifecycleHandler(_callbackReceivers);
+            var context = SheetHideContext.Create(_sheets[ActiveSheetId]);
 
-            // Preprocess
-            var preprocessHandles = lifecycleHandler.BeforeHide(context);
-            foreach (var coroutineHandle in preprocessHandles)
-                while (!coroutineHandle.IsTerminated)
-                    yield return coroutineHandle;
+            yield return _lifecycleHandler.BeforeHide(context);
 
-            // Play Animation
-            var animationHandle = context.ExitSheet.Exit(context.PlayAnimation, null);
-            while (!animationHandle.IsTerminated) 
-                yield return null;
+            yield return _lifecycleHandler.Hide(context, playAnimation);
 
-            // End Transition
+            _lifecycleHandler.AfterHide(context);
+
             ActiveSheetId = null;
+            
             _transitionHandler.End();
-
-            // Postprocess
-            lifecycleHandler.AfterHide(context);
         }
 
         /// <summary>
@@ -376,6 +340,31 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 AssetLoader.Release(assetLoadHandle);
 
             _assetLoadHandles.Clear();
+        }
+
+        private IEnumerator LoadSheet(
+            Type sheetType,
+            string resourceKey,
+            bool loadAsync,
+            Action<Sheet, AssetLoadHandle<GameObject>> onLoaded
+        )
+        {
+            var assetLoadHandle = loadAsync
+                ? AssetLoader.LoadAsync<GameObject>(resourceKey)
+                : AssetLoader.Load<GameObject>(resourceKey);
+
+            if (!assetLoadHandle.IsDone)
+                yield return new WaitUntil(() => assetLoadHandle.IsDone);
+
+            if (assetLoadHandle.Status == AssetLoadStatus.Failed)
+                throw assetLoadHandle.OperationException;
+
+            var instance = Instantiate(assetLoadHandle.Result);
+            if (!instance.TryGetComponent(sheetType, out var c))
+                c = instance.AddComponent(sheetType);
+
+            var sheet = (Sheet)c;
+            onLoaded?.Invoke(sheet, assetLoadHandle);
         }
     }
 }

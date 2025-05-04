@@ -39,21 +39,21 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             int popCount
         )
         {
-            var unusedIds = new List<string>();
-            var unusedPages = new List<Page>();
+            var exitPageIds = new List<string>();
+            var exitPages = new List<Page>();
 
             for (var i = orderedPageIds.Count - 1; i >= orderedPageIds.Count - popCount; i--)
             {
                 var id = orderedPageIds[i];
-                unusedIds.Add(id);
-                unusedPages.Add(pages[id]);
+                exitPageIds.Add(id);
+                exitPages.Add(pages[id]);
             }
 
             var enterIndex = orderedPageIds.Count - popCount - 1;
             var enterId = enterIndex >= 0 ? orderedPageIds[enterIndex] : null;
             var enter = enterId != null ? pages[enterId] : null;
 
-            return new PagePopContext(orderedPageIds, pages, unusedIds, unusedPages, enterId, enter);
+            return new PagePopContext(orderedPageIds, pages, exitPageIds, exitPages, enterId, enter);
         }
     }
 }

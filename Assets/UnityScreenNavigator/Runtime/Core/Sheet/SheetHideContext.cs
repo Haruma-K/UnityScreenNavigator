@@ -2,18 +2,16 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 {
     public sealed class SheetHideContext
     {
-        private SheetHideContext(Sheet exitSheet, bool playAnimation)
+        private SheetHideContext(Sheet exitSheet)
         {
             ExitSheet = exitSheet;
-            PlayAnimation = playAnimation;
         }
 
         public Sheet ExitSheet { get; }
-        public bool PlayAnimation { get; }
 
-        public static SheetHideContext Create(Sheet exitSheet, bool playAnimation)
+        public static SheetHideContext Create(Sheet exitSheet)
         {
-            return new SheetHideContext(exitSheet, playAnimation);
+            return new SheetHideContext(exitSheet);
         }
     }
 }

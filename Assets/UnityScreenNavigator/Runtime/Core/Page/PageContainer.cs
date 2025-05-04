@@ -14,35 +14,31 @@ namespace UnityScreenNavigator.Runtime.Core.Page
     [RequireComponent(typeof(RectMask2D))]
     public sealed class PageContainer : MonoBehaviour, IScreenContainer
     {
-        private static readonly Dictionary<int, PageContainer> InstanceCacheByTransform =
-            new Dictionary<int, PageContainer>();
+        private static readonly Dictionary<int, PageContainer> InstanceCacheByTransform = new();
 
-        private static readonly Dictionary<string, PageContainer> InstanceCacheByName =
-            new Dictionary<string, PageContainer>();
+        private static readonly Dictionary<string, PageContainer> InstanceCacheByName = new();
 
         [SerializeField] private string _name;
 
-        private readonly Dictionary<string, AssetLoadHandle<GameObject>> _assetLoadHandles
-            = new Dictionary<string, AssetLoadHandle<GameObject>>();
+        private readonly Dictionary<string, AssetLoadHandle<GameObject>> _assetLoadHandles = new();
 
-        private readonly List<IPageContainerCallbackReceiver> _callbackReceivers =
-            new List<IPageContainerCallbackReceiver>();
+        private readonly List<IPageContainerCallbackReceiver> _callbackReceivers = new();
 
-        private readonly List<string> _orderedPageIds = new List<string>();
+        private readonly List<string> _orderedPageIds = new();
 
-        private readonly Dictionary<string, Page> _pages = new Dictionary<string, Page>();
+        private readonly Dictionary<string, Page> _pages = new();
 
-        private readonly Dictionary<string, AssetLoadHandle<GameObject>> _preloadedResourceHandles =
-            new Dictionary<string, AssetLoadHandle<GameObject>>();
+        private readonly Dictionary<string, AssetLoadHandle<GameObject>> _preloadedResourceHandles = new();
 
         private IAssetLoader _assetLoader;
 
         private CanvasGroup _canvasGroup;
 
         private bool _isActivePageStacked;
-        public static List<PageContainer> Instances { get; } = new List<PageContainer>();
+        private PageLifecycleHandler _lifecycleHandler;
 
         private ScreenContainerTransitionHandler _transitionHandler;
+        public static List<PageContainer> Instances { get; } = new();
 
         /// <summary>
         ///     By default, <see cref="IAssetLoader" /> in <see cref="UnityScreenNavigatorSettings" /> is used.
@@ -55,12 +51,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         }
 
         /// <summary>
-        ///     True if in transition.
-        /// </summary>
-        public bool IsInTransition => _transitionHandler.IsInTransition;
-
-        /// <summary>
-        ///     List of PageIds sorted in the order they are stacked. 
+        ///     List of PageIds sorted in the order they are stacked.
         /// </summary>
         public IReadOnlyList<string> OrderedPagesIds => _orderedPageIds;
 
@@ -68,12 +59,6 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         ///     Map of PageId to Page.
         /// </summary>
         public IReadOnlyDictionary<string, Page> Pages => _pages;
-
-        public bool Interactable
-        {
-            get => _canvasGroup.interactable;
-            set => _canvasGroup.interactable = value;
-        }
 
         private void Awake()
         {
@@ -84,6 +69,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
             _transitionHandler = new ScreenContainerTransitionHandler(this);
+            _lifecycleHandler = new PageLifecycleHandler((RectTransform)transform, _callbackReceivers);
         }
 
         private void OnDestroy()
@@ -112,6 +98,17 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             foreach (var keyToRemove in keysToRemove) InstanceCacheByTransform.Remove(keyToRemove);
 
             Instances.Remove(this);
+        }
+
+        /// <summary>
+        ///     True if in transition.
+        /// </summary>
+        public bool IsInTransition => _transitionHandler.IsInTransition;
+
+        public bool Interactable
+        {
+            get => _canvasGroup.interactable;
+            set => _canvasGroup.interactable = value;
         }
 
         /// <summary>
@@ -186,11 +183,22 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <param name="loadAsync"></param>
         /// <param name="onLoad"></param>
         /// <returns></returns>
-        public AsyncProcessHandle Push(string resourceKey, bool playAnimation, bool stack = true, string pageId = null,
-            bool loadAsync = true, Action<(string pageId, Page page)> onLoad = null)
+        public AsyncProcessHandle Push(
+            string resourceKey,
+            bool playAnimation,
+            bool stack = true,
+            string pageId = null,
+            bool loadAsync = true,
+            Action<(string pageId, Page page)> onLoad = null
+        )
         {
-            return CoroutineManager.Instance.Run(PushRoutine(typeof(Page), resourceKey, playAnimation, stack, onLoad,
-                loadAsync, pageId));
+            return CoroutineManager.Instance.Run(PushRoutine(typeof(Page),
+                resourceKey,
+                playAnimation,
+                stack,
+                onLoad,
+                loadAsync,
+                pageId));
         }
 
         /// <summary>
@@ -204,11 +212,23 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <param name="loadAsync"></param>
         /// <param name="onLoad"></param>
         /// <returns></returns>
-        public AsyncProcessHandle Push(Type pageType, string resourceKey, bool playAnimation, bool stack = true,
-            string pageId = null, bool loadAsync = true, Action<(string pageId, Page page)> onLoad = null)
+        public AsyncProcessHandle Push(
+            Type pageType,
+            string resourceKey,
+            bool playAnimation,
+            bool stack = true,
+            string pageId = null,
+            bool loadAsync = true,
+            Action<(string pageId, Page page)> onLoad = null
+        )
         {
-            return CoroutineManager.Instance.Run(PushRoutine(pageType, resourceKey, playAnimation, stack, onLoad,
-                loadAsync, pageId));
+            return CoroutineManager.Instance.Run(PushRoutine(pageType,
+                resourceKey,
+                playAnimation,
+                stack,
+                onLoad,
+                loadAsync,
+                pageId));
         }
 
         /// <summary>
@@ -222,12 +242,23 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <param name="onLoad"></param>
         /// <typeparam name="TPage"></typeparam>
         /// <returns></returns>
-        public AsyncProcessHandle Push<TPage>(string resourceKey, bool playAnimation, bool stack = true,
-            string pageId = null, bool loadAsync = true, Action<(string pageId, TPage page)> onLoad = null)
+        public AsyncProcessHandle Push<TPage>(
+            string resourceKey,
+            bool playAnimation,
+            bool stack = true,
+            string pageId = null,
+            bool loadAsync = true,
+            Action<(string pageId, TPage page)> onLoad = null
+        )
             where TPage : Page
         {
-            return CoroutineManager.Instance.Run(PushRoutine(typeof(TPage), resourceKey, playAnimation, stack,
-                x => onLoad?.Invoke((x.pageId, (TPage)x.page)), loadAsync, pageId));
+            return CoroutineManager.Instance.Run(PushRoutine(typeof(TPage),
+                resourceKey,
+                playAnimation,
+                stack,
+                x => onLoad?.Invoke((x.pageId, (TPage)x.page)),
+                loadAsync,
+                pageId));
         }
 
         /// <summary>
@@ -255,7 +286,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 var pageId = _orderedPageIds[i];
                 if (pageId == destinationPageId)
                     break;
-                
+
                 popCount++;
             }
 
@@ -265,150 +296,123 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
         }
 
-        private IEnumerator PushRoutine(Type pageType, string resourceKey, bool playAnimation, bool stack = true,
-            Action<(string pageId, Page page)> onLoad = null, bool loadAsync = true, string pageId = null)
+        private IEnumerator PushRoutine(
+            Type pageType,
+            string resourceKey,
+            bool playAnimation,
+            bool stack = true,
+            Action<(string pageId, Page page)> onLoad = null,
+            bool loadAsync = true,
+            string pageId = null
+        )
         {
-            if (resourceKey == null)
-                throw new ArgumentNullException(nameof(resourceKey));
+            Assert.IsNotNull(resourceKey);
+            Assert.IsFalse(IsInTransition,
+                "Cannot transition because the screen is already in transition.");
 
-            if (IsInTransition)
-                throw new InvalidOperationException(
-                    "Cannot transition because the screen is already in transition.");
-            
             _transitionHandler.Begin();
 
-            // Setup
-            var assetLoadHandle = loadAsync
-                ? AssetLoader.LoadAsync<GameObject>(resourceKey)
-                : AssetLoader.Load<GameObject>(resourceKey);
-            if (!assetLoadHandle.IsDone) yield return new WaitUntil(() => assetLoadHandle.IsDone);
+            pageId ??= Guid.NewGuid().ToString();
 
-            if (assetLoadHandle.Status == AssetLoadStatus.Failed) throw assetLoadHandle.OperationException;
+            Page page = null;
+            yield return LoadPage(pageType,
+                resourceKey,
+                loadAsync,
+                (p, lh) =>
+                {
+                    page = p;
+                    _assetLoadHandles.Add(pageId, lh);
+                    onLoad?.Invoke((pageId, p));
+                });
 
-            var instance = Instantiate(assetLoadHandle.Result);
-            if (!instance.TryGetComponent(pageType, out var c))
-                c = instance.AddComponent(pageType);
+            var context = PagePushContext.Create(pageId, page, _orderedPageIds, _pages, stack, _isActivePageStacked);
 
-            var context = PagePushContext.Create(pageId, (Page)c, _orderedPageIds, _pages, stack);
-            var lifecycleHandler = new PageLifecycleHandler(_callbackReceivers);
+            yield return _lifecycleHandler.AfterLoad(context);
 
-            _assetLoadHandles.Add(context.EnterPageId, assetLoadHandle);
-            onLoad?.Invoke((context.EnterPageId, context.EnterPage));
-            var afterLoadHandle = context.EnterPage.AfterLoad((RectTransform)transform);
-            while (!afterLoadHandle.IsTerminated)
-                yield return null;
+            yield return _lifecycleHandler.BeforePush(context);
 
-            // Preprocess
-            var preprocessHandles = lifecycleHandler.BeforePush(context);
-            foreach (var coroutineHandle in preprocessHandles)
-                while (!coroutineHandle.IsTerminated)
-                    yield return coroutineHandle;
+            yield return _lifecycleHandler.Push(context, playAnimation);
 
-            // Play Animations
-            var animationHandles = new List<AsyncProcessHandle>();
-            if (context.ExitPage != null)
-                animationHandles.Add(context.ExitPage.Exit(true, playAnimation, context.EnterPage));
+            _lifecycleHandler.AfterPush(context);
 
-            animationHandles.Add(context.EnterPage.Enter(true, playAnimation, context.ExitPage));
-
-            foreach (var coroutineHandle in animationHandles)
-                while (!coroutineHandle.IsTerminated)
-                    yield return coroutineHandle;
-
-            // End Transition
-            if (!_isActivePageStacked && context.ExitPage != null)
+            if (context.ShouldRemoveExitPage)
             {
+                context.ExitPage.gameObject.SetActive(false);
                 _pages.Remove(context.ExitPageId);
                 _orderedPageIds.Remove(context.ExitPageId);
             }
 
             _pages.Add(context.EnterPageId, context.EnterPage);
             _orderedPageIds.Add(context.EnterPageId);
+            _isActivePageStacked = stack;
 
             _transitionHandler.End();
 
-            // Postprocess
-            lifecycleHandler.AfterPush(context);
+            // Resource cleanup isn't tied to the transition itself, so it should be handled asynchronously in the background.
+            StartCoroutine(AfterPushRoutine(context));
+        }
 
-            // Unload Unused Page
-            if (!_isActivePageStacked && context.ExitPage != null)
+        private IEnumerator AfterPushRoutine(
+            PagePushContext context
+        )
+        {
+            yield return _lifecycleHandler.AfterPushRoutine(context);
+            if (context.ShouldRemoveExitPage)
             {
-                var beforeReleaseHandle = context.ExitPage.BeforeRelease();
-                while (!beforeReleaseHandle.IsTerminated) yield return null;
-
+                Destroy(context.ExitPage.gameObject);
                 var handle = _assetLoadHandles[context.ExitPageId];
                 AssetLoader.Release(handle);
-
-                Destroy(context.ExitPage.gameObject);
                 _assetLoadHandles.Remove(context.ExitPageId);
             }
-
-            _isActivePageStacked = stack;
         }
 
         private IEnumerator PopRoutine(bool playAnimation, int popCount = 1)
         {
             Assert.IsTrue(popCount >= 1);
-
-            if (_pages.Count < popCount)
-                throw new InvalidOperationException(
-                    "Cannot transition because the page count is less than the pop count.");
-
-            if (IsInTransition)
-                throw new InvalidOperationException(
-                    "Cannot transition because the screen is already in transition.");
+            Assert.IsTrue(_pages.Count >= popCount,
+                "Cannot transition because the page count is less than the pop count.");
+            Assert.IsFalse(IsInTransition,
+                "Cannot transition because the screen is already in transition.");
 
             _transitionHandler.Begin();
 
             var context = PagePopContext.Create(_orderedPageIds, _pages, popCount);
-            var lifecycleHandler = new PageLifecycleHandler(_callbackReceivers);
 
-            // Preprocess
-            var preprocessHandles = lifecycleHandler.BeforePop(context);
-            
-            foreach (var coroutineHandle in preprocessHandles)
-                while (!coroutineHandle.IsTerminated)
-                    yield return coroutineHandle;
+            yield return _lifecycleHandler.BeforePop(context);
 
-            // Play Animations
-            var animationHandles = new List<AsyncProcessHandle>
-            {
-                context.ExitPage.Exit(false, playAnimation, context.EnterPage)
-            };
-            if (context.EnterPage != null) animationHandles.Add(context.EnterPage.Enter(false, playAnimation, context.ExitPage));
+            yield return _lifecycleHandler.Pop(context, playAnimation);
 
-            foreach (var coroutineHandle in animationHandles)
-                while (!coroutineHandle.IsTerminated)
-                    yield return coroutineHandle;
+            _lifecycleHandler.AfterPop(context);
 
-            // End Transition
             for (var i = 0; i < context.ExitPageIds.Count; i++)
             {
-                var unusedPageId = context.ExitPageIds[i];
-                _pages.Remove(unusedPageId);
+                var exitPage = context.ExitPages[i];
+                var exitPageId = context.ExitPageIds[i];
+                exitPage.gameObject.SetActive(false);
+                _pages.Remove(exitPageId);
                 _orderedPageIds.RemoveAt(_orderedPageIds.Count - 1);
             }
 
+            _isActivePageStacked = true;
+
             _transitionHandler.End();
 
-            // Postprocess
-            lifecycleHandler.AfterPop(context);
+            // Resource cleanup isn't tied to the transition itself, so it should be handled asynchronously in the background.
+            StartCoroutine(AfterPopRoutine(context));
+        }
 
-            // Unload Unused Page
-            var beforeReleaseHandle = context.ExitPage.BeforeRelease();
-            while (!beforeReleaseHandle.IsTerminated) yield return null;
-
+        private IEnumerator AfterPopRoutine(PagePopContext context)
+        {
+            yield return _lifecycleHandler.AfterPopRoutine(context);
             for (var i = 0; i < context.ExitPageIds.Count; i++)
             {
                 var unusedPageId = context.ExitPageIds[i];
                 var unusedPage = context.ExitPages[i];
-                var loadHandle = _assetLoadHandles[unusedPageId];
                 Destroy(unusedPage.gameObject);
+                var loadHandle = _assetLoadHandles[unusedPageId];
                 AssetLoader.Release(loadHandle);
                 _assetLoadHandles.Remove(unusedPageId);
             }
-
-            _isActivePageStacked = true;
         }
 
         public AsyncProcessHandle Preload(string resourceKey, bool loadAsync = true)
@@ -452,6 +456,31 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             var handle = _preloadedResourceHandles[resourceKey];
             _preloadedResourceHandles.Remove(resourceKey);
             AssetLoader.Release(handle);
+        }
+
+        private IEnumerator LoadPage(
+            Type pageType,
+            string resourceKey,
+            bool loadAsync,
+            Action<Page, AssetLoadHandle<GameObject>> onLoaded
+        )
+        {
+            var assetLoadHandle = loadAsync
+                ? AssetLoader.LoadAsync<GameObject>(resourceKey)
+                : AssetLoader.Load<GameObject>(resourceKey);
+
+            if (!assetLoadHandle.IsDone)
+                yield return new WaitUntil(() => assetLoadHandle.IsDone);
+
+            if (assetLoadHandle.Status == AssetLoadStatus.Failed)
+                throw assetLoadHandle.OperationException;
+
+            var instance = Instantiate(assetLoadHandle.Result);
+            if (!instance.TryGetComponent(pageType, out var c))
+                c = instance.AddComponent(pageType);
+
+            var page = (Page)c;
+            onLoaded?.Invoke(page, assetLoadHandle);
         }
     }
 }

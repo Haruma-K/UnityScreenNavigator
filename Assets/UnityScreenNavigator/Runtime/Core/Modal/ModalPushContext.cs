@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace UnityScreenNavigator.Runtime.Core.Modal
@@ -35,15 +34,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             Dictionary<string, Modal> modals
         )
         {
-            var resolvedModalId = modalId ?? Guid.NewGuid().ToString();
-
             var hasExit = orderedModalIds.Count > 0;
             var exitId = hasExit ? orderedModalIds[orderedModalIds.Count - 1] : null;
             var exitModal = hasExit ? modals[exitId] : null;
 
             var enterIndex = modals.Count;
 
-            return new ModalPushContext(resolvedModalId, enterModal, exitId, exitModal, enterIndex);
+            return new ModalPushContext(modalId, enterModal, exitId, exitModal, enterIndex);
         }
     }
 }
