@@ -294,6 +294,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 c = instance.AddComponent(modalType);
 
             var context = ModalPushContext.Create(modalId, (Modal)c, _orderedModalIds, _modals);
+            var lifecycleHandler = new ModalLifecycleHandler(_callbackReceivers);
 
             _assetLoadHandles.Add(context.ModalId, assetLoadHandle);
             onLoad?.Invoke((context.ModalId, context.EnterModal));
@@ -302,15 +303,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 yield return null;
 
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers)
-                callbackReceiver.BeforePush(context.EnterModal, context.ExitModal);
-
-            var preprocessHandles = new List<AsyncProcessHandle>();
-            if (context.ExitModal != null)
-                preprocessHandles.Add(context.ExitModal.BeforeExit(true, context.EnterModal));
-
-            preprocessHandles.Add(context.EnterModal.BeforeEnter(true, context.ExitModal));
-
+            var preprocessHandles = lifecycleHandler.BeforePush(context);
             foreach (var coroutineHandle in preprocessHandles)
                 while (!coroutineHandle.IsTerminated)
                     yield return coroutineHandle;
@@ -337,12 +330,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _transitionHandler.End();
 
             // Postprocess
-            if (context.ExitModal != null) context.ExitModal.AfterExit(true, context.EnterModal);
-
-            context.EnterModal.AfterEnter(true, context.ExitModal);
-
-            foreach (var callbackReceiver in _callbackReceivers)
-                callbackReceiver.AfterPush(context.EnterModal, context.ExitModal);
+            lifecycleHandler.AfterPush(context);
         }
 
         private IEnumerator PopRoutine(bool playAnimation, int popCount = 1)
@@ -358,20 +346,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     "Cannot transition because the screen is already in transition.");
 
             var context = ModalPopContext.Create(_orderedModalIds, _modals, popCount);
+            var lifecycleHandler = new ModalLifecycleHandler(_callbackReceivers);
             
             _transitionHandler.Begin();
 
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers)
-                callbackReceiver.BeforePop(context.EnterModal, context.FirstExitModal);
-
-            var preprocessHandles = new List<AsyncProcessHandle>
-            {
-                context.FirstExitModal.BeforeExit(false, context.EnterModal)
-            };
-            if (context.EnterModal != null)
-                preprocessHandles.Add(context.EnterModal.BeforeEnter(false, context.FirstExitModal));
-
+            var preprocessHandles = lifecycleHandler.BeforePop(context);
+            
             foreach (var coroutineHandle in preprocessHandles)
                 while (!coroutineHandle.IsTerminated)
                     yield return coroutineHandle;
@@ -406,12 +387,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _transitionHandler.End();
 
             // Postprocess
-            context.FirstExitModal.AfterExit(false, context.EnterModal);
-            if (context.EnterModal != null) context.EnterModal.AfterEnter(false, context.FirstExitModal);
-
-            foreach (var callbackReceiver in _callbackReceivers)
-                callbackReceiver.AfterPop(context.EnterModal, context.FirstExitModal);
-
+            lifecycleHandler.AfterPop(context);
+            
             // Unload Unused Page
             var beforeReleaseHandle = context.FirstExitModal.BeforeRelease();
             while (!beforeReleaseHandle.IsTerminated) yield return null;

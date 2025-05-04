@@ -297,18 +297,12 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                     "Cannot transition because the sheet is already active.");
 
             var context = SheetShowContext.Create(sheetId, ActiveSheetId, _sheets);
+            var lifecycleHandler = new SheetLifecycleHandler(_callbackReceivers);
 
             _transitionHandler.Begin();
 
-
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers)
-                callbackReceiver.BeforeShow(context.EnterSheet, context.ExitSheet);
-
-            var preprocessHandles = new List<AsyncProcessHandle>();
-            if (context.ExitSheet != null) preprocessHandles.Add(context.ExitSheet.BeforeExit(context.EnterSheet));
-
-            preprocessHandles.Add(context.EnterSheet.BeforeEnter(context.ExitSheet));
+            var preprocessHandles = lifecycleHandler.BeforeShow(context);
             foreach (var coroutineHandle in preprocessHandles)
                 while (!coroutineHandle.IsTerminated)
                     yield return null;
@@ -329,12 +323,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             _transitionHandler.End();
 
             // Postprocess
-            if (context.ExitSheet != null) context.ExitSheet.AfterExit(context.EnterSheet);
-
-            context.EnterSheet.AfterEnter(context.ExitSheet);
-
-            foreach (var callbackReceiver in _callbackReceivers)
-                callbackReceiver.AfterShow(context.EnterSheet, context.ExitSheet);
+            lifecycleHandler.AfterShow(context);
         }
 
         private IEnumerator HideRoutine(bool playAnimation)
@@ -350,14 +339,13 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             _transitionHandler.Begin();
 
             var context = SheetHideContext.Create(_sheets[ActiveSheetId], playAnimation);
+            var lifecycleHandler = new SheetLifecycleHandler(_callbackReceivers);
 
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers) 
-                callbackReceiver.BeforeHide(context.ExitSheet);
-
-            var preprocessHandle = context.ExitSheet.BeforeExit(null);
-            while (!preprocessHandle.IsTerminated) 
-                yield return preprocessHandle;
+            var preprocessHandles = lifecycleHandler.BeforeHide(context);
+            foreach (var coroutineHandle in preprocessHandles)
+                while (!coroutineHandle.IsTerminated)
+                    yield return coroutineHandle;
 
             // Play Animation
             var animationHandle = context.ExitSheet.Exit(context.PlayAnimation, null);
@@ -369,9 +357,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             _transitionHandler.End();
 
             // Postprocess
-            context.ExitSheet.AfterExit(null);
-            foreach (var callbackReceiver in _callbackReceivers) 
-                callbackReceiver.AfterHide(context.ExitSheet);
+            lifecycleHandler.AfterHide(context);
         }
 
         /// <summary>

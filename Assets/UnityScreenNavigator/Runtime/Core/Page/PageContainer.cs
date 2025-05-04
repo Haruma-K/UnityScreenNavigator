@@ -290,6 +290,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 c = instance.AddComponent(pageType);
 
             var context = PagePushContext.Create(pageId, (Page)c, _orderedPageIds, _pages, stack);
+            var lifecycleHandler = new PageLifecycleHandler(_callbackReceivers);
 
             _assetLoadHandles.Add(context.EnterPageId, assetLoadHandle);
             onLoad?.Invoke((context.EnterPageId, context.EnterPage));
@@ -298,14 +299,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 yield return null;
 
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers)
-                callbackReceiver.BeforePush(context.EnterPage, context.ExitPage);
-
-            var preprocessHandles = new List<AsyncProcessHandle>();
-            if (context.ExitPage != null) preprocessHandles.Add(context.ExitPage.BeforeExit(true, context.EnterPage));
-
-            preprocessHandles.Add(context.EnterPage.BeforeEnter(true, context.ExitPage));
-
+            var preprocessHandles = lifecycleHandler.BeforePush(context);
             foreach (var coroutineHandle in preprocessHandles)
                 while (!coroutineHandle.IsTerminated)
                     yield return coroutineHandle;
@@ -334,13 +328,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             _transitionHandler.End();
 
             // Postprocess
-            if (context.ExitPage != null)
-                context.ExitPage.AfterExit(true, context.EnterPage);
-
-            context.EnterPage.AfterEnter(true, context.ExitPage);
-
-            foreach (var callbackReceiver in _callbackReceivers)
-                callbackReceiver.AfterPush(context.EnterPage, context.ExitPage);
+            lifecycleHandler.AfterPush(context);
 
             // Unload Unused Page
             if (!_isActivePageStacked && context.ExitPage != null)
@@ -373,18 +361,11 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             _transitionHandler.Begin();
 
             var context = PagePopContext.Create(_orderedPageIds, _pages, popCount);
-            var exitPage = context.ExitPage;
-            var enterPage = context.EnterPage;
+            var lifecycleHandler = new PageLifecycleHandler(_callbackReceivers);
 
             // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforePop(enterPage, exitPage);
-
-            var preprocessHandles = new List<AsyncProcessHandle>
-            {
-                exitPage.BeforeExit(false, enterPage)
-            };
-            if (enterPage != null) preprocessHandles.Add(enterPage.BeforeEnter(false, exitPage));
-
+            var preprocessHandles = lifecycleHandler.BeforePop(context);
+            
             foreach (var coroutineHandle in preprocessHandles)
                 while (!coroutineHandle.IsTerminated)
                     yield return coroutineHandle;
@@ -392,9 +373,9 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             // Play Animations
             var animationHandles = new List<AsyncProcessHandle>
             {
-                exitPage.Exit(false, playAnimation, enterPage)
+                context.ExitPage.Exit(false, playAnimation, context.EnterPage)
             };
-            if (enterPage != null) animationHandles.Add(enterPage.Enter(false, playAnimation, exitPage));
+            if (context.EnterPage != null) animationHandles.Add(context.EnterPage.Enter(false, playAnimation, context.ExitPage));
 
             foreach (var coroutineHandle in animationHandles)
                 while (!coroutineHandle.IsTerminated)
@@ -411,13 +392,10 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             _transitionHandler.End();
 
             // Postprocess
-            exitPage.AfterExit(false, enterPage);
-            if (enterPage != null) enterPage.AfterEnter(false, exitPage);
-
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterPop(enterPage, exitPage);
+            lifecycleHandler.AfterPop(context);
 
             // Unload Unused Page
-            var beforeReleaseHandle = exitPage.BeforeRelease();
+            var beforeReleaseHandle = context.ExitPage.BeforeRelease();
             while (!beforeReleaseHandle.IsTerminated) yield return null;
 
             for (var i = 0; i < context.ExitPageIds.Count; i++)
