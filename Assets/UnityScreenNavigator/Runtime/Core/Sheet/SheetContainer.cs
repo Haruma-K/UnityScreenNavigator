@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.UI;
-using UnityScreenNavigator.Runtime.Core.Modal;
-using UnityScreenNavigator.Runtime.Core.Page;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
@@ -14,7 +12,7 @@ using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 namespace UnityScreenNavigator.Runtime.Core.Sheet
 {
     [RequireComponent(typeof(RectMask2D))]
-    public sealed class SheetContainer : MonoBehaviour
+    public sealed class SheetContainer : MonoBehaviour, IScreenContainer
     {
         private static readonly Dictionary<int, SheetContainer> InstanceCacheByTransform =
             new Dictionary<int, SheetContainer>();
@@ -36,6 +34,9 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         private IAssetLoader _assetLoader;
         private CanvasGroup _canvasGroup;
         public static List<SheetContainer> Instances { get; } = new List<SheetContainer>();
+
+        private ScreenContainerTransitionHandler _transitionHandler;
+        private SheetLifecycleHandler _lifecycleHandler;
 
         /// <summary>
         ///     By default, <see cref="IAssetLoader" /> in <see cref="UnityScreenNavigatorSettings" /> is used.
@@ -63,7 +64,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <summary>
         ///     True if in transition.
         /// </summary>
-        public bool IsInTransition { get; private set; }
+        public bool IsInTransition => _transitionHandler.IsInTransition;
 
         /// <summary>
         ///     Registered sheets.
@@ -84,6 +85,8 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
             if (!string.IsNullOrWhiteSpace(_name)) InstanceCacheByName.Add(_name, this);
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
+            _transitionHandler = new ScreenContainerTransitionHandler(this);
+            _lifecycleHandler = new SheetLifecycleHandler((RectTransform)transform, _callbackReceivers);
         }
 
         private void OnDestroy()
@@ -247,30 +250,28 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         private IEnumerator RegisterRoutine(Type sheetType, string resourceKey,
             Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true, string sheetId = null)
         {
-            if (resourceKey == null) throw new ArgumentNullException(nameof(resourceKey));
+            Assert.IsNotNull(resourceKey);
 
-            var assetLoadHandle = loadAsync
-                ? AssetLoader.LoadAsync<GameObject>(resourceKey)
-                : AssetLoader.Load<GameObject>(resourceKey);
-            while (!assetLoadHandle.IsDone) yield return null;
+            sheetId ??= Guid.NewGuid().ToString();
 
-            if (assetLoadHandle.Status == AssetLoadStatus.Failed) throw assetLoadHandle.OperationException;
+            Sheet sheet = null;
+            yield return LoadSheet(sheetType,
+                resourceKey,
+                loadAsync,
+                (s, lh) =>
+                {
+                    sheet = s;
+                    _sheets.Add(sheetId, sheet);
+                    _sheetNameToId[resourceKey] = sheetId;
+                    _assetLoadHandles.Add(sheetId, lh);
+                    onLoad?.Invoke((sheetId, s));
+                });
 
-            var instance = Instantiate(assetLoadHandle.Result);
-            if (!instance.TryGetComponent(sheetType, out var c))
-                c = instance.AddComponent(sheetType);
-            var sheet = (Sheet)c;
+            var context = new SheetRegisterContext(sheetId, sheet);
 
-            if (sheetId == null)
-                sheetId = Guid.NewGuid().ToString();
-            _sheets.Add(sheetId, sheet);
-            _sheetNameToId[resourceKey] = sheetId;
-            _assetLoadHandles.Add(sheetId, assetLoadHandle);
-            onLoad?.Invoke((sheetId, sheet));
-            var afterLoadHandle = sheet.AfterLoad((RectTransform)transform);
-            while (!afterLoadHandle.IsTerminated) yield return null;
+            yield return _lifecycleHandler.AfterLoad(context);
 
-            yield return sheetId;
+            yield return context.SheetId;
         }
 
         private IEnumerator ShowByResourceKeyRoutine(string resourceKey, bool playAnimation)
@@ -281,165 +282,46 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         private IEnumerator ShowRoutine(string sheetId, bool playAnimation)
         {
-            if (IsInTransition)
-                throw new InvalidOperationException(
-                    "Cannot transition because the screen is already in transition.");
+            Assert.IsFalse(IsInTransition,
+                "Cannot transition because the screen is already in transition.");
+            Assert.IsFalse(ActiveSheetId != null && ActiveSheetId == sheetId,
+                "Cannot transition because the sheet is already active.");
 
-            if (ActiveSheetId != null && ActiveSheetId == sheetId)
-                throw new InvalidOperationException(
-                    "Cannot transition because the sheet is already active.");
+            var context = SheetShowContext.Create(sheetId, ActiveSheetId, _sheets);
 
-            IsInTransition = true;
+            _transitionHandler.Begin();
 
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
-                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
-                {
-                    foreach (var pageContainer in PageContainer.Instances)
-                        pageContainer.Interactable = false;
-                    foreach (var modalContainer in ModalContainer.Instances)
-                        modalContainer.Interactable = false;
-                    foreach (var sheetContainer in Instances)
-                        sheetContainer.Interactable = false;
-                }
-                else
-                {
-                    Interactable = false;
-                }
-            }
+            yield return _lifecycleHandler.BeforeShow(context);
 
-            var enterSheet = _sheets[sheetId];
-            var exitSheet = ActiveSheetId != null ? _sheets[ActiveSheetId] : null;
+            yield return _lifecycleHandler.Show(context, playAnimation);
 
-            // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforeShow(enterSheet, exitSheet);
+            _lifecycleHandler.AfterShow(context);
 
-            var preprocessHandles = new List<AsyncProcessHandle>();
-            if (exitSheet != null) preprocessHandles.Add(exitSheet.BeforeExit(enterSheet));
-
-            preprocessHandles.Add(enterSheet.BeforeEnter(exitSheet));
-            foreach (var coroutineHandle in preprocessHandles)
-                while (!coroutineHandle.IsTerminated)
-                    yield return null;
-
-            // Play Animation
-            var animationHandles = new List<AsyncProcessHandle>();
-            if (exitSheet != null) animationHandles.Add(exitSheet.Exit(playAnimation, enterSheet));
-
-            animationHandles.Add(enterSheet.Enter(playAnimation, exitSheet));
-
-            foreach (var handle in animationHandles)
-                while (!handle.IsTerminated)
-                    yield return null;
-
-            // End Transition
             ActiveSheetId = sheetId;
-            IsInTransition = false;
-
-            // Postprocess
-            if (exitSheet != null) exitSheet.AfterExit(enterSheet);
-
-            enterSheet.AfterEnter(exitSheet);
-
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterShow(enterSheet, exitSheet);
-
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
-                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
-                {
-                    // If there's a container in transition, it should restore Interactive to true when the transition is finished.
-                    // So, do nothing here if there's a transitioning container.
-                    if (PageContainer.Instances.All(x => !x.IsInTransition)
-                        && ModalContainer.Instances.All(x => !x.IsInTransition)
-                        && Instances.All(x => !x.IsInTransition))
-                    {
-                        foreach (var pageContainer in PageContainer.Instances)
-                            pageContainer.Interactable = true;
-                        foreach (var modalContainer in ModalContainer.Instances)
-                            modalContainer.Interactable = true;
-                        foreach (var sheetContainer in Instances)
-                            sheetContainer.Interactable = true;
-                    }
-                }
-                else
-                {
-                    Interactable = true;
-                }
-            }
+            
+            _transitionHandler.End();
         }
 
         private IEnumerator HideRoutine(bool playAnimation)
         {
-            if (IsInTransition)
-                throw new InvalidOperationException(
-                    "Cannot transition because the screen is already in transition.");
+            Assert.IsFalse(IsInTransition,
+                "Cannot transition because the screen is already in transition.");
+            Assert.IsNotNull(ActiveSheetId,
+                "Cannot transition because there is no active sheets.");
 
-            if (ActiveSheetId == null)
-                throw new InvalidOperationException(
-                    "Cannot transition because there is no active sheets.");
+            _transitionHandler.Begin();
 
-            IsInTransition = true;
+            var context = SheetHideContext.Create(_sheets[ActiveSheetId]);
 
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
-                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
-                {
-                    foreach (var pageContainer in PageContainer.Instances)
-                        pageContainer.Interactable = false;
-                    foreach (var modalContainer in ModalContainer.Instances)
-                        modalContainer.Interactable = false;
-                    foreach (var sheetContainer in Instances)
-                        sheetContainer.Interactable = false;
-                }
-                else
-                {
-                    Interactable = false;
-                }
-            }
+            yield return _lifecycleHandler.BeforeHide(context);
 
-            var exitSheet = _sheets[ActiveSheetId];
+            yield return _lifecycleHandler.Hide(context, playAnimation);
 
-            // Preprocess
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.BeforeHide(exitSheet);
+            _lifecycleHandler.AfterHide(context);
 
-            var preprocessHandle = exitSheet.BeforeExit(null);
-            while (!preprocessHandle.IsTerminated) yield return preprocessHandle;
-
-            // Play Animation
-            var animationHandle = exitSheet.Exit(playAnimation, null);
-            while (!animationHandle.IsTerminated) yield return null;
-
-            // End Transition
             ActiveSheetId = null;
-            IsInTransition = false;
-
-            // Postprocess
-            exitSheet.AfterExit(null);
-            foreach (var callbackReceiver in _callbackReceivers) callbackReceiver.AfterHide(exitSheet);
-
-            if (!UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
-            {
-                if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
-                {
-                    // If there's a container in transition, it should restore Interactive to true when the transition is finished.
-                    // So, do nothing here if there's a transitioning container.
-                    if (PageContainer.Instances.All(x => !x.IsInTransition)
-                        && ModalContainer.Instances.All(x => !x.IsInTransition)
-                        && Instances.All(x => !x.IsInTransition))
-                    {
-                        foreach (var pageContainer in PageContainer.Instances)
-                            pageContainer.Interactable = true;
-                        foreach (var modalContainer in ModalContainer.Instances)
-                            modalContainer.Interactable = true;
-                        foreach (var sheetContainer in Instances)
-                            sheetContainer.Interactable = true;
-                    }
-                }
-                else
-                {
-                    Interactable = true;
-                }
-            }
+            
+            _transitionHandler.End();
         }
 
         /// <summary>
@@ -458,6 +340,31 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 AssetLoader.Release(assetLoadHandle);
 
             _assetLoadHandles.Clear();
+        }
+
+        private IEnumerator LoadSheet(
+            Type sheetType,
+            string resourceKey,
+            bool loadAsync,
+            Action<Sheet, AssetLoadHandle<GameObject>> onLoaded
+        )
+        {
+            var assetLoadHandle = loadAsync
+                ? AssetLoader.LoadAsync<GameObject>(resourceKey)
+                : AssetLoader.Load<GameObject>(resourceKey);
+
+            if (!assetLoadHandle.IsDone)
+                yield return new WaitUntil(() => assetLoadHandle.IsDone);
+
+            if (assetLoadHandle.Status == AssetLoadStatus.Failed)
+                throw assetLoadHandle.OperationException;
+
+            var instance = Instantiate(assetLoadHandle.Result);
+            if (!instance.TryGetComponent(sheetType, out var c))
+                c = instance.AddComponent(sheetType);
+
+            var sheet = (Sheet)c;
+            onLoaded?.Invoke(sheet, assetLoadHandle);
         }
     }
 }
