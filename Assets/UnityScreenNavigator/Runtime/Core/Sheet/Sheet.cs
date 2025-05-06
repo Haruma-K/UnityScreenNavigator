@@ -44,6 +44,12 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             set => _identifier = value;
         }
 
+        public int RenderingOrder
+        {
+            get => _renderingOrder;
+            set => _renderingOrder = value;
+        }
+
         public SheetTransitionAnimationContainer AnimationContainer => _animationContainer;
 
         public bool IsTransitioning { get; private set; }

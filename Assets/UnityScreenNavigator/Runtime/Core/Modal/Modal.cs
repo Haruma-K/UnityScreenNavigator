@@ -39,6 +39,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         private readonly CompositeLifecycleEvent<IModalLifecycleEvent> _lifecycleEvents = new();
 
+        public bool UsePrefabNameAsIdentifier
+        {
+            get => _usePrefabNameAsIdentifier;
+            set => _usePrefabNameAsIdentifier = value;
+        }
+
         public string Identifier
         {
             get => _identifier;

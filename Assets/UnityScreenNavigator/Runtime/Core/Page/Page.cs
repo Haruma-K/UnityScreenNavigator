@@ -40,10 +40,22 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         private readonly CompositeLifecycleEvent<IPageLifecycleEvent> _lifecycleEvents = new();
 
+        public bool UsePrefabNameAsIdentifier
+        {
+            get => _usePrefabNameAsIdentifier;
+            set => _usePrefabNameAsIdentifier = value;
+        }
+
         public string Identifier
         {
             get => _identifier;
             set => _identifier = value;
+        }
+
+        public int RenderingOrder
+        {
+            get => _renderingOrder;
+            set => _renderingOrder = value;
         }
 
         public PageTransitionAnimationContainer AnimationContainer => _animationContainer;
