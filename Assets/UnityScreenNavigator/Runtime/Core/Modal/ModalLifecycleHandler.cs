@@ -110,7 +110,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 while (!handle.IsTerminated)
                     yield return handle;
 
-            _backdropHandler.AfterModalExit(context.FirstExitModal, context.FirstExitModalIndex, playAnimation);
+            for (var i = 0; i < context.ExitModals.Count; i++)
+            {
+                var exitModal = context.ExitModals[i];
+                var exitModalIndex = context.ExitModalIndices[i];
+                _backdropHandler.AfterModalExit(exitModal, exitModalIndex, playAnimation);
+            }
         }
 
         public void AfterPop(ModalPopContext context)
