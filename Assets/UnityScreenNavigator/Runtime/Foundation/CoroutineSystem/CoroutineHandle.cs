@@ -21,6 +21,9 @@ namespace UnityScreenNavigator.Runtime.Foundation
         /// </summary>
         public CoroutineStepResult Step()
         {
+            if (Status.IsFaulted)
+                return CoroutineStepResult.Faulted;
+
             if (Status.IsCompleted)
                 return CoroutineStepResult.Completed;
 
