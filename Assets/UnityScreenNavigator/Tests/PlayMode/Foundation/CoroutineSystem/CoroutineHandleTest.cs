@@ -3,7 +3,7 @@ using System.Collections;
 using NUnit.Framework;
 using UnityScreenNavigator.Runtime.Foundation;
 
-namespace UnityScreenNavigator.Tests.PlayMode.Foundation
+namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
 {
     internal sealed class CoroutineHandleTest
     {
