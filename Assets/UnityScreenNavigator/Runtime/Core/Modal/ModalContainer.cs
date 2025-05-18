@@ -255,6 +255,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         )
             where TModal : Modal
         {
+            CoroutineManager.Instance.ThrowException = false;
             return CoroutineManager.Instance.Run(PushRoutine(typeof(TModal),
                 resourceKey,
                 playAnimation,
@@ -342,6 +343,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             _transitionHandler.End();
         }
+
+
 
         private IEnumerator PopRoutine(bool playAnimation, int popCount = 1)
         {
