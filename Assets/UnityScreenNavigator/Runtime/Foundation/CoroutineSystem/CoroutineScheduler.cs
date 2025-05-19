@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace UnityScreenNavigator.Runtime.Foundation
 {
-    internal sealed class CoroutineSystem : MonoBehaviour
+    internal sealed class CoroutineScheduler : MonoBehaviour
     {
-        private static CoroutineSystem _instance;
+        private static CoroutineScheduler _instance;
         private CoroutineRunner _runner;
 
         private void Update()
@@ -28,7 +28,7 @@ namespace UnityScreenNavigator.Runtime.Foundation
             DontDestroyOnLoad(go);
             go.hideFlags = HideFlags.HideAndDontSave;
 
-            _instance = go.AddComponent<CoroutineSystem>();
+            _instance = go.AddComponent<CoroutineScheduler>();
             _instance._runner = new CoroutineRunner();
         }
     }
