@@ -11,7 +11,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         public void Constructor_初期化後_StatusがNotNullかつ未完了であること()
         {
             // Arrange
-            var simpleRoutine = SimpleRoutine();
+            var simpleRoutine = CreateRoutine();
 
             // Act
             var handle = new CoroutineHandle(simpleRoutine);
@@ -27,8 +27,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         public void Step_コルーチンが初回MoveNextで完了する場合_Completedを返しStatusが完了になること()
         {
             // Arrange
-            // MoveNext() が false を返す IEnumerator (ステップがないため)
-            var routine = SimpleRoutine();
+            var routine = CreateRoutine();
             var handle = new CoroutineHandle(routine);
 
             // Act
@@ -45,7 +44,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         public void Step_コルーチンがnullをyieldする場合_Continueを返しStatusが未完了であること()
         {
             // Arrange
-            var routine = SimpleRoutine(() => null);
+            var routine = CreateRoutine(() => null);
             var handle = new CoroutineHandle(routine);
 
             // Act
@@ -62,7 +61,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         {
             // Arrange
             var awaitedStatus = new AsyncStatus();
-            var routine = SimpleRoutine(() => awaitedStatus);
+            var routine = CreateRoutine(() => awaitedStatus);
             var handle = new CoroutineHandle(routine);
 
             // Act
@@ -81,7 +80,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             var awaitedStatus = new AsyncStatus();
             awaitedStatus.MarkCompleted(); // 事前に完了させておく
             // 最初に awaitedStatus を yield し、その直後にコルーチンが完了する (MoveNext が false を返す)
-            var finalRoutine = SimpleRoutine(() => awaitedStatus);
+            var finalRoutine = CreateRoutine(() => awaitedStatus);
             var handle = new CoroutineHandle(finalRoutine);
 
             // Act
@@ -104,7 +103,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             awaitedStatus.MarkCompleted();
 
             // awaitedStatus を yield した後に、さらに null を yield するコルーチン
-            var routine = SimpleRoutine(() => awaitedStatus, () => null);
+            var routine = CreateRoutine(() => awaitedStatus, () => null);
             var handle = new CoroutineHandle(routine);
 
             // Act
@@ -126,7 +125,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             var awaitedException = new InvalidOperationException("Awaited task failed");
             awaitedStatus.MarkFaulted(awaitedException);
 
-            var routine = SimpleRoutine(() => awaitedStatus);
+            var routine = CreateRoutine(() => awaitedStatus);
             var handle = new CoroutineHandle(routine);
 
             // Act
@@ -144,7 +143,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         {
             // Arrange
             var exceptionToThrow = new ArithmeticException("Coroutine calculation error");
-            var routine = SimpleRoutine(() => throw exceptionToThrow);
+            var routine = CreateRoutine(() => throw exceptionToThrow);
             var handle = new CoroutineHandle(routine);
 
             // Act
@@ -177,7 +176,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         public void Step_既に完了しているコルーチンに対してStepを呼ぶ場合_Completedを返すこと()
         {
             // Arrange
-            var routine = SimpleRoutine(); // すぐ完了するコルーチン
+            var routine = CreateRoutine(); // すぐ完了するコルーチン
             var handle = new CoroutineHandle(routine);
             handle.Step(); // これで完了する
 
@@ -194,7 +193,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         {
             // Arrange
             var exceptionToThrow = new AccessViolationException("Failed");
-            var routine = SimpleRoutine(() => throw exceptionToThrow);
+            var routine = CreateRoutine(() => throw exceptionToThrow);
             var handle = new CoroutineHandle(routine);
             handle.Step();
 
@@ -212,7 +211,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         public void Step_コルーチンがAsyncStatus以外のオブジェクトをyieldする場合_Continueを返すこと()
         {
             // Arrange
-            var routine = SimpleRoutine(() => 123); // int を yield する
+            var routine = CreateRoutine(() => 123); // int を yield する
             var handle = new CoroutineHandle(routine);
 
             // Act
@@ -228,7 +227,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         public void Step_複数ステップ後にコルーチンが完了する場合_正しくCompletedになること()
         {
             // Arrange
-            var routine = SimpleRoutine(() => null, () => null, () => "step 3 then complete"); // 3回 yield して完了
+            var routine = CreateRoutine(() => null, () => null, () => "step 3 then complete"); // 3回 yield して完了
             var handle = new CoroutineHandle(routine);
 
             // Act & Assert
@@ -263,7 +262,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             var completedAsyncStatus = new AsyncStatus();
             completedAsyncStatus.MarkCompleted();
 
-            var routine = SimpleRoutine(() => completedAsyncStatus, () => null);
+            var routine = CreateRoutine(() => completedAsyncStatus, () => null);
             var handle = new CoroutineHandle(routine);
 
             // Act
@@ -279,8 +278,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             Assert.That(handle.Status.IsCompleted, Is.False);
         }
 
-        // Helper method to create a simple IEnumerator that yields specified values
-        private static IEnumerator SimpleRoutine(params Func<object>[] steps)
+        private static IEnumerator CreateRoutine(params Func<object>[] steps)
         {
             foreach (var step in steps)
                 yield return step.Invoke();

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine.Assertions;
 
 namespace UnityScreenNavigator.Runtime.Foundation
 {
@@ -43,16 +44,14 @@ namespace UnityScreenNavigator.Runtime.Foundation
 
         public void MarkCompleted()
         {
-            if (IsCompleted)
-                return;
+            Assert.IsFalse(IsCompleted);
 
             IsCompleted = true;
         }
 
         public void MarkFaulted(Exception ex)
         {
-            if (IsCompleted)
-                return;
+            Assert.IsFalse(IsCompleted);
 
             Exception = ex;
             AllExceptions.Add(ex);
@@ -61,19 +60,11 @@ namespace UnityScreenNavigator.Runtime.Foundation
 
         public void MarkFaulted(IReadOnlyList<Exception> exceptions)
         {
-            if (IsCompleted)
-                return;
-
+            Assert.IsFalse(IsCompleted);
+            
             Exception = exceptions.FirstOrDefault();
             AllExceptions.AddRange(exceptions);
             IsCompleted = true;
-        }
-
-
-        public IEnumerator Wait()
-        {
-            while (!IsCompleted)
-                yield return null;
         }
     }
 }

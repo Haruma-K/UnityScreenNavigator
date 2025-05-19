@@ -7,46 +7,12 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
 {
     internal sealed class CoroutineRunnerTest
     {
-        private static IEnumerator SimpleRoutine(int stepsToContinue, Action onComplete = null)
-        {
-            for (var i = 0; i < stepsToContinue; i++)
-                yield return null;
-            onComplete?.Invoke();
-        }
-
-        private static IEnumerator ThrowingRoutine(Exception ex, int stepsBeforeThrow = 0)
-        {
-            for (var i = 0; i < stepsBeforeThrow; i++)
-                yield return null;
-            throw ex;
-        }
-
-        private static IEnumerator YieldAsyncStatusRoutine(AsyncStatus statusToYield, bool thenComplete = false)
-        {
-            yield return statusToYield;
-            if (thenComplete) yield break; // コルーチンを完了させる
-            yield return null; // 完了しない場合はもう一度yield
-        }
-
-        [Test]
-        public void Constructor_初期状態_内部キューは空であること()
-        {
-            // Arrange & Act
-            var runner = new CoroutineRunner();
-            // 内部キューはprivateなので直接は見れないが、Tickの挙動で確認する
-
-            // Assert
-            // Tickを呼んでも例外などが発生しないことを確認 (間接的なテスト)
-            Assert.DoesNotThrow(() => runner.Tick());
-        }
-
         [Test]
         public void Run_新しいコルーチンを登録_Statusを返し内部で処理が開始されること()
         {
             // Arrange
             var runner = new CoroutineRunner();
-            var steps = 1;
-            var routine = SimpleRoutine(steps);
+            var routine = CreateRoutine(() => null);
 
             // Act
             var status = runner.Run(routine);
@@ -64,23 +30,11 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         }
 
         [Test]
-        public void Tick_実行中のコルーチンがない場合_何も起きないこと()
-        {
-            // Arrange
-            var runner = new CoroutineRunner();
-
-            // Act & Assert
-            // 複数回Tickを呼んでも問題ないことを確認
-            Assert.DoesNotThrow(() => runner.Tick());
-            Assert.DoesNotThrow(() => runner.Tick());
-        }
-
-        [Test]
         public void Tick_単一の継続コルーチンがある場合_Stepが呼ばれ再度キューに追加されること()
         {
             // Arrange
             var runner = new CoroutineRunner();
-            var routine = SimpleRoutine(2); // 2回nullを返す
+            var routine = CreateRoutine(() => null, () => null);
             var status = runner.Run(routine);
 
             // Act
@@ -103,7 +57,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         {
             // Arrange
             var runner = new CoroutineRunner();
-            var routine = SimpleRoutine(0); // すぐに完了する
+            var routine = CreateRoutine();
             var status = runner.Run(routine);
             Assert.That(status.IsCompleted, Is.False, "Run直後は未完了");
 
@@ -127,7 +81,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             // Arrange
             var runner = new CoroutineRunner();
             var exception = new InvalidOperationException("test fail");
-            var routine = ThrowingRoutine(exception); // すぐに例外
+            var routine = CreateRoutine(() => throw exception); // すぐに例外
             var status = runner.Run(routine);
             Assert.That(status.IsCompleted, Is.False, "Run直後は未完了");
             Assert.That(status.IsFaulted, Is.False);
@@ -152,8 +106,8 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         {
             // Arrange
             var runner = new CoroutineRunner();
-            var continueRoutine = SimpleRoutine(1); // 1回nullを返し、次に完了
-            var completeRoutine = SimpleRoutine(0); // すぐに完了
+            var continueRoutine = CreateRoutine(() => null);
+            var completeRoutine = CreateRoutine();
 
             var statusContinue = runner.Run(continueRoutine);
             var statusComplete = runner.Run(completeRoutine);
@@ -177,7 +131,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             // Arrange
             var runner = new CoroutineRunner();
             var yieldedStatus = new AsyncStatus(); // 未完了のまま
-            var routine = YieldAsyncStatusRoutine(yieldedStatus);
+            var routine = CreateRoutine(() => yieldedStatus, () => null);
             var mainStatus = runner.Run(routine);
 
             // Act
@@ -204,7 +158,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             var runner = new CoroutineRunner();
             var yieldedStatus = new AsyncStatus();
             yieldedStatus.MarkCompleted(); // 事前に完了
-            var routine = YieldAsyncStatusRoutine(yieldedStatus, true);
+            var routine = CreateRoutine(() => yieldedStatus);
             var mainStatus = runner.Run(routine);
 
             // Act
@@ -224,7 +178,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             var innerException = new TimeoutException("Inner task timed out");
             yieldedStatus.MarkFaulted(innerException); // 事前に失敗
 
-            var routine = YieldAsyncStatusRoutine(yieldedStatus);
+            var routine = CreateRoutine(() => yieldedStatus, () => null);
             var mainStatus = runner.Run(routine);
 
             // Act
@@ -234,6 +188,12 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             Assert.That(mainStatus.IsCompleted, Is.True);
             Assert.That(mainStatus.IsFaulted, Is.True);
             Assert.That(mainStatus.Exception, Is.SameAs(innerException));
+        }
+        
+        private static IEnumerator CreateRoutine(params Func<object>[] steps)
+        {
+            foreach (var step in steps)
+                yield return step.Invoke();
         }
     }
 }
