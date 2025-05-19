@@ -7,6 +7,14 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
 {
     internal sealed class CoroutineHandleTest
     {
+        private CoroutineRunner _testRunner;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _testRunner = new CoroutineRunner();
+        }
+        
         [Test]
         public void Constructor_初期化後_StatusがNotNullかつ未完了であること()
         {
@@ -14,7 +22,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             var simpleRoutine = CreateRoutine();
 
             // Act
-            var handle = new CoroutineHandle(simpleRoutine);
+            var handle = new CoroutineHandle(simpleRoutine, _testRunner);
 
             // Assert
             Assert.That(handle.Status, Is.Not.Null);
@@ -28,7 +36,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         {
             // Arrange
             var routine = CreateRoutine();
-            var handle = new CoroutineHandle(routine);
+            var handle = new CoroutineHandle(routine, _testRunner);
 
             // Act
             var result = handle.Step();
@@ -45,7 +53,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         {
             // Arrange
             var routine = CreateRoutine(() => null);
-            var handle = new CoroutineHandle(routine);
+            var handle = new CoroutineHandle(routine, _testRunner);
 
             // Act
             var result = handle.Step();
@@ -62,7 +70,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             // Arrange
             var awaitedStatus = new AsyncStatus();
             var routine = CreateRoutine(() => awaitedStatus);
-            var handle = new CoroutineHandle(routine);
+            var handle = new CoroutineHandle(routine, _testRunner);
 
             // Act
             var result = handle.Step();
@@ -81,7 +89,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             awaitedStatus.MarkCompleted(); // 事前に完了させておく
             // 最初に awaitedStatus を yield し、その直後にコルーチンが完了する (MoveNext が false を返す)
             var finalRoutine = CreateRoutine(() => awaitedStatus);
-            var handle = new CoroutineHandle(finalRoutine);
+            var handle = new CoroutineHandle(finalRoutine, _testRunner);
 
             // Act
             // 1回目のStepでawaitedStatusを処理し、コルーチン内のwhile(true)ループにより
@@ -104,7 +112,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
 
             // awaitedStatus を yield した後に、さらに null を yield するコルーチン
             var routine = CreateRoutine(() => awaitedStatus, () => null);
-            var handle = new CoroutineHandle(routine);
+            var handle = new CoroutineHandle(routine, _testRunner);
 
             // Act
             // 最初のStepで awaitedStatus を処理し、内部ループで次の yield return null まで進み、そこで停止する
@@ -126,7 +134,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             awaitedStatus.MarkFaulted(awaitedException);
 
             var routine = CreateRoutine(() => awaitedStatus);
-            var handle = new CoroutineHandle(routine);
+            var handle = new CoroutineHandle(routine, _testRunner);
 
             // Act
             var result = handle.Step();
@@ -144,7 +152,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             // Arrange
             var exceptionToThrow = new ArithmeticException("Coroutine calculation error");
             var routine = CreateRoutine(() => throw exceptionToThrow);
-            var handle = new CoroutineHandle(routine);
+            var handle = new CoroutineHandle(routine, _testRunner);
 
             // Act
             // Step内で例外をキャッチし、適切に処理することをテスト
@@ -177,7 +185,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         {
             // Arrange
             var routine = CreateRoutine(); // すぐ完了するコルーチン
-            var handle = new CoroutineHandle(routine);
+            var handle = new CoroutineHandle(routine, _testRunner);
             handle.Step(); // これで完了する
 
             // Act
@@ -194,7 +202,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             // Arrange
             var exceptionToThrow = new AccessViolationException("Failed");
             var routine = CreateRoutine(() => throw exceptionToThrow);
-            var handle = new CoroutineHandle(routine);
+            var handle = new CoroutineHandle(routine, _testRunner);
             handle.Step();
 
             // Act
@@ -212,7 +220,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         {
             // Arrange
             var routine = CreateRoutine(() => 123); // int を yield する
-            var handle = new CoroutineHandle(routine);
+            var handle = new CoroutineHandle(routine, _testRunner);
 
             // Act
             var result = handle.Step();
@@ -228,7 +236,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
         {
             // Arrange
             var routine = CreateRoutine(() => null, () => null, () => "step 3 then complete"); // 3回 yield して完了
-            var handle = new CoroutineHandle(routine);
+            var handle = new CoroutineHandle(routine, _testRunner);
 
             // Act & Assert
             // 1回目のStep
@@ -263,7 +271,7 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             completedAsyncStatus.MarkCompleted();
 
             var routine = CreateRoutine(() => completedAsyncStatus, () => null);
-            var handle = new CoroutineHandle(routine);
+            var handle = new CoroutineHandle(routine, _testRunner);
 
             // Act
             // 最初のStep()呼び出し:
@@ -277,6 +285,89 @@ namespace UnityScreenNavigator.Tests.PlayMode.Foundation.CoroutineSystem
             Assert.That(result, Is.EqualTo(CoroutineStepResult.Continue));
             Assert.That(handle.Status.IsCompleted, Is.False);
         }
+
+        [Test]
+        public void Step_CustomYieldInstructionをYieldしKeepWaitingがTrueの場合_Continueを返すこと()
+        {
+            // Arrange
+            var customInstruction = new TestCustomYieldInstruction(1);
+            var routine = CreateRoutine(() => customInstruction);
+            var handle = new CoroutineHandle(routine, _testRunner);
+
+            // Act
+            var result = handle.Step();
+
+            // Assert
+            Assert.That(result, Is.EqualTo(CoroutineStepResult.Continue));
+            Assert.That(handle.Status.IsCompleted, Is.False);
+            Assert.That(customInstruction.QueryCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Step_CustomYieldInstructionをYieldしKeepWaitingがFalseでコルーチン完了の場合_Completedを返すこと()
+        {
+            // Arrange
+            var customInstruction = new TestCustomYieldInstruction();
+            var routine = CreateRoutine(() => customInstruction);
+            var handle = new CoroutineHandle(routine, _testRunner);
+
+            // Act
+            var result = handle.Step();
+
+            // Assert
+            Assert.That(result, Is.EqualTo(CoroutineStepResult.Completed));
+            Assert.That(handle.Status.IsCompleted, Is.True);
+            Assert.That(customInstruction.QueryCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Step_CustomYieldInstructionをYieldしKeepWaitingがFalseで次にNullをYieldする場合_Continueを返すこと()
+        {
+            // Arrange
+            var customInstruction = new TestCustomYieldInstruction();
+            var routine = CreateRoutine(() => customInstruction, () => null);
+            var handle = new CoroutineHandle(routine, _testRunner);
+
+            // Act
+            var result = handle.Step();
+
+            // Assert
+            Assert.That(result, Is.EqualTo(CoroutineStepResult.Continue));
+            Assert.That(handle.Status.IsCompleted, Is.False);
+            Assert.That(customInstruction.QueryCount, Is.EqualTo(1));
+        }
+
+        // 以下はUnityのコルーチンと挙動が異なるが許容
+        /*
+        [Test]
+        public void Step_CustomYieldInstructionが数ステップ後にKeepWaitingFalseになる場合_コルーチンが進行すること()
+        {
+            // Arrange
+            var customInstruction = new TestCustomYieldInstruction(2);
+            var routine = CreateRoutine(() => customInstruction, () => "After CustomYield");
+            var handle = new CoroutineHandle(routine);
+
+            // Act & Assert
+            var result1 = handle.Step(); // keepWaiting=true
+            Assert.That(result1, Is.EqualTo(CoroutineStepResult.Continue));
+            Assert.That(customInstruction.QueryCount, Is.EqualTo(1));
+            Assert.That(handle.Status.IsCompleted, Is.False);
+
+            var result2 = handle.Step(); // keepWaiting=true
+            Assert.That(result2, Is.EqualTo(CoroutineStepResult.Continue));
+            Assert.That(customInstruction.QueryCount, Is.EqualTo(2));
+            Assert.That(handle.Status.IsCompleted, Is.False);
+
+            var result3 = handle.Step(); // keepWaiting=false, 次のyieldへ
+            Assert.That(result3, Is.EqualTo(CoroutineStepResult.Continue));
+            Assert.That(customInstruction.QueryCount, Is.EqualTo(3));
+            Assert.That(handle.Status.IsCompleted, Is.False);
+
+            var result4 = handle.Step(); // コルーチン完了
+            Assert.That(result4, Is.EqualTo(CoroutineStepResult.Completed));
+            Assert.That(handle.Status.IsCompleted, Is.True);
+        }
+        */
 
         private static IEnumerator CreateRoutine(params Func<object>[] steps)
         {
