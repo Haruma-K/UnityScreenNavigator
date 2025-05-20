@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
+using UnityScreenNavigator.Runtime.Foundation;
 using Object = UnityEngine.Object;
 
 namespace UnityScreenNavigator.Runtime.Core.Modal
@@ -16,13 +16,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _prefab = prefab;
         }
 
-        public AsyncProcessHandle BeforeModalEnter(Modal modal, int modalIndex, bool playAnimation)
+        public AsyncStatus BeforeModalEnter(Modal modal, int modalIndex, bool playAnimation)
         {
             var parent = (RectTransform)modal.transform.parent;
 
             // Do not generate a backdrop for the first modal
             if (modalIndex != 0)
-                return AsyncProcessHandle.Completed();
+                return AsyncStatus.Completed();
 
             var backdrop = Object.Instantiate(_prefab);
             backdrop.Setup(parent, modalIndex);
@@ -34,11 +34,11 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         {
         }
 
-        public AsyncProcessHandle BeforeModalExit(Modal modal, int modalIndex, bool playAnimation)
+        public AsyncStatus BeforeModalExit(Modal modal, int modalIndex, bool playAnimation)
         {
             // Do not remove the backdrop for the first modal
             if (modalIndex != 0)
-                return AsyncProcessHandle.Completed();
+                return AsyncStatus.Completed();
 
             var backdrop = modal.transform.parent.GetChild(0).GetComponent<ModalBackdrop>();
             return backdrop.Exit(playAnimation);

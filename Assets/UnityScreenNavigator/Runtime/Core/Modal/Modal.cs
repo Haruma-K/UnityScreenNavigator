@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 #if USN_USE_ASYNC_METHODS
 using System.Threading.Tasks;
 #endif
@@ -169,8 +168,9 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _lifecycleEvents.RemoveItem(lifecycleEvent);
         }
 
-        internal AsyncProcessHandle AfterLoad(RectTransform parentTransform)
+        internal AsyncStatus AfterLoad(RectTransform parentTransform)
         {
+            Debug.Log("//////");
             _rectTransform = (RectTransform)transform;
             _canvasGroup = gameObject.GetOrAddComponent<CanvasGroup>();
             _lifecycleEvents.AddItem(this, 0);
@@ -180,12 +180,12 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _canvasGroup.alpha = 0.0f;
 
             var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Initialize());
-            return CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
+            return CoroutineScheduler.Run(CreateCoroutine(lifecycleEventTask));
         }
 
-        internal AsyncProcessHandle BeforeEnter(bool push, Modal partnerModal)
+        internal AsyncStatus BeforeEnter(bool push, Modal partnerModal)
         {
-            return CoroutineManager.Instance.Run(BeforeEnterRoutine(push, partnerModal));
+            return CoroutineScheduler.Run(BeforeEnterRoutine(push, partnerModal));
         }
 
         private IEnumerator BeforeEnterRoutine(bool push, Modal partnerModal)
@@ -204,14 +204,14 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             var lifecycleEventTask = push
                 ? _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPushEnter())
                 : _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPopEnter());
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
-            while (!handle.IsTerminated)
+            var handle = CoroutineScheduler.Run(CreateCoroutine(lifecycleEventTask));
+            while (!handle.IsCompleted)
                 yield return null;
         }
 
-        internal AsyncProcessHandle Enter(bool push, bool playAnimation, Modal partnerModal)
+        internal AsyncStatus Enter(bool push, bool playAnimation, Modal partnerModal)
         {
-            return CoroutineManager.Instance.Run(EnterRoutine(push, playAnimation, partnerModal));
+            return CoroutineScheduler.Run(EnterRoutine(push, playAnimation, partnerModal));
         }
 
         private IEnumerator EnterRoutine(bool push, bool playAnimation, Modal partnerModal)
@@ -230,7 +230,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     {
                         anim.SetPartner(partnerModal?.transform as RectTransform);
                         anim.Setup(_rectTransform);
-                        yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                        yield return CoroutineScheduler.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
                     }
                 }
 
@@ -251,9 +251,9 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             TransitionAnimationType = null;
         }
 
-        internal AsyncProcessHandle BeforeExit(bool push, Modal partnerModal)
+        internal AsyncStatus BeforeExit(bool push, Modal partnerModal)
         {
-            return CoroutineManager.Instance.Run(BeforeExitRoutine(push, partnerModal));
+            return CoroutineScheduler.Run(BeforeExitRoutine(push, partnerModal));
         }
 
         private IEnumerator BeforeExitRoutine(bool push, Modal partnerModal)
@@ -273,14 +273,14 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 ? _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPushExit())
                 : _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPopExit());
 
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
-            while (!handle.IsTerminated)
+            var handle = CoroutineScheduler.Run(CreateCoroutine(routines));
+            while (!handle.IsCompleted)
                 yield return null;
         }
 
-        internal AsyncProcessHandle Exit(bool push, bool playAnimation, Modal partnerModal)
+        internal AsyncStatus Exit(bool push, bool playAnimation, Modal partnerModal)
         {
-            return CoroutineManager.Instance.Run(ExitRoutine(push, playAnimation, partnerModal));
+            return CoroutineScheduler.Run(ExitRoutine(push, playAnimation, partnerModal));
         }
 
         private IEnumerator ExitRoutine(bool push, bool playAnimation, Modal partnerModal)
@@ -297,7 +297,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     {
                         anim.SetPartner(partnerModal?.transform as RectTransform);
                         anim.Setup(_rectTransform);
-                        yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                        yield return CoroutineScheduler.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
                     }
                 }
 
@@ -323,10 +323,10 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             var _ = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Cleanup());
         }
 
-        internal AsyncProcessHandle BeforeRelease()
+        internal AsyncStatus BeforeRelease()
         {
             var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Cleanup());
-            return CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
+            return CoroutineScheduler.Run(CreateCoroutine(lifecycleEventTask));
         }
 
 #if USN_USE_ASYNC_METHODS
@@ -337,8 +337,8 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         {
             foreach (var target in targets)
             {
-                var handle = CoroutineManager.Instance.Run(CreateCoroutine(target));
-                if (!handle.IsTerminated)
+                var handle = CoroutineScheduler.Run(CreateCoroutine(target));
+                if (!handle.IsCompleted)
                     yield return handle;
             }
         }

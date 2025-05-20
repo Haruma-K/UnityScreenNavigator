@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
+using UnityScreenNavigator.Runtime.Foundation;
 
 namespace UnityScreenNavigator.Runtime.Core.Modal
 {
@@ -15,7 +15,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _prefab = prefab;
         }
 
-        public AsyncProcessHandle BeforeModalEnter(Modal modal, int modalIndex, bool playAnimation)
+        public AsyncStatus BeforeModalEnter(Modal modal, int modalIndex, bool playAnimation)
         {
             var parent = (RectTransform)modal.transform.parent;
             var backdrop = Object.Instantiate(_prefab);
@@ -29,7 +29,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         {
         }
 
-        public AsyncProcessHandle BeforeModalExit(Modal modal, int modalIndex, bool playAnimation)
+        public AsyncStatus BeforeModalExit(Modal modal, int modalIndex, bool playAnimation)
         {
             var backdropSiblingIndex = modalIndex * 2;
             var backdrop = modal.transform.parent.GetChild(backdropSiblingIndex).GetComponent<ModalBackdrop>();

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
+using UnityScreenNavigator.Runtime.Foundation;
 
 namespace UnityScreenNavigator.Runtime.Core.Modal
 {
@@ -25,6 +25,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         public IEnumerator AfterLoad(ModalPushContext context)
         {
+            Debug.Log("AfterLoad+++");
             yield return context.EnterModal.AfterLoad(_containerTransform);
         }
 
@@ -33,19 +34,19 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             foreach (var receiver in _callbackReceivers)
                 receiver.BeforePush(context.EnterModal, context.ExitModal);
 
-            var handles = new List<AsyncProcessHandle>();
+            var handles = new List<AsyncStatus>();
             if (context.ExitModal != null)
                 handles.Add(context.ExitModal.BeforeExit(true, context.EnterModal));
 
             handles.Add(context.EnterModal.BeforeEnter(true, context.ExitModal));
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
 
         public IEnumerator Push(ModalPushContext context, bool playAnimation)
         {
-            var handles = new List<AsyncProcessHandle>
+            var handles = new List<AsyncStatus>
             {
                 _backdropHandler.BeforeModalEnter(context.EnterModal, context.EnterModalIndex, playAnimation)
             };
@@ -55,7 +56,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             handles.Add(context.EnterModal.Enter(true, playAnimation, context.ExitModal));
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
 
             _backdropHandler.AfterModalEnter(context.EnterModal, context.EnterModalIndex, true);
@@ -77,7 +78,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             foreach (var receiver in _callbackReceivers)
                 receiver.BeforePop(context.EnterModal, context.FirstExitModal);
 
-            var handles = new List<AsyncProcessHandle>();
+            var handles = new List<AsyncStatus>();
             foreach (var exitModal in context.ExitModals)
                 handles.Add(exitModal.BeforeExit(false, context.EnterModal));
 
@@ -85,13 +86,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 handles.Add(context.EnterModal.BeforeEnter(false, context.FirstExitModal));
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
 
         public IEnumerator Pop(ModalPopContext context, bool playAnimation)
         {
-            var handles = new List<AsyncProcessHandle>();
+            var handles = new List<AsyncStatus>();
 
             for (var i = 0; i < context.ExitModals.Count; i++)
             {
@@ -107,7 +108,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 handles.Add(context.EnterModal.Enter(false, playAnimation, context.FirstExitModal));
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
 
             for (var i = 0; i < context.ExitModals.Count; i++)
@@ -134,7 +135,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             var handles = context.ExitModals.Select(exitModal => exitModal.BeforeRelease());
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
     }

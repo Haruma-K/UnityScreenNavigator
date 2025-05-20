@@ -1,16 +1,17 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace UnityScreenNavigator.Runtime.Foundation
 {
-    internal sealed class AsyncStatus
+    public sealed class AsyncStatus : CustomYieldInstruction
     {
         public bool IsCompleted { get; private set; }
         public bool IsFaulted => AllExceptions.Count > 0;
+        public override bool keepWaiting => !IsCompleted;
 
         /// <summary>
         ///     Exceptions. If multiple exceptions occur, only the first one is recorded.
@@ -21,6 +22,13 @@ namespace UnityScreenNavigator.Runtime.Foundation
         ///     List of all exceptions that occurred during the async operation.
         /// </summary>
         public List<Exception> AllExceptions { get; } = new();
+
+        public static AsyncStatus Completed()
+        {
+            var status = new AsyncStatus();
+            status.MarkCompleted();
+            return status;
+        }
 
         public static AsyncStatus Create(Func<Task> asyncFunc)
         {
@@ -61,10 +69,20 @@ namespace UnityScreenNavigator.Runtime.Foundation
         public void MarkFaulted(IReadOnlyList<Exception> exceptions)
         {
             Assert.IsFalse(IsCompleted);
-            
+
             Exception = exceptions.FirstOrDefault();
             AllExceptions.AddRange(exceptions);
             IsCompleted = true;
+        }
+
+        public void ThrowIfFaulted()
+        {
+            if (IsFaulted)
+            {
+                if (AllExceptions.Count == 1)
+                    throw Exception;
+                throw new AggregateException("Multiple exceptions occurred during the async operation.", AllExceptions);
+            }
         }
     }
 }

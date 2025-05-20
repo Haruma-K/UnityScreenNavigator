@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
+using UnityScreenNavigator.Runtime.Foundation;
 using Object = UnityEngine.Object;
 
 namespace UnityScreenNavigator.Runtime.Core.Modal
@@ -27,7 +27,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _changeTiming = changeTiming;
         }
 
-        public AsyncProcessHandle BeforeModalEnter(Modal modal, int modalIndex, bool playAnimation)
+        public AsyncStatus BeforeModalEnter(Modal modal, int modalIndex, bool playAnimation)
         {
             var parent = (RectTransform)modal.transform.parent;
 
@@ -46,7 +46,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             if (_changeTiming == ChangeTiming.BeforeAnimation)
                 _instance.transform.SetSiblingIndex(backdropSiblingIndex);
 
-            return AsyncProcessHandle.Completed();
+            return AsyncStatus.Completed();
         }
 
         public void AfterModalEnter(Modal modal, int modalIndex, bool playAnimation)
@@ -57,7 +57,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 _instance.transform.SetSiblingIndex(backdropSiblingIndex);
         }
 
-        public AsyncProcessHandle BeforeModalExit(Modal modal, int modalIndex, bool playAnimation)
+        public AsyncStatus BeforeModalExit(Modal modal, int modalIndex, bool playAnimation)
         {
             // If it is the first modal, play the backdrop animation
             if (modalIndex == 0)
@@ -67,7 +67,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             if (_changeTiming == ChangeTiming.BeforeAnimation)
                 _instance.transform.SetSiblingIndex(modalIndex - 1);
 
-            return AsyncProcessHandle.Completed();
+            return AsyncStatus.Completed();
         }
 
         public void AfterModalExit(Modal modal, int modalIndex, bool playAnimation)

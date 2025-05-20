@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 
 namespace UnityScreenNavigator.Runtime.Core.Modal
 {
@@ -193,7 +192,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <param name="loadAsync"></param>
         /// <param name="onLoad"></param>
         /// <returns></returns>
-        public AsyncProcessHandle Push(
+        public AsyncStatus Push(
             string resourceKey,
             bool playAnimation,
             string modalId = null,
@@ -201,12 +200,14 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             Action<(string modalId, Modal modal)> onLoad = null
         )
         {
-            return CoroutineManager.Instance.Run(PushRoutine(typeof(Modal),
+            var status = CoroutineScheduler.Run(PushRoutine(typeof(Modal),
                 resourceKey,
                 playAnimation,
                 onLoad,
                 loadAsync,
                 modalId));
+            status.ThrowIfFaulted();
+            return status;
         }
 
         /// <summary>
@@ -219,7 +220,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <param name="loadAsync"></param>
         /// <param name="onLoad"></param>
         /// <returns></returns>
-        public AsyncProcessHandle Push(
+        public AsyncStatus Push(
             Type modalType,
             string resourceKey,
             bool playAnimation,
@@ -228,12 +229,14 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             Action<(string modalId, Modal modal)> onLoad = null
         )
         {
-            return CoroutineManager.Instance.Run(PushRoutine(modalType,
+            var status = CoroutineScheduler.Run(PushRoutine(modalType,
                 resourceKey,
                 playAnimation,
                 onLoad,
                 loadAsync,
                 modalId));
+            status.ThrowIfFaulted();
+            return status;
         }
 
         /// <summary>
@@ -246,7 +249,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <param name="onLoad"></param>
         /// <typeparam name="TModal"></typeparam>
         /// <returns></returns>
-        public AsyncProcessHandle Push<TModal>(
+        public AsyncStatus Push<TModal>(
             string resourceKey,
             bool playAnimation,
             string modalId = null,
@@ -255,13 +258,14 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         )
             where TModal : Modal
         {
-            CoroutineManager.Instance.ThrowException = false;
-            return CoroutineManager.Instance.Run(PushRoutine(typeof(TModal),
+            var status = CoroutineScheduler.Run(PushRoutine(typeof(TModal),
                 resourceKey,
                 playAnimation,
                 x => onLoad?.Invoke((x.modalId, (TModal)x.modal)),
                 loadAsync,
                 modalId));
+            status.ThrowIfFaulted();
+            return status;
         }
 
         /// <summary>
@@ -270,9 +274,11 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <param name="playAnimation"></param>
         /// <param name="popCount"></param>
         /// <returns></returns>
-        public AsyncProcessHandle Pop(bool playAnimation, int popCount = 1)
+        public AsyncStatus Pop(bool playAnimation, int popCount = 1)
         {
-            return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
+            var status = CoroutineScheduler.Run(PopRoutine(playAnimation, popCount));
+            status.ThrowIfFaulted();
+            return status;
         }
 
         /// <summary>
@@ -281,7 +287,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <param name="playAnimation"></param>
         /// <param name="destinationModalId"></param>
         /// <returns></returns>
-        public AsyncProcessHandle Pop(bool playAnimation, string destinationModalId)
+        public AsyncStatus Pop(bool playAnimation, string destinationModalId)
         {
             var popCount = 0;
             for (var i = _orderedModalIds.Count - 1; i >= 0; i--)
@@ -296,7 +302,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             if (popCount == _orderedModalIds.Count)
                 throw new Exception($"The modal with id '{destinationModalId}' is not found.");
 
-            return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
+            return CoroutineScheduler.Run(PopRoutine(playAnimation, popCount));
         }
 
         private IEnumerator PushRoutine(
@@ -330,10 +336,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             var context = ModalPushContext.Create(modalId, modal, _orderedModalIds, _modals);
 
+            Debug.Log("1 --------------------------");
             yield return _lifecycleHandler.AfterLoad(context);
 
+            Debug.Log("2 --------------------------");
             yield return _lifecycleHandler.BeforePush(context);
 
+            Debug.Log("3 --------------------------");
             yield return _lifecycleHandler.Push(context, playAnimation);
 
             _lifecycleHandler.AfterPush(context);
@@ -343,8 +352,6 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             _transitionHandler.End();
         }
-
-
 
         private IEnumerator PopRoutine(bool playAnimation, int popCount = 1)
         {
@@ -398,9 +405,9 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
         }
 
-        public AsyncProcessHandle Preload(string resourceKey, bool loadAsync = true)
+        public AsyncStatus Preload(string resourceKey, bool loadAsync = true)
         {
-            return CoroutineManager.Instance.Run(PreloadRoutine(resourceKey, loadAsync));
+            return CoroutineScheduler.Run(PreloadRoutine(resourceKey, loadAsync));
         }
 
         private IEnumerator PreloadRoutine(string resourceKey, bool loadAsync = true)
