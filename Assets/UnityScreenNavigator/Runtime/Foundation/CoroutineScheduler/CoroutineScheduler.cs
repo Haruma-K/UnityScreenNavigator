@@ -10,8 +10,25 @@ namespace UnityScreenNavigator.Runtime.Foundation
     /// </summary>
     public class CoroutineScheduler : MonoBehaviour
     {
+        private static CoroutineScheduler _instance;
         private readonly Dictionary<int, RunningCoroutineInfo> _runningCoroutines = new();
         private int _nextId;
+
+        public static CoroutineScheduler Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    var gameObj = new GameObject($"{nameof(UnityScreenNavigator)}.{nameof(CoroutineScheduler)}");
+                    gameObj.hideFlags = HideFlags.HideAndDontSave;
+                    DontDestroyOnLoad(gameObj);
+                    _instance = gameObj.AddComponent<CoroutineScheduler>();
+                }
+
+                return _instance;
+            }
+        }
 
         private void OnDestroy()
         {
@@ -30,22 +47,22 @@ namespace UnityScreenNavigator.Runtime.Foundation
                 }
 
             _runningCoroutines.Clear();
+            _instance = null;
         }
 
         /// <summary>
         ///     新しいコルーチンを開始します。
         /// </summary>
         /// <param name="routine">実行するコルーチンを表す IEnumerator。</param>
-        /// <param name="logExceptionToConsole">true の場合、コルーチンからキャッチされた例外は Debug.LogException を介して Unity コンソールにログ出力されます。</param>
-        /// <returns>コルーチンを管理および監視するための <see cref="ICoroutineOperation" /> ハンドル。</returns>
-        public AsyncStatusHandle Run(IEnumerator routine, bool logExceptionToConsole = true)
+        /// <param name="logException">true の場合、コルーチンからキャッチされた例外は Debug.LogException を介して Unity コンソールにログ出力されます。</param>
+        public AsyncStatusHandle Run(IEnumerator routine, bool logException = true)
         {
             if (routine == null)
                 throw new ArgumentNullException(nameof(routine));
 
             var id = _nextId++;
             var handle = new AsyncStatusHandle(id);
-            var unityCoroutine = StartCoroutine(WrapRoutine(routine, handle, logExceptionToConsole));
+            var unityCoroutine = StartCoroutine(WrapRoutine(routine, handle, logException));
             _runningCoroutines.Add(id, new RunningCoroutineInfo(unityCoroutine, handle));
             return handle;
         }
