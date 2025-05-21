@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
+using UnityScreenNavigator.Runtime.Foundation;
 
 namespace UnityScreenNavigator.Runtime.Core.Modal
 {
@@ -39,7 +39,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             handles.Add(context.EnterModal.BeforeEnter(true, context.ExitModal));
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
 
@@ -55,7 +55,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             handles.Add(context.EnterModal.Enter(true, playAnimation, context.ExitModal));
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
 
             _backdropHandler.AfterModalEnter(context.EnterModal, context.EnterModalIndex, true);
@@ -85,7 +85,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 handles.Add(context.EnterModal.BeforeEnter(false, context.FirstExitModal));
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
 
@@ -107,7 +107,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 handles.Add(context.EnterModal.Enter(false, playAnimation, context.FirstExitModal));
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
 
             for (var i = 0; i < context.ExitModals.Count; i++)
@@ -134,7 +134,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             var handles = context.ExitModals.Select(exitModal => exitModal.BeforeRelease());
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
     }

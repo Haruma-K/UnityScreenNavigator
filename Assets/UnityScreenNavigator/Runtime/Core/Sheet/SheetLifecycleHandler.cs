@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
+using UnityScreenNavigator.Runtime.Foundation;
 
 namespace UnityScreenNavigator.Runtime.Core.Sheet
 {
@@ -36,7 +36,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             handles.Add(context.EnterSheet.BeforeEnter(context.ExitSheet));
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return null;
         }
 
@@ -50,7 +50,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             handles.Add(context.EnterSheet.Enter(playAnimation, context.ExitSheet));
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
         
@@ -76,14 +76,14 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             };
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
 
         public IEnumerator Hide(SheetHideContext context, bool playAnimation)
         {
             var handle = context.ExitSheet.Exit(playAnimation, null);
-            while (!handle.IsTerminated)
+            while (!handle.IsCompleted)
                 yield return null;
         }
 

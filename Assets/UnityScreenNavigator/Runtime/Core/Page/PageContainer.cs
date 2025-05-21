@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 
 namespace UnityScreenNavigator.Runtime.Core.Page
 {
@@ -192,7 +191,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             Action<(string pageId, Page page)> onLoad = null
         )
         {
-            return CoroutineManager.Instance.Run(PushRoutine(typeof(Page),
+            return CoroutineScheduler.Instance.Run(PushRoutine(typeof(Page),
                 resourceKey,
                 playAnimation,
                 stack,
@@ -222,7 +221,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             Action<(string pageId, Page page)> onLoad = null
         )
         {
-            return CoroutineManager.Instance.Run(PushRoutine(pageType,
+            return CoroutineScheduler.Instance.Run(PushRoutine(pageType,
                 resourceKey,
                 playAnimation,
                 stack,
@@ -252,7 +251,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         )
             where TPage : Page
         {
-            return CoroutineManager.Instance.Run(PushRoutine(typeof(TPage),
+            return CoroutineScheduler.Instance.Run(PushRoutine(typeof(TPage),
                 resourceKey,
                 playAnimation,
                 stack,
@@ -269,7 +268,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <returns></returns>
         public AsyncProcessHandle Pop(bool playAnimation, int popCount = 1)
         {
-            return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
+            return CoroutineScheduler.Instance.Run(PopRoutine(playAnimation, popCount));
         }
 
         /// <summary>
@@ -293,7 +292,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             if (popCount == _orderedPageIds.Count)
                 throw new Exception($"The page with id '{destinationPageId}' is not found.");
 
-            return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
+            return CoroutineScheduler.Instance.Run(PopRoutine(playAnimation, popCount));
         }
 
         private IEnumerator PushRoutine(
@@ -417,7 +416,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         public AsyncProcessHandle Preload(string resourceKey, bool loadAsync = true)
         {
-            return CoroutineManager.Instance.Run(PreloadRoutine(resourceKey, loadAsync));
+            return CoroutineScheduler.Instance.Run(PreloadRoutine(resourceKey, loadAsync));
         }
 
         private IEnumerator PreloadRoutine(string resourceKey, bool loadAsync = true)

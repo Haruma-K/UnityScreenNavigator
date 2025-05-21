@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
+using UnityScreenNavigator.Runtime.Foundation;
 
 namespace UnityScreenNavigator.Runtime.Core.Page
 {
@@ -37,7 +37,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             handles.Add(context.EnterPage.BeforeEnter(true, context.ExitPage));
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
 
@@ -51,7 +51,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             handles.Add(context.EnterPage.Enter(true, playAnimation, context.ExitPage));
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
 
@@ -72,7 +72,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 yield break;
 
             var handle = context.ExitPage.BeforeRelease();
-            while (!handle.IsTerminated)
+            while (!handle.IsCompleted)
                 yield return handle;
         }
 
@@ -89,7 +89,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 handles.Add(context.EnterPage.BeforeEnter(false, context.ExitPage));
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
 
@@ -106,7 +106,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 handles.Add(context.EnterPage.Enter(false, playAnimation, context.ExitPage));
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
 
@@ -126,7 +126,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             var handles = context.ExitPages.Select(exitModal => exitModal.BeforeRelease());
 
             foreach (var handle in handles)
-                while (!handle.IsTerminated)
+                while (!handle.IsCompleted)
                     yield return handle;
         }
     }

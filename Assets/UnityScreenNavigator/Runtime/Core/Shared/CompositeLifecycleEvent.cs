@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
+using UnityScreenNavigator.Runtime.Foundation;
 
 namespace UnityScreenNavigator.Runtime.Core.Shared
 {
@@ -39,6 +39,14 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
             return _priorityToLifecycleEvent[priority];
         }
 
+        public IEnumerable<TLifecycleEvent> GetOrderedItems()
+        {
+            int? currentPriority = null;
+            while ((currentPriority = FindNextPriority(currentPriority)) != null)
+                foreach (var item in GetItems(currentPriority.Value))
+                    yield return item;
+        }
+
         public void AddItem(TLifecycleEvent item, int priority)
         {
             if (!_priorityToLifecycleEvent.ContainsKey(priority))
@@ -54,39 +62,6 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
                     _priorityToLifecycleEvent.Remove(pair.Key);
                     break;
                 }
-        }
-
-        public async Task ExecuteLifecycleEventsSequentially(Func<TLifecycleEvent, Task> execute)
-        {
-            int? currentPriority = null;
-            while ((currentPriority = FindNextPriority(currentPriority)) != null)
-            {
-                // LifecycleEvents with the same Priority are executed in parallel.
-                var lifecycleEvents = GetItems(currentPriority.Value);
-                var tasks = lifecycleEvents.Select(execute).ToArray();
-                await Task.WhenAll(tasks);
-            }
-        }
-
-        public IEnumerator ExecuteLifecycleEventsSequentially(Func<TLifecycleEvent, IEnumerator> execute)
-        {
-            int? currentPriority = null;
-            while ((currentPriority = FindNextPriority(currentPriority)) != null)
-            {
-                // LifecycleEvents with the same Priority are executed in parallel.
-                var lifecycleEvents = GetItems(currentPriority.Value);
-                var handles = lifecycleEvents.Select(x => CoroutineManager.Instance.Run(execute(x))).ToArray();
-                foreach (var handle in handles)
-                    while (!handle.IsTerminated)
-                        yield return null;
-            }
-        }
-
-        public void ExecuteLifecycleEventsSequentially(Action<TLifecycleEvent> execute)
-        {
-            foreach (var lifecycleEvent in _priorityToLifecycleEvent.Values)
-            foreach (var item in lifecycleEvent)
-                execute(item);
         }
     }
 }

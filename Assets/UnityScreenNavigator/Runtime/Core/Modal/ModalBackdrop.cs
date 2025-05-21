@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 
 namespace UnityScreenNavigator.Runtime.Core.Modal
 {
@@ -61,7 +60,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         internal AsyncProcessHandle Enter(bool playAnimation)
         {
-            return CoroutineManager.Instance.Run(EnterRoutine(playAnimation));
+            return CoroutineScheduler.Instance.Run(EnterRoutine(playAnimation));
         }
 
         private IEnumerator EnterRoutine(bool playAnimation)
@@ -81,7 +80,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 if (anim.Duration > 0)
                 {
                     anim.Setup(_rectTransform);
-                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
+                    yield return CoroutineScheduler.Instance.Run(anim.CreatePlayRoutine());
                 }
             }
 
@@ -90,7 +89,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         internal AsyncProcessHandle Exit(bool playAnimation)
         {
-            return CoroutineManager.Instance.Run(ExitRoutine(playAnimation));
+            return CoroutineScheduler.Instance.Run(ExitRoutine(playAnimation));
         }
 
         private IEnumerator ExitRoutine(bool playAnimation)
@@ -110,7 +109,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                 if (anim.Duration > 0)
                 {
                     anim.Setup(_rectTransform);
-                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine());
+                    yield return CoroutineScheduler.Instance.Run(anim.CreatePlayRoutine());
                 }
             }
 

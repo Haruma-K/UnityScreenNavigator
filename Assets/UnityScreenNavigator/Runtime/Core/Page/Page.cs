@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 #if USN_USE_ASYNC_METHODS
 using System.Threading.Tasks;
 #endif
@@ -203,13 +202,13 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             _canvasGroup.alpha = 0.0f;
 
             var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Initialize());
-            return CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
+            return CoroutineScheduler.Instance.Run(CreateCoroutine(lifecycleEventTask));
         }
 
 
         internal AsyncProcessHandle BeforeEnter(bool push, Page partnerPage)
         {
-            return CoroutineManager.Instance.Run(BeforeEnterRoutine(push, partnerPage));
+            return CoroutineScheduler.Instance.Run(BeforeEnterRoutine(push, partnerPage));
         }
 
         private IEnumerator BeforeEnterRoutine(bool push, Page partnerPage)
@@ -225,15 +224,15 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             var lifecycleEventTask = push
                 ? _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPushEnter())
                 : _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPopEnter());
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
+            var handle = CoroutineScheduler.Instance.Run(CreateCoroutine(lifecycleEventTask));
 
-            while (!handle.IsTerminated)
+            while (!handle.IsCompleted)
                 yield return null;
         }
 
         internal AsyncProcessHandle Enter(bool push, bool playAnimation, Page partnerPage)
         {
-            return CoroutineManager.Instance.Run(EnterRoutine(push, playAnimation, partnerPage));
+            return CoroutineScheduler.Instance.Run(EnterRoutine(push, playAnimation, partnerPage));
         }
 
         private IEnumerator EnterRoutine(bool push, bool playAnimation, Page partnerPage)
@@ -250,7 +249,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 {
                     anim.SetPartner(partnerPage?.transform as RectTransform);
                     anim.Setup(_rectTransform);
-                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                    yield return CoroutineScheduler.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
                 }
             }
 
@@ -271,7 +270,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
 
         internal AsyncProcessHandle BeforeExit(bool push, Page partnerPage)
         {
-            return CoroutineManager.Instance.Run(BeforeExitRoutine(push, partnerPage));
+            return CoroutineScheduler.Instance.Run(BeforeExitRoutine(push, partnerPage));
         }
 
         private IEnumerator BeforeExitRoutine(bool push, Page partnerPage)
@@ -286,15 +285,15 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             var routines = push
                 ? _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPushExit())
                 : _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPopExit());
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
+            var handle = CoroutineScheduler.Instance.Run(CreateCoroutine(routines));
 
-            while (!handle.IsTerminated)
+            while (!handle.IsCompleted)
                 yield return null;
         }
 
         internal AsyncProcessHandle Exit(bool push, bool playAnimation, Page partnerPage)
         {
-            return CoroutineManager.Instance.Run(ExitRoutine(push, playAnimation, partnerPage));
+            return CoroutineScheduler.Instance.Run(ExitRoutine(push, playAnimation, partnerPage));
         }
 
         private IEnumerator ExitRoutine(bool push, bool playAnimation, Page partnerPage)
@@ -309,7 +308,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
                 {
                     anim.SetPartner(partnerPage?.transform as RectTransform);
                     anim.Setup(_rectTransform);
-                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                    yield return CoroutineScheduler.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
                 }
             }
 
@@ -337,7 +336,7 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         internal AsyncProcessHandle BeforeRelease()
         {
             var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Cleanup());
-            return CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
+            return CoroutineScheduler.Instance.Run(CreateCoroutine(lifecycleEventTask));
         }
 
 #if USN_USE_ASYNC_METHODS
@@ -348,8 +347,8 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         {
             foreach (var target in targets)
             {
-                var handle = CoroutineManager.Instance.Run(CreateCoroutine(target));
-                if (!handle.IsTerminated)
+                var handle = CoroutineScheduler.Instance.Run(CreateCoroutine(target));
+                if (!handle.IsCompleted)
                     yield return handle;
             }
         }

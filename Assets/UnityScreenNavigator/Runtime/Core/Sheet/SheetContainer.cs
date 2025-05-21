@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 
 namespace UnityScreenNavigator.Runtime.Core.Sheet
 {
@@ -175,7 +174,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <returns></returns>
         public AsyncProcessHandle ShowByResourceKey(string resourceKey, bool playAnimation)
         {
-            return CoroutineManager.Instance.Run(ShowByResourceKeyRoutine(resourceKey, playAnimation));
+            return CoroutineScheduler.Instance.Run(ShowByResourceKeyRoutine(resourceKey, playAnimation));
         }
 
         /// <summary>
@@ -186,7 +185,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <returns></returns>
         public AsyncProcessHandle Show(string sheetId, bool playAnimation)
         {
-            return CoroutineManager.Instance.Run(ShowRoutine(sheetId, playAnimation));
+            return CoroutineScheduler.Instance.Run(ShowRoutine(sheetId, playAnimation));
         }
 
         /// <summary>
@@ -195,7 +194,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         /// <param name="playAnimation"></param>
         public AsyncProcessHandle Hide(bool playAnimation)
         {
-            return CoroutineManager.Instance.Run(HideRoutine(playAnimation));
+            return CoroutineScheduler.Instance.Run(HideRoutine(playAnimation));
         }
 
         /// <summary>
@@ -210,7 +209,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         public AsyncProcessHandle Register(string resourceKey,
             Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true, string sheetId = null)
         {
-            return CoroutineManager.Instance.Run(
+            return CoroutineScheduler.Instance.Run(
                 RegisterRoutine(typeof(Sheet), resourceKey, onLoad, loadAsync, sheetId));
         }
 
@@ -227,7 +226,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         public AsyncProcessHandle Register(Type sheetType, string resourceKey,
             Action<(string sheetId, Sheet sheet)> onLoad = null, bool loadAsync = true, string sheetId = null)
         {
-            return CoroutineManager.Instance.Run(RegisterRoutine(sheetType, resourceKey, onLoad, loadAsync, sheetId));
+            return CoroutineScheduler.Instance.Run(RegisterRoutine(sheetType, resourceKey, onLoad, loadAsync, sheetId));
         }
 
         /// <summary>
@@ -243,7 +242,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             Action<(string sheetId, TSheet sheet)> onLoad = null, bool loadAsync = true, string sheetId = null)
             where TSheet : Sheet
         {
-            return CoroutineManager.Instance.Run(RegisterRoutine(typeof(TSheet), resourceKey,
+            return CoroutineScheduler.Instance.Run(RegisterRoutine(typeof(TSheet), resourceKey,
                 x => onLoad?.Invoke((x.sheetId, (TSheet)x.sheet)), loadAsync, sheetId));
         }
 

@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
+using UnityScreenNavigator.Runtime.Foundation;
 using Object = UnityEngine.Object;
 
 namespace UnityScreenNavigator.Runtime.Core.Modal

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 #if USN_USE_ASYNC_METHODS
 using System.Threading.Tasks;
 #endif
@@ -19,8 +19,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         [SerializeField] [EnabledIf(nameof(_usePrefabNameAsIdentifier), false)]
         private string _identifier;
 
-        [SerializeField]
-        private ModalTransitionAnimationContainer _animationContainer = new ModalTransitionAnimationContainer();
+        [SerializeField] private ModalTransitionAnimationContainer _animationContainer = new();
 
         private CanvasGroup _canvasGroup;
         private RectTransform _parentTransform;
@@ -179,16 +178,13 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _rectTransform.FillParent(_parentTransform);
             _canvasGroup.alpha = 0.0f;
 
-            var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Initialize());
-            return CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
+            var processes = _lifecycleEvents
+                .GetOrderedItems()
+                .Select(x => AsyncProcess.Run(x.Initialize()));
+            return AsyncProcess.WhenAll(processes);
         }
 
         internal AsyncProcessHandle BeforeEnter(bool push, Modal partnerModal)
-        {
-            return CoroutineManager.Instance.Run(BeforeEnterRoutine(push, partnerModal));
-        }
-
-        private IEnumerator BeforeEnterRoutine(bool push, Modal partnerModal)
         {
             IsTransitioning = true;
             if (push)
@@ -201,17 +197,16 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
             SetTransitionProgress(0.0f);
 
-            var lifecycleEventTask = push
-                ? _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPushEnter())
-                : _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPopEnter());
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
-            while (!handle.IsTerminated)
-                yield return null;
+            var orderedEvents = _lifecycleEvents.GetOrderedItems();
+            var processes = push
+                ? orderedEvents.Select(x => AsyncProcess.Run(x.WillPushEnter()))
+                : orderedEvents.Select(x => AsyncProcess.Run(x.WillPopEnter()));
+            return AsyncProcess.WhenAll(processes);
         }
 
         internal AsyncProcessHandle Enter(bool push, bool playAnimation, Modal partnerModal)
         {
-            return CoroutineManager.Instance.Run(EnterRoutine(push, playAnimation, partnerModal));
+            return CoroutineScheduler.Run(EnterRoutine(push, playAnimation, partnerModal));
         }
 
         private IEnumerator EnterRoutine(bool push, bool playAnimation, Modal partnerModal)
@@ -230,7 +225,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     {
                         anim.SetPartner(partnerModal?.transform as RectTransform);
                         anim.Setup(_rectTransform);
-                        yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                        yield return anim.CreatePlayRoutine(TransitionProgressReporter);
                     }
                 }
 
@@ -253,10 +248,10 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         internal AsyncProcessHandle BeforeExit(bool push, Modal partnerModal)
         {
-            return CoroutineManager.Instance.Run(BeforeExitRoutine(push, partnerModal));
+            return CoroutineScheduler.Instance.Run(BeforeExitRoutine(push, partnerModal));
         }
 
-        private IEnumerator BeforeExitRoutine(bool push, Modal partnerModal)
+        private async Task<AsyncProcessHandle> BeforeExitRoutine(bool push, Modal partnerModal)
         {
             IsTransitioning = true;
             if (!push)
@@ -268,19 +263,25 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             }
 
             SetTransitionProgress(0.0f);
-            
-            var routines = push
-                ? _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPushExit())
-                : _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillPopExit());
 
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(routines));
-            while (!handle.IsTerminated)
-                yield return null;
+            var processes = push
+                ? _lifecycleEvents.GetOrderedItems().Select(x => x.WillPushExit())
+                : _lifecycleEvents.GetOrderedItems().Select(x => x.WillPopExit());
+
+            var handles = new List<AsyncProcessHandle>();
+            foreach (var process in processes)
+            {
+                var handle = AsyncProcess.Run(process);
+                handles.Add(handle);
+                await handle.Task;
+            }
+
+            return AsyncProcess.WhenAll(handles);
         }
 
         internal AsyncProcessHandle Exit(bool push, bool playAnimation, Modal partnerModal)
         {
-            return CoroutineManager.Instance.Run(ExitRoutine(push, playAnimation, partnerModal));
+            return CoroutineScheduler.Instance.Run(ExitRoutine(push, playAnimation, partnerModal));
         }
 
         private IEnumerator ExitRoutine(bool push, bool playAnimation, Modal partnerModal)
@@ -297,7 +298,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
                     {
                         anim.SetPartner(partnerModal?.transform as RectTransform);
                         anim.Setup(_rectTransform);
-                        yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                        yield return CoroutineScheduler.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
                     }
                 }
 
@@ -317,54 +318,18 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             IsTransitioning = false;
             TransitionAnimationType = null;
         }
-        
+
         internal void BeforeReleaseAndForget()
         {
-            var _ = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Cleanup());
+            foreach (var item in _lifecycleEvents.GetOrderedItems())
+                AsyncProcess.Run(item.Cleanup());
         }
 
         internal AsyncProcessHandle BeforeRelease()
         {
-            var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Cleanup());
-            return CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
-        }
-
-#if USN_USE_ASYNC_METHODS
-        private IEnumerator CreateCoroutine(IEnumerable<Task> targets)
-#else
-        private IEnumerator CreateCoroutine(IEnumerable<IEnumerator> targets)
-#endif
-        {
-            foreach (var target in targets)
-            {
-                var handle = CoroutineManager.Instance.Run(CreateCoroutine(target));
-                if (!handle.IsTerminated)
-                    yield return handle;
-            }
-        }
-
-#if USN_USE_ASYNC_METHODS
-        private IEnumerator CreateCoroutine(Task target)
-#else
-        private IEnumerator CreateCoroutine(IEnumerator target)
-#endif
-        {
-#if USN_USE_ASYNC_METHODS
-            async void WaitTaskAndCallback(Task task, Action callback)
-            {
-                await task;
-                callback?.Invoke();
-            }
-            
-            var isCompleted = false;
-            WaitTaskAndCallback(target, () =>
-            {
-                isCompleted = true;
-            });
-            return new WaitUntil(() => isCompleted);
-#else
-            return target;
-#endif
+            var handles = _lifecycleEvents.GetOrderedItems()
+                .Select(x => AsyncProcess.Run(x.Cleanup()));
+            return AsyncProcess.WhenAll(handles);
         }
 
         private void SetTransitionProgress(float progress)

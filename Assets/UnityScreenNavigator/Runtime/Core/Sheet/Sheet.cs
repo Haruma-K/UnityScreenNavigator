@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 #if USN_USE_ASYNC_METHODS
 using System.Threading.Tasks;
 #endif
@@ -162,12 +161,12 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             gameObject.SetActive(false);
 
             var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.Initialize());
-            return CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
+            return CoroutineScheduler.Instance.Run(CreateCoroutine(lifecycleEventTask));
         }
 
         internal AsyncProcessHandle BeforeEnter(Sheet partnerSheet)
         {
-            return CoroutineManager.Instance.Run(BeforeEnterRoutine(partnerSheet));
+            return CoroutineScheduler.Instance.Run(BeforeEnterRoutine(partnerSheet));
         }
 
         private IEnumerator BeforeEnterRoutine(Sheet partnerSheet)
@@ -181,14 +180,14 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             _canvasGroup.alpha = 0.0f;
 
             var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillEnter());
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
-            while (!handle.IsTerminated)
+            var handle = CoroutineScheduler.Instance.Run(CreateCoroutine(lifecycleEventTask));
+            while (!handle.IsCompleted)
                 yield return null;
         }
 
         internal AsyncProcessHandle Enter(bool playAnimation, Sheet partnerSheet)
         {
-            return CoroutineManager.Instance.Run(EnterRoutine(playAnimation, partnerSheet));
+            return CoroutineScheduler.Instance.Run(EnterRoutine(playAnimation, partnerSheet));
         }
 
         private IEnumerator EnterRoutine(bool playAnimation, Sheet partnerSheet)
@@ -205,7 +204,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 {
                     anim.SetPartner(partnerSheet?.transform as RectTransform);
                     anim.Setup(_rectTransform);
-                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                    yield return CoroutineScheduler.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
                 }
             }
 
@@ -223,7 +222,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
 
         internal AsyncProcessHandle BeforeExit(Sheet partnerSheet)
         {
-            return CoroutineManager.Instance.Run(BeforeExitRoutine(partnerSheet));
+            return CoroutineScheduler.Instance.Run(BeforeExitRoutine(partnerSheet));
         }
 
         private IEnumerator BeforeExitRoutine(Sheet partnerSheet)
@@ -237,14 +236,14 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
             _canvasGroup.alpha = 1.0f;
 
             var lifecycleEventTask = _lifecycleEvents.ExecuteLifecycleEventsSequentially(x => x.WillExit());
-            var handle = CoroutineManager.Instance.Run(CreateCoroutine(lifecycleEventTask));
-            while (!handle.IsTerminated)
+            var handle = CoroutineScheduler.Instance.Run(CreateCoroutine(lifecycleEventTask));
+            while (!handle.IsCompleted)
                 yield return null;
         }
 
         internal AsyncProcessHandle Exit(bool playAnimation, Sheet partnerSheet)
         {
-            return CoroutineManager.Instance.Run(ExitRoutine(playAnimation, partnerSheet));
+            return CoroutineScheduler.Instance.Run(ExitRoutine(playAnimation, partnerSheet));
         }
 
         private IEnumerator ExitRoutine(bool playAnimation, Sheet partnerSheet)
@@ -259,7 +258,7 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
                 {
                     anim.SetPartner(partnerSheet?.transform as RectTransform);
                     anim.Setup(_rectTransform);
-                    yield return CoroutineManager.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
+                    yield return CoroutineScheduler.Instance.Run(anim.CreatePlayRoutine(TransitionProgressReporter));
                 }
             }
 
@@ -290,8 +289,8 @@ namespace UnityScreenNavigator.Runtime.Core.Sheet
         {
             foreach (var target in targets)
             {
-                var handle = CoroutineManager.Instance.Run(CreateCoroutine(target));
-                if (!handle.IsTerminated)
+                var handle = CoroutineScheduler.Instance.Run(CreateCoroutine(target));
+                if (!handle.IsCompleted)
                     yield return handle;
             }
         }

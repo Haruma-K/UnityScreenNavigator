@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Demo.Core.Scripts.Presentation.Shared;
@@ -5,6 +6,7 @@ using Demo.Core.Scripts.UseCase.Setting;
 using Demo.Core.Scripts.View.Setting;
 using Demo.Subsystem.Misc;
 using UniRx;
+using UnityEngine;
 
 namespace Demo.Core.Scripts.Presentation.Setting
 {
@@ -75,6 +77,12 @@ namespace Demo.Core.Scripts.Presentation.Setting
         {
             viewState.SoundSettings.SeVolume.Value = volume;
             viewState.SoundSettings.IsSeEnabled.Value = !isMuted;
+        }
+
+        protected override async Task ViewWillPushEnter(SettingsModal view, SettingsViewState viewState)
+        {
+            await Task.Delay(1000);
+            throw new Exception("TEst Exception");
         }
 
         protected override async Task ViewWillPopExit(SettingsModal view, SettingsViewState viewState)

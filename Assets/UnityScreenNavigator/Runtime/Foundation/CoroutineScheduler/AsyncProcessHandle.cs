@@ -7,15 +7,16 @@ using UnityEngine.Assertions;
 
 namespace UnityScreenNavigator.Runtime.Foundation
 {
-    //TODO: あとでAsyncProcessHandleにリネーム
-    public sealed class AsyncStatusHandle : CustomYieldInstruction
+    public sealed class AsyncProcessHandle : CustomYieldInstruction
     {
-        internal AsyncStatusHandle()
+        private readonly TaskCompletionSource<object> _tcs = new();
+        
+        internal AsyncProcessHandle()
         {
             CoroutineId = -1;
         }
 
-        internal AsyncStatusHandle(int coroutineId)
+        internal AsyncProcessHandle(int coroutineId)
         {
             CoroutineId = coroutineId;
         }
@@ -35,32 +36,14 @@ namespace UnityScreenNavigator.Runtime.Foundation
         ///     List of all exceptions that occurred during the async operation.
         /// </summary>
         public List<Exception> AllExceptions { get; } = new();
+        
+        public Task Task => _tcs.Task;
 
-        public static AsyncStatusHandle Completed()
+        public static AsyncProcessHandle Completed()
         {
-            var status = new AsyncStatusHandle();
+            var status = new AsyncProcessHandle();
             status.MarkCompleted();
             return status;
-        }
-
-        internal static AsyncStatusHandle Create(Func<Task> asyncFunc)
-        {
-            var status = new AsyncStatusHandle();
-            status.MonitorAsync(asyncFunc);
-            return status;
-        }
-
-        private async void MonitorAsync(Func<Task> asyncFunc)
-        {
-            try
-            {
-                await asyncFunc();
-                MarkCompleted();
-            }
-            catch (Exception ex)
-            {
-                MarkFaulted(ex);
-            }
         }
 
         internal void MarkCompleted()
@@ -68,6 +51,7 @@ namespace UnityScreenNavigator.Runtime.Foundation
             Assert.IsFalse(IsCompleted);
 
             IsCompleted = true;
+            _tcs.TrySetResult(null);
         }
 
         internal void MarkFaulted(Exception ex)
@@ -77,6 +61,7 @@ namespace UnityScreenNavigator.Runtime.Foundation
             Exception = ex;
             AllExceptions.Add(ex);
             IsCompleted = true;
+            _tcs.TrySetException(ex); 
         }
 
         internal void MarkFaulted(IReadOnlyList<Exception> exceptions)
@@ -86,6 +71,7 @@ namespace UnityScreenNavigator.Runtime.Foundation
             Exception = exceptions.FirstOrDefault();
             AllExceptions.AddRange(exceptions);
             IsCompleted = true;
+            _tcs.TrySetException(new AggregateException(exceptions));
         }
 
         internal void ThrowIfFaulted()

@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Shared;
 using UnityScreenNavigator.Runtime.Foundation;
 using UnityScreenNavigator.Runtime.Foundation.AssetLoader;
-using UnityScreenNavigator.Runtime.Foundation.Coroutine;
 
 namespace UnityScreenNavigator.Runtime.Core.Modal
 {
@@ -201,7 +200,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             Action<(string modalId, Modal modal)> onLoad = null
         )
         {
-            return CoroutineManager.Instance.Run(PushRoutine(typeof(Modal),
+            return CoroutineScheduler.Instance.Run(PushRoutine(typeof(Modal),
                 resourceKey,
                 playAnimation,
                 onLoad,
@@ -228,7 +227,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             Action<(string modalId, Modal modal)> onLoad = null
         )
         {
-            return CoroutineManager.Instance.Run(PushRoutine(modalType,
+            return CoroutineScheduler.Instance.Run(PushRoutine(modalType,
                 resourceKey,
                 playAnimation,
                 onLoad,
@@ -255,7 +254,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         )
             where TModal : Modal
         {
-            return CoroutineManager.Instance.Run(PushRoutine(typeof(TModal),
+            return CoroutineScheduler.Instance.Run(PushRoutine(typeof(TModal),
                 resourceKey,
                 playAnimation,
                 x => onLoad?.Invoke((x.modalId, (TModal)x.modal)),
@@ -271,7 +270,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <returns></returns>
         public AsyncProcessHandle Pop(bool playAnimation, int popCount = 1)
         {
-            return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
+            return CoroutineScheduler.Instance.Run(PopRoutine(playAnimation, popCount));
         }
 
         /// <summary>
@@ -295,7 +294,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             if (popCount == _orderedModalIds.Count)
                 throw new Exception($"The modal with id '{destinationModalId}' is not found.");
 
-            return CoroutineManager.Instance.Run(PopRoutine(playAnimation, popCount));
+            return CoroutineScheduler.Instance.Run(PopRoutine(playAnimation, popCount));
         }
 
         private IEnumerator PushRoutine(
@@ -397,7 +396,7 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
 
         public AsyncProcessHandle Preload(string resourceKey, bool loadAsync = true)
         {
-            return CoroutineManager.Instance.Run(PreloadRoutine(resourceKey, loadAsync));
+            return CoroutineScheduler.Instance.Run(PreloadRoutine(resourceKey, loadAsync));
         }
 
         private IEnumerator PreloadRoutine(string resourceKey, bool loadAsync = true)
