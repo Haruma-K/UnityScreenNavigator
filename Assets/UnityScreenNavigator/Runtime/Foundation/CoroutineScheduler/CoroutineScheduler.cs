@@ -26,7 +26,7 @@ namespace UnityScreenNavigator.Runtime.Foundation
                 catch (Exception ex)
                 {
                     Debug.LogWarning(
-                        $"CoroutineScheduler.OnDestroy 中にコルーチン (Id: {entry.Handle.Id}) の停止エラー: {ex.Message}");
+                        $"CoroutineScheduler.OnDestroy 中にコルーチン (Id: {entry.Handle.CoroutineId}) の停止エラー: {ex.Message}");
                 }
 
             _runningCoroutines.Clear();
@@ -45,9 +45,9 @@ namespace UnityScreenNavigator.Runtime.Foundation
 
             var id = _nextId++;
             var handle = new AsyncStatusHandle(id);
-            var unityCoroutine = StartCoroutine(WrapRoutine(routine, logExceptionToConsole, id));
-            _runningCoroutines.Add(id, new RunningCoroutineInfo(unityCoroutine, operation));
-            return operation;
+            var unityCoroutine = StartCoroutine(WrapRoutine(routine, handle, logExceptionToConsole));
+            _runningCoroutines.Add(id, new RunningCoroutineInfo(unityCoroutine, handle));
+            return handle;
         }
 
         /// <summary>
@@ -98,8 +98,7 @@ namespace UnityScreenNavigator.Runtime.Foundation
         private IEnumerator WrapRoutine(
             IEnumerator routine,
             AsyncStatusHandle handle,
-            bool logExceptionToConsole,
-            int id
+            bool logExceptionToConsole
         )
         {
             try
@@ -134,7 +133,7 @@ namespace UnityScreenNavigator.Runtime.Foundation
             }
             finally
             {
-                _runningCoroutines.Remove(id);
+                _runningCoroutines.Remove(handle.CoroutineId);
             }
         }
 
