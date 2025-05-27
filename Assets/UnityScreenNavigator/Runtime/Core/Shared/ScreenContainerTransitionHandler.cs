@@ -21,15 +21,19 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
             if (IsInTransition)
                 throw new InvalidOperationException("Transition already in progress.");
 
-            IsInTransition = true;
-
             if (UnityScreenNavigatorSettings.Instance.EnableInteractionInTransition)
+            {
+                IsInTransition = true;
                 return;
+            }
 
             if (UnityScreenNavigatorSettings.Instance.ControlInteractionsOfAllContainers)
             {
                 if (!AllContainersFinishedTransition())
+                {
+                    IsInTransition = true;
                     return;
+                }
 
                 SetAllContainersInteractable(false);
             }
@@ -37,6 +41,8 @@ namespace UnityScreenNavigator.Runtime.Core.Shared
             {
                 _container.Interactable = false;
             }
+
+            IsInTransition = true;
         }
 
         public void End()
