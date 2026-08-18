@@ -1,6 +1,6 @@
 using System;
 using Demo.Subsystem.PresentationFramework;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.View.Top
 {
@@ -8,7 +8,7 @@ namespace Demo.Core.Scripts.View.Top
     {
         private readonly Subject<Unit> _onClickedSubject = new Subject<Unit>();
 
-        public IObservable<Unit> OnClicked => _onClickedSubject;
+        public Observable<Unit> OnClicked => _onClickedSubject;
 
         void ITopState.InvokeBackButtonClicked()
         {

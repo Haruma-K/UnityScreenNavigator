@@ -1,7 +1,7 @@
 using System;
 using Demo.Core.Scripts.View.Foundation;
 using Demo.Subsystem.PresentationFramework;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.View.UnitShop
 {
@@ -12,7 +12,7 @@ namespace Demo.Core.Scripts.View.UnitShop
         public UnitShopItemSetViewState SpecialItems { get; } = new UnitShopItemSetViewState();
         public UnitShopItemSetViewState SaleItems { get; } = new UnitShopItemSetViewState();
 
-        public IObservable<Unit> OnBackButtonClicked => _onBackButtonClickedSubject;
+        public Observable<Unit> OnBackButtonClicked => _onBackButtonClickedSubject;
 
         public void InvokeBackButtonClicked()
         {

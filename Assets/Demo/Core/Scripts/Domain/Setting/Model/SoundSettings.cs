@@ -1,5 +1,5 @@
 using System;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.Domain.Setting.Model
 {
@@ -9,7 +9,7 @@ namespace Demo.Core.Scripts.Domain.Setting.Model
 
         public float Volume { get; private set; }
         public bool Muted { get; private set; }
-        public IObservable<ValueChangedEvent> ValueChanged => _valueChangedSubject;
+        public Observable<ValueChangedEvent> ValueChanged => _valueChangedSubject;
 
         internal void SetValues(float volume, bool muted)
         {

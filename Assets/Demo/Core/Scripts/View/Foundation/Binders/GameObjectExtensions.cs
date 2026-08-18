@@ -1,12 +1,12 @@
 using System;
-using UniRx;
+using R3;
 using UnityEngine;
 
 namespace Demo.Core.Scripts.View.Foundation.Binders
 {
     public static class GamObjectExtensions
     {
-        public static IDisposable SetActiveSelfSource(this GameObject self, IObservable<bool> source,
+        public static IDisposable SetActiveSelfSource(this GameObject self, Observable<bool> source,
             bool invert = false)
         {
             return source

@@ -1,6 +1,6 @@
 ﻿using System;
 using Demo.Subsystem.PresentationFramework;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.View.Setting
 {
@@ -10,8 +10,8 @@ namespace Demo.Core.Scripts.View.Setting
         private readonly Subject<Unit> _onLockedButtonClickedSubject = new();
 
         public SoundSettingsViewState SoundSettings { get; } = new SoundSettingsViewState();
-        public IObservable<Unit> CloseButtonClicked => _onCloseButtonClickedSubject;
-        public IObservable<Unit> LockedButtonClicked => _onLockedButtonClickedSubject;
+        public Observable<Unit> CloseButtonClicked => _onCloseButtonClickedSubject;
+        public Observable<Unit> LockedButtonClicked => _onLockedButtonClickedSubject;
 
         void ISettingsState.InvokeCloseButtonClicked()
         {

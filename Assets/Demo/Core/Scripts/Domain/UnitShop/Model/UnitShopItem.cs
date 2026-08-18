@@ -1,5 +1,5 @@
 using System;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.Domain.UnitShop.Model
 {
@@ -18,7 +18,7 @@ namespace Demo.Core.Scripts.Domain.UnitShop.Model
         public string MasterId { get; }
         public bool IsSoldOut { get; private set; }
 
-        public IObservable<ValueChangedEvent> ValueChanged => _valueChangedSubject;
+        public Observable<ValueChangedEvent> ValueChanged => _valueChangedSubject;
 
         internal void SetValue(bool isSoldOut)
         {

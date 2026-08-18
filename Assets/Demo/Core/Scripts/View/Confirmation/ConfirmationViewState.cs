@@ -1,6 +1,6 @@
 using System;
 using Demo.Subsystem.PresentationFramework;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.View.Confirmation
 {
@@ -9,8 +9,8 @@ namespace Demo.Core.Scripts.View.Confirmation
         private readonly ReactiveProperty<string> _message = new();
         private readonly Subject<Unit> _onCloseButtonClickedSubject = new();
 
-        public IReactiveProperty<string> Message => _message;
-        public IObservable<Unit> CloseButtonClicked => _onCloseButtonClickedSubject;
+        public ReactiveProperty<string> Message => _message;
+        public Observable<Unit> CloseButtonClicked => _onCloseButtonClickedSubject;
 
         void IConfirmationViewState.InvokeCloseButtonClicked()
         {

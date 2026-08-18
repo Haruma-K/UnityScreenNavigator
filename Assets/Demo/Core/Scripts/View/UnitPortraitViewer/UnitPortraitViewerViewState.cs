@@ -2,7 +2,7 @@ using System;
 using Demo.Core.Scripts.View.Foundation;
 using Demo.Core.Scripts.View.Parts.UnitPortrait;
 using Demo.Subsystem.PresentationFramework;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.View.UnitPortraitViewer
 {
@@ -11,7 +11,7 @@ namespace Demo.Core.Scripts.View.UnitPortraitViewer
         private readonly Subject<Unit> _onCloseButtonClickedSubject = new Subject<Unit>();
 
         public UnitPortraitViewState Portrait { get; } = new UnitPortraitViewState();
-        public IObservable<Unit> OnCloseButtonClicked => _onCloseButtonClickedSubject;
+        public Observable<Unit> OnCloseButtonClicked => _onCloseButtonClickedSubject;
 
         public void InvokeOnCloseButtonClicked()
         {

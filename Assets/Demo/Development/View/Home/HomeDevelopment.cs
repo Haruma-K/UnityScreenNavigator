@@ -1,6 +1,6 @@
 ﻿using Demo.Core.Scripts.View.Home;
 using Demo.Development.View.Shared;
-using UniRx;
+using R3;
 using UnityEngine;
 
 namespace Demo.Development.View.Home

@@ -4,7 +4,7 @@ using Demo.Core.Scripts.Presentation.Shared;
 using Demo.Core.Scripts.UseCase.Setting;
 using Demo.Core.Scripts.View.Setting;
 using Demo.Subsystem.Misc;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.Presentation.Setting
 {

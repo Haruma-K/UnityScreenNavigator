@@ -2,7 +2,7 @@
 using Demo.Core.Scripts.View.Foundation;
 using Demo.Core.Scripts.View.Foundation.Binders;
 using Demo.Subsystem.PresentationFramework;
-using UniRx;
+using R3;
 using UnityEngine;
 using UnityEngine.UI;
 

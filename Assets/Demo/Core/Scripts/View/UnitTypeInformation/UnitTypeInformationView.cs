@@ -8,7 +8,7 @@ using Demo.Core.Scripts.View.Parts.UnitThumbnail;
 using Demo.Subsystem.GUIComponents.TabGroup;
 using Demo.Subsystem.PresentationFramework;
 using TMPro;
-using UniRx;
+using R3;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Sheet;

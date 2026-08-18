@@ -1,5 +1,5 @@
 using Demo.Subsystem.PresentationFramework;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.View.Setting
 {
@@ -12,12 +12,12 @@ namespace Demo.Core.Scripts.View.Setting
         private readonly ReactiveProperty<float> _seVolume = new ReactiveProperty<float>();
         private readonly ReactiveProperty<float> _voiceVolume = new ReactiveProperty<float>();
 
-        public IReactiveProperty<float> VoiceVolume => _voiceVolume;
-        public IReactiveProperty<float> BgmVolume => _bgmVolume;
-        public IReactiveProperty<float> SeVolume => _seVolume;
-        public IReactiveProperty<bool> IsVoiceEnabled => _isVoiceEnabled;
-        public IReactiveProperty<bool> IsBgmEnabled => _isBgmEnabled;
-        public IReactiveProperty<bool> IsSeEnabled => _isSeEnabled;
+        public ReactiveProperty<float> VoiceVolume => _voiceVolume;
+        public ReactiveProperty<float> BgmVolume => _bgmVolume;
+        public ReactiveProperty<float> SeVolume => _seVolume;
+        public ReactiveProperty<bool> IsVoiceEnabled => _isVoiceEnabled;
+        public ReactiveProperty<bool> IsBgmEnabled => _isBgmEnabled;
+        public ReactiveProperty<bool> IsSeEnabled => _isSeEnabled;
 
         protected override void DisposeInternal()
         {

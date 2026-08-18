@@ -3,7 +3,7 @@ using Demo.Core.Scripts.View.Foundation.Binders;
 using Demo.Core.Scripts.View.Parts.UnitThumbnail;
 using Demo.Subsystem.PresentationFramework;
 using TMPro;
-using UniRx;
+using R3;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;

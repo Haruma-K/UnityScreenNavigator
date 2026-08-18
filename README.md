@@ -92,7 +92,7 @@ For more information, including copyright, please refer to the following website
 ## Setup
 
 #### Requirement
-* Unity 2021.3 or higher
+* Unity 6 (6000.0) or higher
 * uGUI (UIElements not supported)
 
 #### Install
