@@ -1,7 +1,6 @@
 {
     "name": "Demo.Presentation",
     "references": [
-        "GUID:560b04d1a97f54a4e82edc0cbbb69285",
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
         "GUID:2359c074672083046b6ff6b309700f8e",
         "GUID:a88fd649a6e1e4bee9b80c079aeeb73e",

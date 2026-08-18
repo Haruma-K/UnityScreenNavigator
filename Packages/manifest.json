@@ -1,8 +1,8 @@
 {
   "dependencies": {
+    "com.cysharp.r3": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.harumak.unityuiplayables": "https://github.com/Haruma-K/UnityUIPlayables.git?path=/Assets/UnityUIPlayables",
-    "com.neuecc.unirx": "https://github.com/neuecc/UniRx.git?path=Assets/Plugins/UniRx/Scripts",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.addressables": "2.9.1",
     "com.unity.ai.navigation": "2.0.13",

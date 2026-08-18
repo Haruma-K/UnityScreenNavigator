@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Demo.Core.Scripts.Presentation.Shared;
 using Demo.Core.Scripts.View.Confirmation;
 using Demo.Subsystem.Misc;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.Presentation.LockConfirmation
 {

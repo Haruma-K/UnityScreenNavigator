@@ -1,7 +1,7 @@
 ﻿using Demo.Core.Scripts.Foundation.Common;
 using Demo.Core.Scripts.View.UnitPortraitViewer;
 using Demo.Development.View.Shared;
-using UniRx;
+using R3;
 using UnityEngine;
 
 namespace Demo.Development.View.UnitPortraitViewer

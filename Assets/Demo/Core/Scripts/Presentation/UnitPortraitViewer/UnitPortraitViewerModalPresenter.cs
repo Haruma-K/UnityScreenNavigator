@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Demo.Core.Scripts.Foundation.Common;
 using Demo.Core.Scripts.Presentation.Shared;
 using Demo.Core.Scripts.View.UnitPortraitViewer;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.Presentation.UnitPortraitViewer
 {

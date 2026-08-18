@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using UniRx;
+using R3;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityScreenNavigator.Runtime.Core.Sheet;
@@ -20,7 +20,7 @@ namespace Demo.Subsystem.GUIComponents.TabGroup
         public bool IsInitializing { get; private set; }
         public bool IsInitialized { get; private set; }
 
-        public IObservable<TabLoadedEvent> OnTabLoaded => _onTabLoadedSubject;
+        public Observable<TabLoadedEvent> OnTabLoaded => _onTabLoadedSubject;
 
         private void Awake()
         {

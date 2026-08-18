@@ -9,7 +9,7 @@ using Demo.Core.Scripts.UseCase.UnitShop;
 using Demo.Core.Scripts.View.Overlay;
 using Demo.Core.Scripts.View.UnitShop;
 using Demo.Subsystem.Misc;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.Presentation.UnitShop
 {

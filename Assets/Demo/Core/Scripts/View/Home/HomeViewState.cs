@@ -1,6 +1,6 @@
 ﻿using System;
 using Demo.Subsystem.PresentationFramework;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.View.Home
 {
@@ -13,7 +13,7 @@ namespace Demo.Core.Scripts.View.Home
         public HomeButtonViewState MainQuestButton { get; } = new HomeButtonViewState();
         public HomeButtonViewState MissionButton { get; } = new HomeButtonViewState();
         public HomeButtonViewState EventQuestButton { get; } = new HomeButtonViewState();
-        public IObservable<Unit> OnBackButtonClicked => _onBackButtonClickedSubject;
+        public Observable<Unit> OnBackButtonClicked => _onBackButtonClickedSubject;
 
         void IHomeState.InvokeBackButtonClicked()
         {

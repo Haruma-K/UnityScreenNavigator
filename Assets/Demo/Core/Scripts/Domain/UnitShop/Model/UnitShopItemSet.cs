@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.Domain.UnitShop.Model
 {
@@ -16,7 +16,7 @@ namespace Demo.Core.Scripts.Domain.UnitShop.Model
         public IReadOnlyList<UnitShopItem> SpecialItems => _specialItems;
         public IReadOnlyList<UnitShopItem> SaleItems => _saleItems;
 
-        public IObservable<ItemsChangedEvent> ItemsChanged => _itemsChangedSubject;
+        public Observable<ItemsChangedEvent> ItemsChanged => _itemsChangedSubject;
 
         internal void SetItems(IReadOnlyList<UnitShopItem> regularItems, IReadOnlyList<UnitShopItem> specialItems,
             IReadOnlyList<UnitShopItem> saleItems)

@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Demo.Core.Scripts.View.Foundation.Binders;
 using Demo.Subsystem.PresentationFramework;
-using UniRx;
+using R3;
 using UnityEngine.UI;
 
 namespace Demo.Core.Scripts.View.Setting

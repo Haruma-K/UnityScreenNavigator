@@ -1,5 +1,5 @@
 using Demo.Subsystem.PresentationFramework;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.View.Parts.UnitPortrait
 {
@@ -7,7 +7,7 @@ namespace Demo.Core.Scripts.View.Parts.UnitPortrait
     {
         private readonly ReactiveProperty<string> _imageResourceKey = new ReactiveProperty<string>();
 
-        public IReactiveProperty<string> ImageResourceKey => _imageResourceKey;
+        public ReactiveProperty<string> ImageResourceKey => _imageResourceKey;
 
         protected override void DisposeInternal()
         {

@@ -1,7 +1,7 @@
 using System;
 using Demo.Core.Scripts.View.Parts.UnitThumbnail;
 using Demo.Subsystem.PresentationFramework;
-using UniRx;
+using R3;
 
 namespace Demo.Core.Scripts.View.UnitShop
 {
@@ -14,11 +14,11 @@ namespace Demo.Core.Scripts.View.UnitShop
         private readonly Subject<Unit> _onBuyButtonClickedSubject = new Subject<Unit>();
         public UnitThumbnailViewState Thumbnail { get; } = new UnitThumbnailViewState();
 
-        public IReactiveProperty<int> Cost => _cost;
-        public IReactiveProperty<string> CostIconImageResourceKey => _costIconImageResourceKey;
-        public IReactiveProperty<bool> IsLocked => _isLocked;
-        public IReactiveProperty<bool> IsSoldOut => _isSoldOut;
-        public IObservable<Unit> OnBuyButtonClicked => _onBuyButtonClickedSubject;
+        public ReactiveProperty<int> Cost => _cost;
+        public ReactiveProperty<string> CostIconImageResourceKey => _costIconImageResourceKey;
+        public ReactiveProperty<bool> IsLocked => _isLocked;
+        public ReactiveProperty<bool> IsSoldOut => _isSoldOut;
+        public Observable<Unit> OnBuyButtonClicked => _onBuyButtonClickedSubject;
 
         public void InvokeBuyButtonClicked()
         {

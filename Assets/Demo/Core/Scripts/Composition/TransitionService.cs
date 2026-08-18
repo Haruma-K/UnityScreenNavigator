@@ -20,7 +20,7 @@ using Demo.Core.Scripts.View.UnitPortraitViewer;
 using Demo.Core.Scripts.View.UnitShop;
 using Demo.Core.Scripts.View.UnitTypeInformation;
 using Demo.Subsystem.PresentationFramework.UnityScreenNavigatorExtensions;
-using UniRx;
+using R3;
 using UnityScreenNavigator.Runtime.Core.Modal;
 using UnityScreenNavigator.Runtime.Core.Page;
 
