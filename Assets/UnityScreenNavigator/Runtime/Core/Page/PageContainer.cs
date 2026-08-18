@@ -14,7 +14,11 @@ namespace UnityScreenNavigator.Runtime.Core.Page
     [RequireComponent(typeof(RectMask2D))]
     public sealed class PageContainer : MonoBehaviour, IScreenContainer
     {
+#if UNITY_6000_5_OR_NEWER
+        private static readonly Dictionary<EntityId, PageContainer> InstanceCacheByTransform = new();
+#else
         private static readonly Dictionary<int, PageContainer> InstanceCacheByTransform = new();
+#endif
 
         private static readonly Dictionary<string, PageContainer> InstanceCacheByName = new();
 
@@ -90,7 +94,11 @@ namespace UnityScreenNavigator.Runtime.Core.Page
             _orderedPageIds.Clear();
 
             InstanceCacheByName.Remove(_name);
+#if UNITY_6000_5_OR_NEWER
+            var keysToRemove = new List<EntityId>();
+#else
             var keysToRemove = new List<int>();
+#endif
             foreach (var cache in InstanceCacheByTransform)
                 if (Equals(cache.Value))
                     keysToRemove.Add(cache.Key);
@@ -130,7 +138,11 @@ namespace UnityScreenNavigator.Runtime.Core.Page
         /// <returns></returns>
         public static PageContainer Of(RectTransform rectTransform, bool useCache = true)
         {
+#if UNITY_6000_5_OR_NEWER
+            var id = rectTransform.GetEntityId();
+#else
             var id = rectTransform.GetInstanceID();
+#endif
             if (useCache && InstanceCacheByTransform.TryGetValue(id, out var container)) return container;
 
             container = rectTransform.GetComponentInParent<PageContainer>();

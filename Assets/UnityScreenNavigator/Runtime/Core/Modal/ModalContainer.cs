@@ -14,7 +14,11 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
     [RequireComponent(typeof(RectMask2D))]
     public sealed class ModalContainer : MonoBehaviour, IScreenContainer
     {
+#if UNITY_6000_5_OR_NEWER
+        private static readonly Dictionary<EntityId, ModalContainer> InstanceCacheByTransform = new();
+#else
         private static readonly Dictionary<int, ModalContainer> InstanceCacheByTransform = new();
+#endif
 
         private static readonly Dictionary<string, ModalContainer> InstanceCacheByName = new();
 
@@ -101,7 +105,11 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
             _orderedModalIds.Clear();
 
             InstanceCacheByName.Remove(_name);
+#if UNITY_6000_5_OR_NEWER
+            var keysToRemove = new List<EntityId>();
+#else
             var keysToRemove = new List<int>();
+#endif
             foreach (var cache in InstanceCacheByTransform)
                 if (Equals(cache.Value))
                     keysToRemove.Add(cache.Key);
@@ -141,7 +149,11 @@ namespace UnityScreenNavigator.Runtime.Core.Modal
         /// <returns></returns>
         public static ModalContainer Of(RectTransform rectTransform, bool useCache = true)
         {
+#if UNITY_6000_5_OR_NEWER
+            var id = rectTransform.GetEntityId();
+#else
             var id = rectTransform.GetInstanceID();
+#endif
             if (useCache && InstanceCacheByTransform.TryGetValue(id, out var container)) return container;
 
             container = rectTransform.GetComponentInParent<ModalContainer>();
